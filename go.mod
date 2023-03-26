@@ -1,6 +1,5 @@
 module github.com/UWNetworksLab/app-defined-networks
 
-
 go 1.20
 
 require (

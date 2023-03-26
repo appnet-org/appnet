@@ -35,7 +35,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Turn on debug logging")
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.adn.yaml)")
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.adn.yaml)")
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 

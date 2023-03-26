@@ -8,7 +8,7 @@ Details are avaliable in our whitepaper: [Application Defined Networks](https://
 
 # Install the CLI
 
-`adnctl` is a command line program to manage mRPC control plane. It allows you to interact with your mRPC deployment.
+`adnctl` is a command line program to manage ADN control plane. It allows you to interact with your ADN deployment.
 
 ## Requirements
 - Kubernetes 
@@ -16,7 +16,7 @@ Details are avaliable in our whitepaper: [Application Defined Networks](https://
 
 To install the CLI, run
 ```bash
-./install.sh
+. ./install.sh
 ```
 
 Once installed, verity the CLI is running correctly with:

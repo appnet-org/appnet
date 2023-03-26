@@ -16,8 +16,12 @@ while getopts "g" opt; do
   esac
 done
 
-echo "export ADN_DIR=$PWD" >> ~/.bashrc
-. ~/.bashrc
+if [ -z "${ADN_DIR}" ]; then
+  echo "Setting ADN_DIR to current directory"
+  echo "export ADN_DIR=$PWD" >> ~/.bashrc
+  . ~/.bashrc
+fi
+
 
 go_bin_dir=$(go env GOPATH)/bin
 
@@ -32,8 +36,9 @@ if [ "${install_go}" = true ]; then
 fi
 
 echo "Building adnctl"
+echo $ADN_DIR
 cd $ADN_DIR/cli
-go install .
+go install 
 mv $go_bin_dir/cli $go_bin_dir/adnctl
 
 
