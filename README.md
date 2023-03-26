@@ -2,7 +2,7 @@
 
 # Overview
 
-Control plane for Application Defined Networks. 
+Control plane for Application Defined Networks (ADN). 
 
 Details are avaliable in our whitepaper: [Application Defined Networks](https://xzhu27.me/papers/Application_Defined_Networks_UW_FOCI.pdf)
 
