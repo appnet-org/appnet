@@ -27,7 +27,7 @@ spec:
               properties:
                 application:
                   type: string
-                policy:
+                policies:
                   type: string
             status:
               type: object
