@@ -35,12 +35,11 @@ if [ "${install_go}" = true ]; then
     . ~/.bashrc
 fi
 
-echo "Building adnctl"
-echo $ADN_DIR
+echo "Building adnctl..."
 cd $ADN_DIR/cli
 go install 
 mv $go_bin_dir/cli $go_bin_dir/adnctl
 
 
-echo "adnctl was successfully installed 🎉"
+echo "adnctl was successfully installed 🎉🎉🎉"
 echo ""

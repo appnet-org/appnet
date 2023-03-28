@@ -16,7 +16,7 @@ var versionCmd = &cobra.Command{
 	Short: "Get adnctl version",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Placeholder
-		fmt.Println("Version 0.1.0")
+		fmt.Println("Version: Experimental")
 	},
 }
 
