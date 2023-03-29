@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-
 # install kubernetes code generator
 # go get -u k8s.io/code-generator/...
 
 set -eu
+
+go get -u k8s.io/code-generator/...
 
 utildir=$( cd "${0%/*}" && pwd )
 rootdir=$( cd "$utildir"/.. && pwd )
@@ -18,7 +19,7 @@ crds=(adncontroller:v1alpha1)
 
 chmod +x "${codegen_pkg}/generate-groups.sh"
 
-bash "${utildir}/generate-groups.sh" "deepcopy,client,informer,lister" \
+bash "${codegen_pkg}/generate-groups.sh" "deepcopy,client,informer,lister" \
   "github.com/UWNetworksLab/app-defined-networks/controller/gen/generated" \
   "github.com/UWNetworksLab/app-defined-networks/controller/gen/apis" \
   "adncontroller:v1alpha1" \
