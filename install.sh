@@ -1,20 +1,17 @@
 #!/bin/bash
 
-set -eu
+# Install Go if not found
+if ! command -v go &> /dev/null
+then
+    echo "Go not found. Installing Go"
+    wget https://go.dev/dl/go1.20.linux-amd64.tar.gz
+    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.20.linux-amd64.tar.gz
 
-install_go=false
+    echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+    source ~/.bashrc
+fi
 
-while getopts "g" opt; do
-  case ${opt} in
-    g)
-      install_go=true
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
-  esac
-done
+set -e
 
 if [ -z "${ADN_DIR}" ]; then
   echo "Setting ADN_DIR to current directory"
@@ -23,26 +20,20 @@ if [ -z "${ADN_DIR}" ]; then
 fi
 
 
-if [ "${install_go}" = true ]; then
-    echo "Installing Go"
-    wget https://go.dev/dl/go1.20.linux-amd64.tar.gz
-    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.20.linux-amd64.tar.gz
-
-    echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-    . ~/.bashrc
-fi
-
 GO_PATH=$(go env GOPATH)
 GO_BIN_DIR=$(go env GOPATH)/bin
-echo "export PATH=$PATH:$go_bin_dir" >> ~/.bashrc
-echo "export GOPATH=$PATH:$go_bin_dir" >> ~/.bashrc
+echo "export PATH=$PATH:$GO_BIN_DIR" >> ~/.bashrc
+echo "export GOPATH=$GO_PATH" >> ~/.bashrc
 . ~/.bashrc
 
 echo "Building adnctl..."
 cd $ADN_DIR/cli
-go install 
-mv $go_bin_dir/cli $go_bin_dir/adnctl
+go install
+mv $GO_BIN_DIR/cli $GO_BIN_DIR/adnctl
 
+cd $ADN_DIR
 
 echo "adnctl was successfully installed 🎉🎉🎉"
 echo ""
+
+set +e
