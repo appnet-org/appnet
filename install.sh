@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 install_go=false
 
@@ -23,15 +23,18 @@ if [ -z "${ADN_DIR}" ]; then
 fi
 
 
-go_bin_dir=$(go env GOPATH)/bin
-
 if [ "${install_go}" = true ]; then
     echo "Installing Go"
     wget https://go.dev/dl/go1.20.linux-amd64.tar.gz
     sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.20.linux-amd64.tar.gz
-    echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 
+    echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+    . ~/.bashrc
+
+    GO_PATH=$(go env GOPATH)
+    GO_BIN_DIR=$(go env GOPATH)/bin
     echo "export PATH=$PATH:$go_bin_dir" >> ~/.bashrc
+    echo "export GOPATH=$PATH:$go_bin_dir" >> ~/.bashrc
     . ~/.bashrc
 fi
 

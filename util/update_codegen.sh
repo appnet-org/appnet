@@ -22,5 +22,6 @@ bash "${utildir}/generate-groups.sh" "deepcopy,client,informer,lister" \
   "github.com/UWNetworksLab/app-defined-networks/controller/gen/generated" \
   "github.com/UWNetworksLab/app-defined-networks/controller/gen/apis" \
   "adncontroller:v1alpha1" \
-  --output-base $utildir/controller
-  --go-header-file $utildir/boilerplate.go.txt
+  --go-header-file "${utildir}/boilerplate.go.txt"
+
+cp -R "${GOPATH}/src/${ROOT_PACKAGE}/controller/gen" 'controller/'
