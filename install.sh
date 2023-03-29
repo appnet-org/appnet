@@ -30,13 +30,13 @@ if [ "${install_go}" = true ]; then
 
     echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
     . ~/.bashrc
-
-    GO_PATH=$(go env GOPATH)
-    GO_BIN_DIR=$(go env GOPATH)/bin
-    echo "export PATH=$PATH:$go_bin_dir" >> ~/.bashrc
-    echo "export GOPATH=$PATH:$go_bin_dir" >> ~/.bashrc
-    . ~/.bashrc
 fi
+
+GO_PATH=$(go env GOPATH)
+GO_BIN_DIR=$(go env GOPATH)/bin
+echo "export PATH=$PATH:$go_bin_dir" >> ~/.bashrc
+echo "export GOPATH=$PATH:$go_bin_dir" >> ~/.bashrc
+. ~/.bashrc
 
 echo "Building adnctl..."
 cd $ADN_DIR/cli
