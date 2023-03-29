@@ -10,8 +10,8 @@ codegen_pkg=${GOPATH}/pkg/mod/k8s.io/code-generator@${gen_ver}
 
 chmod +x "${codegen_pkg}/generate-groups.sh"
 
-"${codegen_pkg}/generate-groups.sh" "deepcopy,client,informer,lister" \
-  "github.com/UWNetworksLab/app-defined-networks/controller/gen/generated" \
-  "github.com/UWNetworksLab/app-defined-networks/controller/gen/apis" \
+bash "${codegen_pkg}/generate-groups.sh" "deepcopy,client,informer,lister" \
+  "$rootdir/controller/gen/generated" \
+  "$rootdir/controller/gen/apis" \
   adncontroller:v1alpha \
   --go-header-file $utildir/boilerplate.go.txt
