@@ -20,9 +20,9 @@ crds=(adncontroller:v1alpha1)
 chmod +x "${codegen_pkg}/generate-groups.sh"
 
 bash "${codegen_pkg}/generate-groups.sh" "deepcopy,client,informer,lister" \
-  "github.com/UWNetworksLab/app-defined-networks/controller/gen/generated" \
-  "github.com/UWNetworksLab/app-defined-networks/controller/gen/apis" \
-  "adncontroller:v1alpha1" \
+  "${ROOT_PACKAGE}/controller/gen/generated" \
+  "${ROOT_PACKAGE}/controller/gen/apis" \
+  "${crds[*]}"  \
   --go-header-file "${utildir}/boilerplate.go.txt"
 
 cp -R "${GOPATH}/src/${ROOT_PACKAGE}/controller/gen" 'controller/'
