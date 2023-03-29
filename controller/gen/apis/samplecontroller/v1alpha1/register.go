@@ -21,7 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	samplecontroller "k8s.io/sample-controller/pkg/apis/samplecontroller"
+	"github.com/UWNetworksLab/app-defined-networks/controller/gen/apis/samplecontroller"
 )
 
 // SchemeGroupVersion is group version used to register these objects
