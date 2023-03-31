@@ -6,9 +6,6 @@ Control plane for Application Defined Networks (ADN).
 
 Details are avaliable in our whitepaper: [Application Defined Networks](https://xzhu27.me/papers/Application_Defined_Networks_UW_FOCI.pdf)
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
-
 ## Requirements
 - Kubernetes and Docker
   - Run `. ./utils/k8s_setup.sh` to install Kubernetes via kubeadm. (Note - this script is only tested on Ubuntu 20.04.)
