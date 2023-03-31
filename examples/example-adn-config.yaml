@@ -1,7 +1,0 @@
-apiVersion: adn.io/v1alpha1
-kind: Adnconfig
-metadata:
-  name: example-adn-config
-spec:
-  application: "echo"
-  policy: "logging"
