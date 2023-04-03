@@ -5,6 +5,17 @@
 domain: core.adn.io
 layout:
 - go.kubebuilder.io/v3
+multigroup: true
 projectName: app-defined-networks
 repo: github.com/UWNetworksLab/app-defined-networks
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: core.adn.io
+  group: api
+  kind: Adnconfig
+  path: github.com/UWNetworksLab/app-defined-networks/api/v1
+  version: v1
 version: "3"

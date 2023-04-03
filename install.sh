@@ -27,7 +27,7 @@ echo "export GOPATH=$GO_PATH" >> ~/.bashrc
 . ~/.bashrc
 
 echo "Building adnctl..."
-cd $ADN_DIR/cli
+cd $ADN_DIR/adnctl
 go install
 
 cd $ADN_DIR

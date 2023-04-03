@@ -1,0 +1,10 @@
+apiVersion: api.core.adn.io/v1
+kind: Adnconfig
+metadata:
+  name: adnconfig-sample
+spec:
+  Type: "edge"
+  Chain: "LoadBalance->FaultInjection"
+  Upstream: "ServiceA"
+  Downsteam: "ServiceB"
+  
