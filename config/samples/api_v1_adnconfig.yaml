@@ -3,8 +3,8 @@ kind: Adnconfig
 metadata:
   name: adnconfig-sample
 spec:
-  Type: "edge"
-  Chain: "LoadBalance->FaultInjection"
-  Upstream: "ServiceA"
-  Downsteam: "ServiceB"
+  type: "edge"
+  chain: "LoadBalance->FaultInjection"
+  upstream: "ServiceA"
+  downstream: "ServiceB"
   

@@ -47,9 +47,17 @@ type AdnconfigReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
 func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	l := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// TODO: add logic here
+	config := &apiv1.Adnconfig{}
+	err := r.Get(ctx, req.NamespacedName, config)
+	if err != nil {
+		l.Error(err, "unable to fetch Adnconfig")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	l.Info("Reconciling Adnconfig", "Name", config.Name, "Namespace", config.Namespace, "Chain", config.Spec.Chain, "Upstream", config.Spec.Upstream, "Downstream", config.Spec.Downstream)
 
 	return ctrl.Result{}, nil
 }
