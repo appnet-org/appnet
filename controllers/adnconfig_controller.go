@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -57,7 +58,13 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	l.Info("Reconciling Adnconfig", "Name", config.Name, "Namespace", config.Namespace, "Chain", config.Spec.Chain, "Upstream", config.Spec.Upstream, "Downstream", config.Spec.Downstream)
+	upstream_service := config.Spec.UpstreamService
+	downstream_service := config.Spec.DownstreamService
+	upstream_elements := strings.Split(config.Spec.UpstreamChain, "->")
+	downstream_elements := strings.Split(config.Spec.DownstreamChain, "->")
+
+
+	l.Info("Reconciling Adnconfig", "Name", config.Name, "Namespace", config.Namespace, "Upstream Service", upstream_service, "Downstream Service", downstream_service, "Upstream-side Elements", upstream_elements, "Downstream-side Elements", downstream_elements)
 
 	return ctrl.Result{}, nil
 }

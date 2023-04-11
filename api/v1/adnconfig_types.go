@@ -29,10 +29,11 @@ type AdnconfigSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Adnconfig. Edit adnconfig_types.go to remove/update
-	Type       string `json:"type"`
-	Chain      string `json:"chain"`
-	Upstream   string `json:"upstream"`
-	Downstream string `json:"downstream"`
+	// Type       string `json:"type"`
+	UpstreamService   string `json:"upstreamService"`
+	UpstreamChain      string `json:"upstreamChain"`
+	DownstreamService string `json:"downstreamService"`
+	DownstreamChain string `json:"downstreamChain"`
 }
 
 // AdnconfigStatus defines the observed state of Adnconfig

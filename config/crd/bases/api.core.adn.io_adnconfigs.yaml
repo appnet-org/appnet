@@ -35,21 +35,21 @@ spec:
           spec:
             description: AdnconfigSpec defines the desired state of Adnconfig
             properties:
-              chain:
+              downstreamChain:
                 type: string
-              downstream:
+              downstreamService:
                 type: string
-              type:
+              upstreamChain:
+                type: string
+              upstreamService:
                 description: Foo is an example field of Adnconfig. Edit adnconfig_types.go
-                  to remove/update
-                type: string
-              upstream:
+                  to remove/update Type       string `json:"type"`
                 type: string
             required:
-            - chain
-            - downstream
-            - type
-            - upstream
+            - downstreamChain
+            - downstreamService
+            - upstreamChain
+            - upstreamService
             type: object
           status:
             description: AdnconfigStatus defines the observed state of Adnconfig
