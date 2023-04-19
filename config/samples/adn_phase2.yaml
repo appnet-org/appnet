@@ -1,0 +1,9 @@
+apiVersion: api.core.adn.io/v1
+kind: Adnconfig
+metadata:
+  name: adnconfig-sample
+spec:
+  upstreamService: "rpc_echo_frontend"
+  downstreamService: "rpc_echo_server"
+  upstreamChain: "rate_limiting(request_per_sec=1000, bucket_size=1000)->logging()->acl()"
+  downstreamChain: ""
