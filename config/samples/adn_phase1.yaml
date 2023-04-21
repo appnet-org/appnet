@@ -3,7 +3,7 @@ kind: Adnconfig
 metadata:
   name: adnconfig-sample
 spec:
-  upstreamService: "rpc_echo_frontend"
+  upstreamService: "rpc_echo_client"
   downstreamService: "rpc_echo_server"
   upstreamChain: "rate_limiting(request_per_sec=1000, bucket_size=1000)->logging()"
   downstreamChain: "acl()"

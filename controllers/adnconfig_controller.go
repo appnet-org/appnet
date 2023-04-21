@@ -61,6 +61,8 @@ func GetProcessPID(processName string) (int, error) {
 }
 
 func RunCommand(command string, args ...string) {
+	// args = append(args, "sudo", "docker", "exec", "290defb90f05", )
+	
 	// Define the command to run
 	cmd := exec.Command(command, args...)
 
@@ -96,9 +98,9 @@ func mrpc_init_setup(ctx context.Context) {
 
 
 	// RunCommand("cargo", "run", "--release", "--bin", "upgrade", "--", "--config", "experimental/mrpc/load-mrpc-plugins.toml")
-	RunCommand("cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase1/receiver_attach.toml", "--pid", strconv.Itoa(serverPid), "--sid", "1")
-	RunCommand("cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase1/ratelimit_attach.toml", "--pid", strconv.Itoa(clientPid), "--sid", "1")		
-	RunCommand("cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase1/logging_attach.toml", "--pid", strconv.Itoa(clientPid), "--sid", "1")
+	RunCommand("sudo", "docker", "exec", "0a00732f91c5","cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase1/receiver_attach.toml", "--pid", strconv.Itoa(serverPid), "--sid", "1")
+	RunCommand("sudo", "docker", "exec", "0a00732f91c5","cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase1/ratelimit_attach.toml", "--pid", strconv.Itoa(clientPid), "--sid", "1")		
+	RunCommand("sudo", "docker", "exec", "0a00732f91c5","cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase1/logging_attach.toml", "--pid", strconv.Itoa(clientPid), "--sid", "1")
 }	
 
 func mrpc_after_migration(ctx context.Context) {
@@ -121,8 +123,8 @@ func mrpc_after_migration(ctx context.Context) {
         return
     }
 
-	RunCommand("cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase2/sender_attach.toml", "--pid", strconv.Itoa(clientPid), "--sid", "1")
-	RunCommand("cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase2/receiver_detach.toml", "--pid", strconv.Itoa(serverPid), "--sid", "1")		
+	RunCommand("sudo", "docker", "exec", "0a00732f91c5","cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase2/sender_attach.toml", "--pid", strconv.Itoa(clientPid), "--sid", "1")
+	RunCommand("sudo", "docker", "exec", "0a00732f91c5","cargo", "run", "--release", "--bin", "addonctl", "--", "--config", "eval/policy/chain/phase2/receiver_detach.toml", "--pid", strconv.Itoa(serverPid), "--sid", "1")		
 }
 
 func remove_all_engines(ctx context.Context) {
