@@ -1,5 +1,5 @@
 import sqlite3
-from elements import acl, logging, rate_limit
+from elements import ACL, Logging
 
 
 def init_input_table(conn, cursor, print_tables=False):
@@ -7,16 +7,22 @@ def init_input_table(conn, cursor, print_tables=False):
     cursor.execute('''
         CREATE TABLE input (
             user VARCHAR(255),
-            message VARCHAR(255)
+            message VARCHAR(255),
+            src VARCHAR(255),
+            dst VARCHAR(255)
         )
     ''')
 
     # Insert data into the input table
-    cursor.execute("INSERT INTO input (user, message) VALUES ('Alice', 'Hello World!')")
-    cursor.execute("INSERT INTO input (user, message) VALUES ('Bob', 'Hello World!')")
-    cursor.execute("INSERT INTO input (user, message) VALUES ('Peter', 'Hello World!')")
-    cursor.execute("INSERT INTO input (user, message) VALUES ('Bill', 'Hello World!')")
-    cursor.execute("INSERT INTO input (user, message) VALUES ('Jeff', 'Hello World!')")
+    data = [
+        ('Alice', 'Hello World!', 'Client', 'Server'),
+        ('Bob', 'Hello World!', 'Client', 'Server'),
+        ('Peter', 'Hello World!', 'Client', 'Server'),
+        ('Bill', 'Hello World!', 'Client', 'Server'),
+        ('Jeff', 'Hello World!', 'Client', 'Server')
+    ]
+
+    cursor.executemany("INSERT INTO input (user, message, src, dst) VALUES (?, ?, ?, ?)", data)
 
     if print_tables:
         cursor.execute("SELECT * FROM input")
@@ -40,18 +46,33 @@ if __name__ == "__main__":
     # Create a cursor
     cursor = conn.cursor()
 
-    # Init input table
-    init_input_table(conn, cursor, True)
+    # Init elements
+    acl = ACL(cursor, verbose=True)
+    logging = Logging(cursor, verbose=True)
 
-    cursor.execute('''CREATE VIEW acl_input AS
-                  SELECT user AS name, message
+    # Init input table
+    init_input_table(conn, cursor, print_tables=False)
+
+    cursor.execute('''CREATE TABLE acl_input AS
+                  SELECT user AS name, *
                   FROM input''')
 
     # Execute acl elements
-    acl(conn, cursor, input_table_name="acl_input", print_tables=True)
+    
+    acl.process(conn, cursor, input_table_name="acl_input")
 
-    cursor.close()
-    conn.close()
+    cursor.execute('''CREATE TABLE logging_input AS
+                  SELECT * FROM output''')
+                
+    logging.process(conn, cursor, input_table_name="logging_input")
+
+    # cursor.execute('''CREATE TABLE rate_limit_input AS
+    #             SELECT * FROM output''')
+
+    # rate_limit(conn, cursor, init_input_table="rate_limit_input", print_tables=True)
+
+    # cursor.close()
+    # conn.close()
 
 
 
