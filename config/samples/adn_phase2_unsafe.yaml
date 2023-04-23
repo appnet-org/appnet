@@ -5,5 +5,5 @@ metadata:
 spec:
   upstreamService: "rpc_echo_client"
   downstreamService: "rpc_echo_server"
-  upstreamChain: "rate_limiting(request_per_sec=1000, bucket_size=1000)->logging()->acl()"
+  upstreamChain: "rate_limiting(request_per_sec=1000, bucket_size=1000)->logging()->acl(unsafe)"
   downstreamChain: ""

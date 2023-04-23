@@ -12,16 +12,19 @@ Initilization:
     Insert the access control rules into the acl table
 */
 INSERT INTO acl (permission, name) VALUES
-('RW', 'user1'),
-('RO', 'user2');
+('Y', 'Alice'),
+('N', 'Bob'),
+('Y', 'Peter'),
+('Y', 'Jeff'),
+('Y', 'Bill');
 
 /*
 Processing Logic:
 */
-CREATE PROCEDURE acl AS 
 CREATE TABLE output AS
-SELECT * from input JOIN acl on input.user = acl.name
-WHERE acl.permission = "RW";
+SELECT * from input_view JOIN acl on input_view.name = acl.name
+WHERE acl.permission = "Y";
 
--- create table input (user varchar(255));
-INSERT INTO input (user) VALUES ('Alice');
+CREATE VIEW input_view AS
+SELECT user AS name, message
+FROM input;
