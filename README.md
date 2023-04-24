@@ -36,13 +36,13 @@ kubectl apply -f config/samples/
 2. Build and push your image to the location specified by `IMG`:
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/app-defined-networks:tag
+make docker-build docker-push IMG=xzhu0027/app-defined-networks:latest
 ```
 
 3. Deploy the controller to the cluster with the image specified by `IMG`:
 
 ```sh
-make deploy IMG=<some-registry>/app-defined-networks:tag
+make deploy IMG=xzhu0027/app-defined-networks:latest
 ```
 
 ### Uninstall CRDs
