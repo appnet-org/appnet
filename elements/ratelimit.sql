@@ -10,7 +10,7 @@ INSERT INTO token_bucket (last_update, tokens) VALUES (CURRENT_TIMESTAMP, @bucke
 CREATE PROCEDURE rate_limiting @bucket_size INT, @request_per_second INT
 AS 
 SELECT TIMESTAMPDIFF(SECOND, last_update, CURRENT_TIMESTAMP)
-INTO elapsed_time
+-- INTO elapsed_time
 FROM token_bucket
 
 -- caculate the current number of tokens
@@ -27,3 +27,8 @@ IF curr_tokens >= num_rpc
   SELECT * from INPUT;
 ELSE
   SELECT CONCAT('Not enough tokens available. Tokens available: ', curr_tokens) as message
+
+
+
+
+SELECT (julianday(CURRENT_TIMESTAMP) - julianday(last_update)) * 86400.00  FROM token_bucket;

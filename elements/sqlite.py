@@ -1,5 +1,6 @@
 import sqlite3
-from elements import ACL, Logging
+from elements import ACL, Logging, RateLimit
+import time
 
 
 def init_input_table(conn, cursor, print_tables=False):
@@ -47,8 +48,11 @@ if __name__ == "__main__":
     cursor = conn.cursor()
 
     # Init elements
-    acl = ACL(cursor, verbose=True)
-    logging = Logging(cursor, verbose=True)
+    acl = ACL(cursor, verbose=False)
+    logging = Logging(cursor, verbose=False)
+    rate_limit = RateLimit(cursor, time_unit=1, tokens=1, verbose=True)
+
+    time.sleep(1)
 
     # Init input table
     init_input_table(conn, cursor, print_tables=False)
@@ -66,13 +70,13 @@ if __name__ == "__main__":
                 
     logging.process(conn, cursor, input_table_name="logging_input")
 
-    # cursor.execute('''CREATE TABLE rate_limit_input AS
-    #             SELECT * FROM output''')
+    cursor.execute('''CREATE TABLE rate_limit_input AS
+                SELECT * FROM output''')
 
-    # rate_limit(conn, cursor, init_input_table="rate_limit_input", print_tables=True)
+    rate_limit.process(conn, cursor, input_table_name="rate_limit_input")
 
-    # cursor.close()
-    # conn.close()
+    cursor.close()
+    conn.close()
 
 
 
