@@ -44,37 +44,36 @@ def init_input_table(conn, cursor, print_tables=False):
 if __name__ == "__main__":
     # conn = sqlite3.connect("demo.db")
     conn = sqlite3.connect(':memory:')
-    
 
     # Create a cursor
     cursor = conn.cursor()
 
     # Init elements
-    acl = ACL(cursor, verbose=False)
-    logging = Logging(cursor, verbose=False)
+    acl = ACL(cursor, verbose=True)
+    logging = Logging(cursor, verbose=True)
     rate_limit = RateLimit(cursor, time_unit=1, tokens=1, verbose=True)
 
     time.sleep(1)
 
     # Init input table
-    init_input_table(conn, cursor, print_tables=False)
+    init_input_table(conn, cursor, print_tables=True)
 
     cursor.execute('''CREATE TABLE acl_input AS
                   SELECT user AS name, *
                   FROM input''')
 
     # Execute acl elements
-    acl.process(conn, cursor, input_table_name="acl_input")
+    acl.egress_process(conn, cursor, input_table_name="acl_input")
 
     cursor.execute('''CREATE TABLE logging_input AS
                   SELECT * FROM output''')
                 
-    logging.process(conn, cursor, input_table_name="logging_input")
+    logging.egress_process(conn, cursor, input_table_name="logging_input")
 
     cursor.execute('''CREATE TABLE rate_limit_input AS
                 SELECT * FROM output''')
 
-    rate_limit.process(conn, cursor, input_table_name="rate_limit_input")
+    rate_limit.egress_process(conn, cursor, input_table_name="rate_limit_input")
 
     cursor.close()
     conn.close()

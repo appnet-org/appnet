@@ -23,9 +23,11 @@ class Element():
             print(row)
     
     # To be implemented in concrete elements
-    def process(self, conn, cursor, input_table_name):
+    def ingress_process(self, conn, cursor, input_table_name):
         pass
 
+    def egress_process(self, conn, cursor, input_table_name):
+        pass
 
 class ACL(Element):
     def __init__(self, cursor, verbose=False):
@@ -43,7 +45,7 @@ class ACL(Element):
 
         if self.verbose: self.print_table(cursor, 'acl')
 
-    def process(self, conn, cursor, input_table_name):
+    def egress_process(self, conn, cursor, input_table_name):
         print(f"Executing {self.name} element...")
 
         # Create the "output" table based on a query
@@ -73,7 +75,7 @@ class Logging(Element):
         ''')    
         if self.verbose: self.print_table(cursor, "rpc_events")
 
-    def process(self, conn, cursor, input_table_name):
+    def egress_process(self, conn, cursor, input_table_name):
         print(f"Executing {self.name} element...")
         
         cursor.execute('''INSERT INTO rpc_events (timestamp, src, dst, value) 
@@ -82,7 +84,9 @@ class Logging(Element):
         cursor.execute('''DROP TABLE IF EXISTS output''')
         cursor.execute('''CREATE TABLE output AS SELECT * from {}'''.format(input_table_name))
 
-        if self.verbose: self.print_table(cursor, "output")
+        if self.verbose: 
+            self.print_table(cursor, "output")
+            self.print_table(cursor, "rpc_events")
 
 
 class RateLimit(Element):
@@ -107,7 +111,7 @@ class RateLimit(Element):
         if self.verbose: self.print_table(cursor, "token_bucket")
 
 
-    def process(self, conn, cursor, input_table_name):
+    def egress_process(self, conn, cursor, input_table_name):
         print(f"Executing {self.name} element...")
 
         # Caculate current tokens and number of rpc to forward
