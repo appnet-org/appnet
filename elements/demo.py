@@ -22,8 +22,9 @@ if __name__ == "__main__":
     logging = Logging(logging_transform)
     rate_limit = RateLimit(rate_limit_transform, time_unit=1, tokens=1)
 
-    # Add elements and constraints 
+    # Add elements
     connection.add_elements([acl, logging, rate_limit])
+    # Add constraints (e.g., logging>acl means logging should be ordered before acl)
     connection.add_constraints("rate_limit>logging, logging>acl")
 
     # Compile the elements
