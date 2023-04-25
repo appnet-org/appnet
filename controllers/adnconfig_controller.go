@@ -87,7 +87,7 @@ func mrpc_init_setup(ctx context.Context, controlPlaneID string) {
 		l.Error(err, "Unable to find rpc_echo_server pid")
 		return
 	}
-	clientPid, err := GetProcessPID("rpc_echo_client2")
+	clientPid, err := GetProcessPID("rpc_echo_client")
 	if err != nil {
 		l.Error(err, "Unable to find rpc_echo_client pid")
 		return
@@ -113,7 +113,7 @@ func mrpc_after_migration_unsafe(ctx context.Context, controlPlaneID string) {
 		l.Error(err, "Unable to find rpc_echo_server pid")
 		return
 	}
-	clientPid, err := GetProcessPID("rpc_echo_client2")
+	clientPid, err := GetProcessPID("rpc_echo_client")
 	if err != nil {
 		l.Error(err, "Unable to find rpc_echo_client pid")
 		return
@@ -138,7 +138,7 @@ func mrpc_after_migration_safe(ctx context.Context, controlPlaneID string) {
 		l.Error(err, "Unable to find rpc_echo_server pid")
 		return
 	}
-	clientPid, err := GetProcessPID("rpc_echo_client2")
+	clientPid, err := GetProcessPID("rpc_echo_client")
 	if err != nil {
 		l.Error(err, "Unable to find rpc_echo_client pid")
 		return
@@ -158,7 +158,7 @@ func remove_all_engines(ctx context.Context, controlPlaneID string) {
 	// Get server and client pids
 	l := log.FromContext(ctx)
 	// _, err := GetProcessPID("rpc_echo_client2")
-	clientPid, err := GetProcessPID("rpc_echo_client2")
+	clientPid, err := GetProcessPID("rpc_echo_client")
 	if err != nil {
 		l.Error(err, "Unable to find rpc_echo_client pid")
 		return

@@ -29,7 +29,7 @@ spec:
       - image: xzhu0027/phoenixos-rpc-echo
         imagePullPolicy: Always
         name: mrpc-client
-        command: ["./rpc_echo_client2"]
+        command: ["./rpc_echo_client"]
         volumeMounts:
           - name: tmp-volume
             mountPath: /tmp/phoenix
