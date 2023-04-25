@@ -42,7 +42,9 @@ def init_input_table(conn, cursor, print_tables=False):
 
 
 if __name__ == "__main__":
-    conn = sqlite3.connect("demo.db")
+    # conn = sqlite3.connect("demo.db")
+    conn = sqlite3.connect(':memory:')
+    
 
     # Create a cursor
     cursor = conn.cursor()
@@ -62,7 +64,6 @@ if __name__ == "__main__":
                   FROM input''')
 
     # Execute acl elements
-    
     acl.process(conn, cursor, input_table_name="acl_input")
 
     cursor.execute('''CREATE TABLE logging_input AS
