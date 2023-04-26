@@ -1,34 +1,26 @@
--- Rate Limiting
+/*
+  Internal State:
+*/
 CREATE TABLE token_bucket (
  last_update TIMESTAMP
  tokens INTEGER 
+ time_unit INTEGER
 )
 
--- initialize the token bucket with 10 tokens
-INSERT INTO token_bucket (last_update, tokens) VALUES (CURRENT_TIMESTAMP, @bucket_size);
-
-CREATE PROCEDURE rate_limiting @bucket_size INT, @request_per_second INT
-AS 
-SELECT TIMESTAMPDIFF(SECOND, last_update, CURRENT_TIMESTAMP)
--- INTO elapsed_time
-FROM token_bucket
-
--- caculate the current number of tokens
-SET curr_tokens = LEAST(tokens + elapsed_time * @request_per_second, @bucket_size);
-SET num_rpc = (SELECT COUNT(*) FROM input);
-
--- Check if there are enough tokens avaliable
-IF curr_tokens >= num_rpc 
-  -- Update the token bucket
-  UPDATE token_bucket
-  SET tokens = curr_tokens - num_rpc, last_update = CURRENT_TIMESTAMP
-  --  Create the output table
-  CREATE TABLE output AS
-  SELECT * from INPUT;
-ELSE
-  SELECT CONCAT('Not enough tokens available. Tokens available: ', curr_tokens) as message
+/*
+Initilization:
+    Insert the parameters
+*/
+INSERT INTO token_bucket (last_update, tokens) VALUES (CURRENT_TIMESTAMP, @bucket_size, @time_unit);
 
 
+/*
+  Processing Logic:
+*/
+SET elapsed_time, curr_tokens, time_unit = SELECT TIMESTAMPDIFF(SECOND, last_update, CURRENT_TIMESTAMP), tokens FROM token_bucket
+SET new_curr_tokens = curr_tokens + time_diff * curr_tokens / time_unit
+SET rpc_forward_count = LEAST(SELECT COUNT(*) FROM input, new_curr_tokens)
 
+UPDATE token_bucket SET curr_tokens=(new_curr_tokens-rpc_forward_count), last_update=CURRENT_TIMESTAMP
 
-SELECT (julianday(CURRENT_TIMESTAMP) - julianday(last_update)) * 86400.00  FROM token_bucket;
+CREATE TABLE output AS SELECT * FROM input LIMIT rpc_forward_count;

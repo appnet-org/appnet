@@ -145,11 +145,9 @@ class RateLimit(Element):
         '''.format(input_table_name)).fetchone()[0]
         new_curr_tokens = curr_tokens + round(time_diff, 0) * self.tokens / self.time_unit
         rpc_forward_count = rpc_count if new_curr_tokens > rpc_count else new_curr_tokens
-        print(rpc_forward_count)
+        
         # Update token bucket table
         self.cursor.execute('''UPDATE token_bucket SET curr_tokens={}, last_update=CURRENT_TIMESTAMP'''.format(str(new_curr_tokens-rpc_forward_count)))
-
-
         self.cursor.execute('''DROP TABLE IF EXISTS output''')
         self.cursor.execute('''CREATE TABLE output AS SELECT * from {} LIMIT {}'''.format(input_table_name, rpc_forward_count))
 

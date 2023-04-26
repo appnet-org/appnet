@@ -24,7 +24,3 @@ Processing Logic:
 CREATE TABLE output AS
 SELECT * from input_view JOIN acl on input_view.name = acl.name
 WHERE acl.permission = "Y";
-
-CREATE VIEW input_view AS
-SELECT user AS name, message
-FROM input;
