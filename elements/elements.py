@@ -16,7 +16,10 @@ class Element():
         self.cursor = cursor
 
     def print_table(self, table_name):
+        if table_name == "output":
+            print("----------------------------------------")
         print(f"Printing {table_name} table...")
+
         self.cursor.execute("SELECT * FROM {}".format(table_name))
         description = self.cursor.description
         column_names = [col[0] for col in description]
@@ -28,6 +31,9 @@ class Element():
         for row in rows:
             print(row)
 
+        if table_name == "output":
+            print("----------------------------------------")
+            
     # The following three method to be implemented in concrete elements
     def init_state(self):
         pass

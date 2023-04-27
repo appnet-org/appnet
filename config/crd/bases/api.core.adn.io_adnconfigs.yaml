@@ -39,15 +39,18 @@ spec:
                 type: string
               downstreamService:
                 type: string
+              safe:
+                description: Foo is an example field of Adnconfig. Edit adnconfig_types.go
+                  to remove/update Type       string `json:"type"`
+                type: boolean
               upstreamChain:
                 type: string
               upstreamService:
-                description: Foo is an example field of Adnconfig. Edit adnconfig_types.go
-                  to remove/update Type       string `json:"type"`
                 type: string
             required:
             - downstreamChain
             - downstreamService
+            - safe
             - upstreamChain
             - upstreamService
             type: object

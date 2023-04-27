@@ -51,6 +51,7 @@ class ADN():
         self.cursor.executemany("INSERT INTO input (user, message, src, dst) VALUES (?, ?, ?, ?)", data)
 
         if self.verbose:
+            print("Printing input table...")
             self.cursor.execute("SELECT * FROM input")
             description = self.cursor.description
             column_names = [col[0] for col in description]

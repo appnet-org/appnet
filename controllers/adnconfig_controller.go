@@ -234,7 +234,7 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	err := r.Get(ctx, req.NamespacedName, config)
 	if err != nil {
 		// l.Error(err, "unable to fetch Adnconfig")
-		l.Info("calling remove_all_engines")
+		// l.Info("calling remove_all_engines")
 		remove_all_engines(ctx, controlPlaneID)
 		l.Info("Reconciliation finished!")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -244,19 +244,19 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	downstream_service := config.Spec.DownstreamService
 	upstream_elements := strings.Split(config.Spec.UpstreamChain, "->")
 	downstream_elements := strings.Split(config.Spec.DownstreamChain, "->")
+	safe := config.Spec.Safe
 
 	// Call addonctl
-	// l.Info("Request is %v", req)
-	l.Info("Reconciling Adnconfig", "Name", config.Name, "Namespace", config.Namespace, "Upstream Service", upstream_service, "Downstream Service", downstream_service, "Upstream-side Elements", upstream_elements, "Downstream-side Elements", downstream_elements)
+	l.Info("Reconciling Adnconfig", "Safe", safe, "Name", config.Name, "Namespace", config.Namespace, "Upstream Service", upstream_service, "Downstream Service", downstream_service, "Upstream-side Elements", upstream_elements, "Downstream-side Elements", downstream_elements)
 	// l.Info("Length of upstream_elements is", len(upstream_elements))
 	if len(upstream_elements) == 2 {
-		l.Info("calling mrpc_init_setup")
+		// l.Info("calling mrpc_init_setup")
 		mrpc_init_setup(ctx, controlPlaneID)
-	} else if len(upstream_elements) == 3 && strings.Contains(config.Spec.UpstreamChain, "unsafe") {
-		l.Info("calling mrpc_after_migration_unsafe")
+	} else if len(upstream_elements) == 3 && safe == false {
+		// l.Info("calling mrpc_after_migration_unsafe")
 		mrpc_after_migration_unsafe(ctx, controlPlaneID)
-	} else if len(upstream_elements) == 3 && strings.Contains(config.Spec.UpstreamChain, "safe") {
-		l.Info("calling mrpc_after_migration_safe")
+	} else if len(upstream_elements) == 3 && safe == true {
+		// l.Info("calling mrpc_after_migration_safe")
 		mrpc_after_migration_safe(ctx, controlPlaneID)
 	}
 
