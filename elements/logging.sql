@@ -12,9 +12,10 @@ CREATE TABLE rpc_events (
 
 
 /*
-  Processing Logic
+  Processing Logic:
+  1. Insert an event for each RPC
+  2. Forward all RPCs
 */
-
 INSERT INTO rpc_events (timestamp, type, source, destination, rpc) 
 SELECT CURRENT_TIMESTAMP, type, src, dst, values
 FROM input;

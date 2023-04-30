@@ -19,8 +19,8 @@ INSERT INTO acl (permission, name) VALUES
 ('Y', 'Bill');
 
 /*
-Processing Logic:
+Processing Logic: block users that do not have permission
 */
 CREATE TABLE output AS
-SELECT * from input_view JOIN acl on input_view.name = acl.name
+SELECT * from input JOIN acl on input.name = acl.name
 WHERE acl.permission = "Y";
