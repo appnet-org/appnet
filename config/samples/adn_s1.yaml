@@ -3,7 +3,6 @@ kind: Adnconfig
 metadata:
   name: adnconfig-sample
 spec:
-  safe: true
   upstreamService: "rpc_echo_client"
   downstreamService: "rpc_echo_server"
   upstreamChain: "rate_limiting(request_per_sec=1)->logging()"

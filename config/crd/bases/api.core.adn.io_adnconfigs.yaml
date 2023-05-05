@@ -40,6 +40,7 @@ spec:
               downstreamService:
                 type: string
               safe:
+                default: true
                 description: Foo is an example field of Adnconfig. Edit adnconfig_types.go
                   to remove/update Type       string `json:"type"`
                 type: boolean
@@ -50,7 +51,6 @@ spec:
             required:
             - downstreamChain
             - downstreamService
-            - safe
             - upstreamChain
             - upstreamService
             type: object

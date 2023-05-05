@@ -235,6 +235,7 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err != nil {
 		// l.Error(err, "unable to fetch Adnconfig")
 		// l.Info("calling remove_all_engines")
+		l.Info("Reconciling Adnconfig")
 		remove_all_engines(ctx, controlPlaneID)
 		l.Info("Reconciliation finished!")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
