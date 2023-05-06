@@ -12,11 +12,8 @@ Initilization:
     Insert the access control rules into the acl table
 */
 INSERT INTO acl (permission, name) VALUES
-('Y', 'Alice'),
-('N', 'Bob'),
-('Y', 'Peter'),
-('Y', 'Jeff'),
-('Y', 'Bill');
+('N', 'Apple'),
+('Y', 'Banana'),
 
 /*
 Processing Logic: block users that do not have permission
