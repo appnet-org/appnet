@@ -1,3 +1,5 @@
+-- Logging
+
 /* 
 Internal state: 
     rpc_events: A table to store rpc events
