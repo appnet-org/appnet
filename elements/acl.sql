@@ -6,7 +6,7 @@ Internal state:
 */
 CREATE TABLE acl (
   name VARCHAR(255),
-  permission CHAR(2) not null
+  permission VARCHAR(2),
 );
 
 /*

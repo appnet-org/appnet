@@ -31,6 +31,7 @@ if __name__ == "__main__":
             "from": "input"
         }
     }]
+    print("Compiling logging statements...")
     for ast in logging_asts:
         rust_code = compile_sql_to_rust(ast)
         print(rust_code)
@@ -49,10 +50,61 @@ if __name__ == "__main__":
     "columns": ["permission", "name"],
     "values": [
         {"permission": "N", "name": "Apple"},
-        {"permission": "Y", "name": "Banana"}
+        # {"permission": "Y", "name": "Banana"}
     ]
+    },
+    {
+    "type": "CreateTableAsSelect",
+    "table": "output",
+    "select": {
+        "type": "SelectJoinStatement",
+        "from": "input",
+        "join": {
+            "type": "JoinOn",
+            "table": "acl",
+            "condition": {
+                "left": "input.name",
+                "operator": "=",
+                "right": "acl.name"
+            }
+        },
+        "where": {
+            "type": "BinaryExpression",
+            "left": {"type": "Column", "name": "acl.permission"},
+            "operator": "=",
+            "right": {"type": "Literal", "value": "\"Y\""}
+        }
+    }
     }]
-
+    print()
+    print("Compiling acl statements...")
     for ast in acl_asts:
+        rust_code = compile_sql_to_rust(ast)
+        print(rust_code)
+
+    
+    fault_asts = [
+    {
+    "type": "SetStatement",
+    "variable": "@probability",
+    "value": "0.2"
+    },
+    {
+    "type": "CreateTableAsSelect",
+    "table": "output",
+    "select": {
+        "type": "SelectWhereStatement",
+        "from": "input",
+        "where": {
+            "type": "BinaryExpression",
+            "left": {"type": "Function", "name": "random"},
+            "operator": "<",
+            "right": {"type": "Variable", "name": "@probability"}
+        }
+    }
+    }]
+    print()
+    print("Compiling fault statements...")
+    for ast in fault_asts:
         rust_code = compile_sql_to_rust(ast)
         print(rust_code)
