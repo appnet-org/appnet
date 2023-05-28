@@ -84,10 +84,12 @@ def handle_insert_statement(node):
 
 def handle_select_statement(node):
     table = node["from"]
-    
-    columns = [i + ".clone()" for i in node["columns"]]
-    columns = ', '.join(columns).replace("CURRENT_TIMESTAMP.clone()", "Utc::now()")
-    return f"{table}.iter().map(|req| RpcEvent::new({columns})).collect::<Vec<_>>()"
+    if len(node["columns"]) == 1 and node["columns"][0] == "*":
+        return f"{table}.clone()"
+    else:
+        columns = [i + ".clone()" for i in node["columns"]]
+        columns = ', '.join(columns).replace("CURRENT_TIMESTAMP.clone()", "Utc::now()")
+        return f"{table}.iter().map(|req| RpcEvent::new({columns})).collect::<Vec<_>>()"
 
 def handle_create_table_as_statement(node):
     new_table = node["table"]

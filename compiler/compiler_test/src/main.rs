@@ -75,7 +75,7 @@ fn main() {
         rpc_events.push(event);
     }
 
-    let output: Vec<_> = input;
+    let output: Vec<_> = input.clone();
 
     println!("In RPC_EVENTS:");
     for message in &rpc_events {
