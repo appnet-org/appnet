@@ -1,6 +1,9 @@
 from compile import *
+import os
 
 if __name__ == "__main__":
+    os.system("rm -f ./generated/*")
+    
     logging_asts = [{
     "type": "CreateTableStatement",
     "table": "rpc_events",
@@ -32,9 +35,12 @@ if __name__ == "__main__":
         }
     }]
     print("Compiling logging statements...")
+
     for ast in logging_asts:
         rust_code = compile_sql_to_rust(ast)
         print(rust_code)
+        with open("./generated/logging.rs", "a") as f:
+            f.write(rust_code + '\n')
 
     acl_asts = [{
     "type": "CreateTableStatement",
@@ -81,6 +87,8 @@ if __name__ == "__main__":
     for ast in acl_asts:
         rust_code = compile_sql_to_rust(ast)
         print(rust_code)
+        with open("./generated/acl.rs", "a") as f:
+            f.write(rust_code + '\n')
 
     
     fault_asts = [
@@ -108,3 +116,5 @@ if __name__ == "__main__":
     for ast in fault_asts:
         rust_code = compile_sql_to_rust(ast)
         print(rust_code)
+        with open("./generated/fault.rs", "a") as f:
+            f.write(rust_code + '\n')

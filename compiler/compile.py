@@ -32,10 +32,36 @@ def handle_create_table_statement(ast):
         rust_type = type_mapping(column["type"])
         rust_struct += f"    pub {column['name']}: {rust_type},\n"
     rust_struct += "}\n"
+    
+    
+    # impl RPCEvent {
+    # pub fn new(event_type: String, source: String, destination: String, payload: String) -> RPCEvent {
+    #     RPCEvent {
+    #         event_type: event_type,
+    #         source: source,
+    #         destination: destination,
+    #         rpc: payload,
+    #     }
+    # }
+    
+    rust_impl = f"impl {table_name} {{\n"
+    rust_impl += f"     pub fn new("
+    for column, idx in zip(ast["columns"], range(len(ast["columns"]))):
+        rust_impl += f"{column['name']}: {type_mapping(column['type'])}"
+        if idx != len(ast["columns"]) - 1:
+            rust_impl += ", "
+    rust_impl += f") -> {table_name} {{\n"
+    
+    rust_impl += f"         {table_name} {{\n"
+    for column in ast["columns"]:
+        rust_impl += f"             {column['name']}: {column['name']},\n"
+    rust_impl += f"         }}\n"
+    rust_impl += f"     }}\n"
+    rust_impl += f"}}\n"
+    
+    rust_vec = f"let mut {table_name}: Vec<{table_name}> = Vec::new();"
 
-    rust_vec = f"let {table_name}: Vec<{table_name}> = Vec::new();"
-
-    return rust_struct + "\n" + rust_vec
+    return rust_struct + "\n" + rust_impl + "\n" + rust_vec
 
 def handle_insert_statement(node):
     table = node["table"]
@@ -58,7 +84,9 @@ def handle_insert_statement(node):
 
 def handle_select_statement(node):
     table = node["from"]
-    columns = ', '.join(node["columns"]).replace("CURRENT_TIMESTAMP", "Utc::now()")
+    
+    columns = [i + ".clone()" for i in node["columns"]]
+    columns = ', '.join(columns).replace("CURRENT_TIMESTAMP.clone()", "Utc::now()")
     return f"{table}.iter().map(|req| RpcEvent::new({columns})).collect::<Vec<_>>()"
 
 def handle_create_table_as_statement(node):
