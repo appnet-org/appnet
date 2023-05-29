@@ -6,3 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = { version = "0.4", features = ["unstable-locales"] }
+
+
+[[bin]]
+name = "logging"
+path = "src/main2.rs"
