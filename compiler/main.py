@@ -56,8 +56,8 @@ if __name__ == "__main__":
     "table": "acl",
     "columns": ["permission", "name"],
     "values": [
-        {"permission": "N", "name": "Apple"},
-        # {"permission": "Y", "name": "Banana"}
+     #   {"permission": "N", "name": "Apple"},
+        {"permission": "Y", "name": "Banana"}
     ]
     },
     {
@@ -70,9 +70,9 @@ if __name__ == "__main__":
             "type": "JoinOn",
             "table": "acl",
             "condition": {
-                "left": "input.name",
+                "left": {"type": "Column", "name": "input.source"},
                 "operator": "=",
-                "right": "acl.name"
+                "right": {"type": "Column", "name": "acl.name"}
             }
         },
         "where": {

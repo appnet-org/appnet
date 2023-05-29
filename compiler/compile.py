@@ -27,6 +27,8 @@ def type_mapping(sql_type):
 
 def handle_create_table_statement(ast, ctx):
     table_name = ast["table"]
+    if table_name == "output":
+        raise ValueError("Table name 'output' is reserved")
     vec_name = "table_" + ast["table"]
     struct_name = "struct_" + ast["table"]
     table = {
@@ -88,9 +90,9 @@ def handle_insert_statement(node, ctx):
         for value in node["values"]:
             # print(type(value))
             for k, v in value.items():
-                values += f"{k}: '{v}', "
-
-        return f"{table}.push(acl {{{values[:-2]}}});"
+                values += f"{k}: \"{v}\".to_string(), "
+        struct_name = table["struct"]["name"]
+        return f"{vec_name}.push({struct_name} {{{values[:-2]}}});"
 
 def handle_select_statement(node, ctx):
     table_from = node["from"]
@@ -117,16 +119,31 @@ def handle_select_statement(node, ctx):
 
 def handle_create_table_as_statement(node, ctx):
     new_table = node["table"]
+    if new_table != "output":
+        raise NotImplementedError("Only output table is supported")
     select_statement = handle_select_statement(node["select"], ctx)
     return f"let {new_table}: Vec<_> = {select_statement};"
 
 def handle_select_join_statement(node, ctx):
     join_condition = handle_binary_expression(node["join"]["condition"], ctx)
     where_condition = handle_binary_expression(node["where"], ctx)
-    return f"iproduct!({node['from']}.iter(), {node['join']['table']}.iter()) .filter(|&(input, acl)| {join_condition} && {where_condition}) .map(|(input, _)| input.clone()) .collect()"
+    join_table_name = node["join"]["table"] 
+    from_table_name = node["from"]
+    if ctx["tables"].get(join_table_name) is None:
+        raise ValueError("Table does not exist")
+    if ctx["tables"].get(from_table_name) is None:
+        raise ValueError("Table does not exist")
+    join_vec_name = ctx["tables"][join_table_name]["name"]
+    from_vec_name = ctx["tables"][from_table_name]["name"]
+    return f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).filter(|&({from_table_name}, {join_table_name})| {join_condition} && {where_condition}).map(|(l, _)| l.clone()).collect()"
 
 def handle_binary_expression(node, ctx):
-    return f"{node['left']} {node['operator']} {node['right']}"
+    left = node["left"]["name"] if node["left"]["type"] == "Column" else node["left"]["value"]
+    right = node["right"]["name"] if node["right"]["type"] == "Column" else node["right"]["value"]
+    op = node["operator"]
+    if op == "=":
+        op = "=="
+    return f"{left} {op} {right}"
 
 def handle_set_statement(node, ctx):
     variable_name = node["variable"].replace('@', '') + "_var"
@@ -140,7 +157,10 @@ def handle_select_where_statement(node, ctx):
 def handle_where_binary_expression(node, ctx):
     left = handle_function(node["left"], ctx) if node["left"]["type"] == "Function" else node["left"]["name"]
     right = node["right"]["name"].replace('@', '')
-    return f"{left} {node['operator']} {right}"
+    op = node["operator"]
+    if op == '=':
+        op = "=="
+    return f"{left} {op} {right}"
 
 def handle_function(node, ctx):
     if node["name"] == "random":

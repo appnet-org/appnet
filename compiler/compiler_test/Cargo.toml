@@ -7,8 +7,12 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4", features = ["unstable-locales"] }
-
+itertools = { version = "0.10" }
 
 [[bin]]
 name = "logging"
 path = "src/main2.rs"
+
+[[bin]]
+name = "acl"
+path = "src/main3.rs"
