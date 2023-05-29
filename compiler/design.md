@@ -4,12 +4,22 @@
 
 We translate each SQL statement to corresponding Rust code.
 
+```bash
+python main.py
+# you will find the generated Rust code in ./generated
+# split, and copy the code to ./compiler_test/src/main{number}.rs
+# This is already done in this repo.
+cd compiler_test
+cargo run --bin logging # acl, fault
+# see the result
+```
+
 ### todos
 
-- For constructors, currently we use clone(copy) rather than move(reference), which is not efficient.
-- For select, we currently consider the two type in Rust is "compatible" and use a `new` constructor.  But for star(select *), since we don't have the column information in AST,  we currently assume input and output are of same type, and use `.clone` directly. Maybe we need some context to determine whether to use `.into` and add the impl for `Into` trait. 
-    - Maybe transform the `*` to a list of column names, and use the same method as `select`?    
-- Do we need special treatment for output?
+- We use clone(copy) rather than move(reference) in constructors, which is not good.
+- We should use `&str` rather than `String` for string literals.
+- We should move result from `input` into `output` rather than copy it.
+
 ## Logging
 
 
