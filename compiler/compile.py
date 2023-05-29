@@ -120,7 +120,7 @@ def handle_select_statement(node, ctx):
 def handle_create_table_as_statement(node, ctx):
     new_table = node["table"]
     if new_table != "output":
-        raise NotImplementedError("Only output table is supported")
+        raise NotImplementedError("Currently only output table is supported")
     select_statement = handle_select_statement(node["select"], ctx)
     return f"let {new_table}: Vec<_> = {select_statement};"
 
@@ -146,7 +146,12 @@ def handle_binary_expression(node, ctx):
     return f"{left} {op} {right}"
 
 def handle_set_statement(node, ctx):
-    variable_name = node["variable"].replace('@', '') + "_var"
+    variable_name = node["variable"].replace('@', '')
+    ctx["vars"][variable_name] = {
+        'name': "var_" + variable_name,
+        'value': node["value"]
+    }
+    variable_name = ctx["vars"][variable_name]["name"]
     rust_code = f"let {variable_name} = {node['value']};"
     return rust_code
 
@@ -157,6 +162,9 @@ def handle_select_where_statement(node, ctx):
 def handle_where_binary_expression(node, ctx):
     left = handle_function(node["left"], ctx) if node["left"]["type"] == "Function" else node["left"]["name"]
     right = node["right"]["name"].replace('@', '')
+    if ctx["vars"].get(right) is None:
+        raise ValueError("Variable does not exist")
+    right = ctx["vars"][right]["name"]
     op = node["operator"]
     if op == '=':
         op = "=="
@@ -198,5 +206,8 @@ def init_ctx():
                     ]
                 } 
             }
+        },
+        "vars": {
+            
         }
     }

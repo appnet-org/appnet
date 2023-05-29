@@ -2,6 +2,7 @@ from compile import *
 import os
 
 if __name__ == "__main__":
+    os.system("mkdir -p ./generated")
     os.system("rm -f ./generated/*")
     
     logging_asts = [{
