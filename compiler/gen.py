@@ -26,16 +26,15 @@ impl Engine for {engine_name} {{
 """
 
 
-if __name__ == "__main__":
+def generate(name):
     ctx = {
         "declaration": [],
         "internal": [],
         "init": [],
         "process": [],
     }
-    name = sys.argv[1].strip(".rs") + "_engine"
-    print(name)
-    with open("./generated/" + sys.argv[1]) as f:
+    print("Generating code for " + name)
+    with open("./generated/" + name + ".rs") as f:
         current = "process"
         for i in f.readlines():
             if i.startswith("///@@"):
@@ -54,13 +53,13 @@ if __name__ == "__main__":
                     if i.strip() != "":
                         ctx[current].append(i)
     
-    print(ctx)
+    #print(ctx)
     
-    with open("./generated/" + name + ".rs", "w") as f:
+    with open("./generated/" + name + "_engine.rs", "w") as f:
         f.write(template.format(
             declaration="".join(ctx["declaration"]),
             internal="".join(ctx["internal"]),
             init="".join(ctx["init"]),
             process="".join(ctx["process"]),
-            engine_name=name,
+            engine_name=name + "_engine",
         ))

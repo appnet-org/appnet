@@ -1,4 +1,5 @@
 from compile import *
+from gen import *
 import os
 
 if __name__ == "__main__":
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     ctx = init_ctx()
     for ast in logging_asts:
         rust_code = compile_sql_to_rust(ast, ctx)
-        print(rust_code)
+        #print(rust_code)
         with open("./generated/logging.rs", "a") as f:
             f.write(rust_code + '\n')
 
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     ctx = init_ctx()
     for ast in acl_asts:
         rust_code = compile_sql_to_rust(ast, ctx)
-        print(rust_code)
+        #print(rust_code)
         with open("./generated/acl.rs", "a") as f:
             f.write(rust_code + '\n')
 
@@ -119,6 +120,12 @@ if __name__ == "__main__":
     ctx = init_ctx()
     for ast in fault_asts:
         rust_code = compile_sql_to_rust(ast, ctx)
-        print(rust_code)
+        #print(rust_code)
         with open("./generated/fault.rs", "a") as f:
             f.write(rust_code + '\n')
+    
+    engines = ["logging", "acl", "fault"]        
+    for e in engines:
+        generate(e)
+        os.system(f"cp ./generated/{e}_engine.rs ./compiler_test/src/{e}_engine.rs")
+    
