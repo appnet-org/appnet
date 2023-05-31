@@ -127,5 +127,6 @@ if __name__ == "__main__":
     engines = ["logging", "acl", "fault"]        
     for e in engines:
         generate(e)
+        os.system(f"rustfmt ./generated/{e}_engine.rs")
         os.system(f"cp ./generated/{e}_engine.rs ./compiler_test/src/{e}_engine.rs")
     
