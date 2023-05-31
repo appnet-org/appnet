@@ -1,12 +1,17 @@
 from compile import *
+from gen import *
+import os
 
 if __name__ == "__main__":
+    os.system("mkdir -p ./generated")
+    os.system("rm -f ./generated/*")
+    
     logging_asts = [{
     "type": "CreateTableStatement",
     "table": "rpc_events",
     "columns": [
         {"name": "timestamp", "type": "TIMESTAMP"},
-        {"name": "type", "type": "VARCHAR", "length": 50},
+        {"name": "event_type", "type": "VARCHAR", "length": 50},
         {"name": "source", "type": "VARCHAR", "length": 50},
         {"name": "destination", "type": "VARCHAR", "length": 50},
         {"name": "rpc", "type": "VARCHAR", "length": 50}
@@ -18,7 +23,7 @@ if __name__ == "__main__":
         "columns": ["timestamp", "event_type", "source", "destination", "rpc"],
         "select": {
             "type": "SelectStatement",
-            "columns": ["CURRENT_TIMESTAMP", "event_type", "source", "destination", "rpc"],
+            "columns": ["CURRENT_TIMESTAMP", "event_type", "source", "destination", "payload"],
             "from": "input"
         }
     },
@@ -32,9 +37,13 @@ if __name__ == "__main__":
         }
     }]
     print("Compiling logging statements...")
+
+    ctx = init_ctx()
     for ast in logging_asts:
-        rust_code = compile_sql_to_rust(ast)
-        print(rust_code)
+        rust_code = compile_sql_to_rust(ast, ctx)
+        #print(rust_code)
+        with open("./generated/logging.rs", "a") as f:
+            f.write(rust_code + '\n')
 
     acl_asts = [{
     "type": "CreateTableStatement",
@@ -49,8 +58,8 @@ if __name__ == "__main__":
     "table": "acl",
     "columns": ["permission", "name"],
     "values": [
-        {"permission": "N", "name": "Apple"},
-        # {"permission": "Y", "name": "Banana"}
+     #   {"permission": "N", "name": "Apple"},
+        {"permission": "Y", "name": "Banana"}
     ]
     },
     {
@@ -63,9 +72,9 @@ if __name__ == "__main__":
             "type": "JoinOn",
             "table": "acl",
             "condition": {
-                "left": "input.name",
+                "left": {"type": "Column", "name": "input.source"},
                 "operator": "=",
-                "right": "acl.name"
+                "right": {"type": "Column", "name": "acl.name"}
             }
         },
         "where": {
@@ -78,9 +87,12 @@ if __name__ == "__main__":
     }]
     print()
     print("Compiling acl statements...")
+    ctx = init_ctx()
     for ast in acl_asts:
-        rust_code = compile_sql_to_rust(ast)
-        print(rust_code)
+        rust_code = compile_sql_to_rust(ast, ctx)
+        #print(rust_code)
+        with open("./generated/acl.rs", "a") as f:
+            f.write(rust_code + '\n')
 
     
     fault_asts = [
@@ -105,6 +117,16 @@ if __name__ == "__main__":
     }]
     print()
     print("Compiling fault statements...")
+    ctx = init_ctx()
     for ast in fault_asts:
-        rust_code = compile_sql_to_rust(ast)
-        print(rust_code)
+        rust_code = compile_sql_to_rust(ast, ctx)
+        #print(rust_code)
+        with open("./generated/fault.rs", "a") as f:
+            f.write(rust_code + '\n')
+    
+    engines = ["logging", "acl", "fault"]        
+    for e in engines:
+        generate(e)
+        os.system(f"rustfmt ./generated/{e}_engine.rs")
+        os.system(f"cp ./generated/{e}_engine.rs ./compiler_test/src/{e}_engine.rs")
+    
