@@ -1,99 +1,70 @@
-//! desired logging template
-//! Requirements:
-//! RpcMessage fields known, derived Clone.
+mod acl_engine;
+mod engine;
+mod fault_engine;
+mod logging_engine;
+use chrono::prelude::*;
+use engine::Engine;
+use engine::RpcMessage;
+fn prepare() -> Vec<RpcMessage> {
+    let mut input: Vec<RpcMessage> = Vec::new();
 
-#[derive(Clone, Debug)]
-pub struct RpcMessage {
-    pub event_type: String,
-    pub source: String,
-    pub destination: String,
-    pub payload: String,
+    for i in 1..10 {
+        input.push(RpcMessage {
+            event_type: "Type1".to_string(),
+            source: "Banana".to_string(),
+            destination: "Destination1".to_string(),
+            payload: "Payload1".to_string(),
+        });
+        input.push(RpcMessage {
+            event_type: "Type2".to_string(),
+            source: "Banana".to_string(),
+            destination: "Destination2".to_string(),
+            payload: "Payload2".to_string(),
+        });
+    }
+    for i in 1..10 {
+        input.push(RpcMessage {
+            event_type: "Type0".to_string(),
+            source: "Apple".to_string(),
+            destination: "Destination0".to_string(),
+            payload: "Payload0".to_string(),
+        });
+    }
+
+    input
 }
 
-pub struct RPCEvent {
-    pub event_type: String,
-    pub source: String,
-    pub destination: String,
-    pub rpc: String,
-}
-
-impl RPCEvent {
-    pub fn new(
-        event_type: String,
-        source: String,
-        destination: String,
-        payload: String,
-    ) -> RPCEvent {
-        RPCEvent {
-            event_type: event_type,
-            source: source,
-            destination: destination,
-            rpc: payload,
-        }
+fn describe(input: &Vec<RpcMessage>) {
+    println!("input size = {}", input.len());
+    for i in 0..input.len() {
+        println!("input[{}] = {:?}", i, input[i]);
     }
 }
 
 fn main() {
-    let mut input: Vec<RpcMessage> = Vec::new();
+    let mut input: Vec<RpcMessage> = prepare();
 
-    input.push(RpcMessage {
-        event_type: "Type1".to_string(),
-        source: "Source1".to_string(),
-        destination: "Destination1".to_string(),
-        payload: "Payload1".to_string(),
-    });
+    let mut fault_engine = fault_engine::fault_engine {};
+    fault_engine.init();
 
-    input.push(RpcMessage {
-        event_type: "Type2".to_string(),
-        source: "Source2".to_string(),
-        destination: "Destination2".to_string(),
-        payload: "Payload2".to_string(),
-    });
+    let mut log_engine = logging_engine::logging_engine {
+        table_rpc_events: Vec::new(),
+    };
+    log_engine.init();
 
-    println!("In INPUT:");
-    for message in &input {
-        println!(
-            "Event Type: {}, Source: {}, Destination: {}, Payload: {}",
-            message.event_type, message.source, message.destination, message.payload
-        );
-    }
+    let mut acl_engine = acl_engine::acl_engine {
+        table_acl: Vec::new(),
+    };
+    acl_engine.init();
 
-    let mut rpc_events: Vec<RPCEvent> = Vec::new();
+    input = fault_engine.process(input);
+    describe(&input);
 
-    for event in input
-        .iter()
-        .map(|req| {
-            RPCEvent::new(
-                req.event_type.clone(),
-                req.source.clone(),
-                req.destination.clone(),
-                req.payload.clone(),
-            )
-        })
-        .collect::<Vec<_>>()
-    {
-        rpc_events.push(event);
-    }
+    input = log_engine.process(input);
+    describe(&input);
 
-    let output: Vec<_> = input.clone();
+    input = acl_engine.process(input);
+    describe(&input);
 
-    println!("In RPC_EVENTS:");
-    for message in &rpc_events {
-        println!(
-            "Event Type: {}, Source: {}, Destination: {}, Payload: {}",
-            message.event_type, message.source, message.destination, message.rpc
-        );
-    }
-
-    println!("In OUTPUT:");
-    for message in &output {
-        println!(
-            "Event Type: {}, Source: {}, Destination: {}, Payload: {}",
-            message.event_type, message.source, message.destination, message.payload
-        );
-    }
-
-    // Following code should generate a compiler error:
-    // error[E0382]: use of moved value: `input`
-    // println!("Expected INPUT, consumed by OUTPUT {:?}", input);
+    println!("Finish!");
 }

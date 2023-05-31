@@ -1,3 +1,10 @@
+def begin_sep(sec):
+    return f"\n///@@ BEG_OF {sec} @@\n"
+
+def end_sep(sec):
+    return f"\n///@@ END_OF {sec} @@\n"
+    
+
 def compile_sql_to_rust(ast, ctx):
     if ast["type"] == "CreateTableAsStatement":
         return handle_create_table_as_statement(ast, ctx)
@@ -32,7 +39,7 @@ def handle_create_table_statement(ast, ctx):
     vec_name = "table_" + ast["table"]
     struct_name = "struct_" + ast["table"]
     table = {
-        "name": vec_name,
+        "name": "self." + vec_name,
         "type": "Vec",
         "struct": {
             "name": struct_name,
@@ -66,9 +73,10 @@ def handle_create_table_statement(ast, ctx):
     rust_impl += f"     }}\n"
     rust_impl += f"}}\n"
     
-    rust_vec = f"let mut {vec_name}: Vec<{struct_name}> = Vec::new();"
+    rust_vec = begin_sep("init") + f"self.{vec_name} = Vec::new();" + end_sep("init")
 
-    return rust_struct + "\n" + rust_impl + "\n" + rust_vec
+    rust_internal = begin_sep("internal") + f"pub {vec_name}: Vec<{struct_name}>," + end_sep("internal")
+    return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_vec + "\n" + rust_internal + "\n" + begin_sep("process")
 
 def handle_insert_statement(node, ctx):
     table_name = node["table"]
