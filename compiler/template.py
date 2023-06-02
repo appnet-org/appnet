@@ -1,4 +1,4 @@
-
+import os
 
 # template_name = "{TemplateName}"
 
@@ -9,10 +9,10 @@ use serde::{{Deserialize, Serialize}};
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct {TemplateName} {{}}
+pub struct {TemplateName}Config {{}}
 
 
-impl {TemplateName} {{
+impl {TemplateName}Config {{
     /// Get config from toml file
     pub fn new(config: Option<&str>) -> anyhow::Result<Self> {{
         let config = toml::from_str(config.unwrap_or(""))?;
@@ -72,7 +72,7 @@ pub(crate) struct {TemplateName}EngineBuilder {{
     config: {TemplateName}Config,
 }}
 
-impl {TemplateName}EngineBuilder {
+impl {TemplateName}EngineBuilder {{
     fn new(node: DataPathNode, config: {TemplateName}Config) -> Self {{
         {TemplateName}EngineBuilder {{ node, config }}
     }}
@@ -84,8 +84,8 @@ impl {TemplateName}EngineBuilder {
             indicator: Default::default(),
             config: self.config,
         }})
-    }
-}
+    }}
+}}
 
 pub struct {TemplateName}Addon {{
     config: {TemplateName}Config,
@@ -149,13 +149,13 @@ impl PhoenixAddon for {TemplateName}Addon {{
         prev_version: Version,
     ) -> Result<Box<dyn Engine>> {{
         if ty != {TemplateName}Addon::{TemplateName}_ENGINE {{
-            bail!("invalid engine type {:?}", ty)
+            bail!("invalid engine type {{:?}}", ty)
         }}
 
         let engine = {TemplateName}Engine::restore(local, node, prev_version)?;
         Ok(Box::new(engine))
     }}
-}
+}}
 """
 
 engine_rs="""
@@ -242,7 +242,7 @@ impl Decompose for {TemplateName}Engine {{
         collections.insert("config".to_string(), Box::new(engine.config));
         (collections, engine.node)
     }}
-}
+}}
 
 impl {TemplateName}Engine {{
     pub(crate) fn restore(
@@ -254,7 +254,7 @@ impl {TemplateName}Engine {{
             .remove("config")
             .unwrap()
             .downcast::<{TemplateName}Config>()
-            .map_err(|x| anyhow!("fail to downcast, type_name={:?}", x.type_name()))?;
+            .map_err(|x| anyhow!("fail to downcast, type_name={{:?}}", x.type_name()))?;
 
         let engine = {TemplateName}Engine {{
             node,
@@ -331,7 +331,63 @@ impl {TemplateName}Engine {{
 }}
 """
 
+api_toml="""
+[package]
+name = "phoenix-api-policy-{TemplateName}"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+phoenix-api.workspace = true
+
+serde.workspace = true
+"""
+
+policy_toml="""
+[package]
+name = "phoenix-{TemplateName}"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+phoenix_common.workspace = true
+phoenix-api-policy-{TemplateName}.workspace = true
+
+futures.workspace = true
+minstant.workspace = true
+thiserror.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+anyhow.workspace = true
+nix.workspace = true
+toml = { workspace = true, features = ["preserve_order"] }
+bincode.workspace = true
+chrono.workspace = true
+"""
 
 if __name__ == "__main__":
-    print("hello")
-
+    template_name = "nofile_logging"
+    template_name_toml = "nofile-logging"
+    template_name_first_cap = "NofileLogging"
+    target_dir = "./generated/{}".format(template_name)
+    os.system(f"rm -rf {target_dir}")
+    os.system(f"mkdir -p {target_dir}")
+    os.chdir(target_dir)
+    print("Current dir: {}".format(os.getcwd()))
+    with open("config.rs", "w") as f:
+        f.write(config_rs.format(TemplateName=template_name_first_cap))
+    with open("lib.rs", "w") as f:
+        f.write(lib_rs.format(TemplateName=template_name_first_cap))
+    with open("module.rs", "w") as f:
+        f.write(module_rs.format(TemplateName=template_name_first_cap))
+    with open("engine.rs", "w") as f:
+        f.write(engine_rs.format(TemplateName=template_name_first_cap))
+    with open("Cargo.toml.api", "w") as f:
+        f.write(api_toml.format(TemplateName=template_name_toml))
+    with open("Cargo.toml.policy", "w") as f:
+        f.write(policy_toml.format(TemplateName=template_name_toml))
+    print("Template {} generated".format(template_name))
