@@ -50,7 +50,7 @@ use crate::module::{TemplateName}Addon;
 #[no_mangle]
 pub fn init_addon(config_string: Option<&str>) -> InitFnResult<Box<dyn PhoenixAddon>> {{
     let config = {TemplateName}Config::new(config_string)?;
-    let addon = {TemplateName}::new(config);
+    let addon = {TemplateName}Addon::new(config);
     Ok(Box::new(addon))
 }}
 """
@@ -76,7 +76,7 @@ impl {TemplateName}EngineBuilder {{
     fn new(node: DataPathNode, config: {TemplateName}Config) -> Self {{
         {TemplateName}EngineBuilder {{ node, config }}
     }}
-    // TODO! LogFile
+    /// TODO! LogFile
     fn build(self) -> Result<{TemplateName}Engine> {{
 
         Ok({TemplateName}Engine {{
@@ -177,12 +177,12 @@ use phoenix_common::module::Version;
 use phoenix_common::storage::{{ResourceCollection, SharedStorage}};
 
 use super::DatapathError;
-use crate::config::{{{TemplateName}Config}};
+use crate::config::{{{TemplateNameCap}Config}};
 
-pub(crate) struct {TemplateName}Engine {{
+pub(crate) struct {TemplateNameCap}Engine {{
     pub(crate) node: DataPathNode,
     pub(crate) indicator: Indicator,
-    pub(crate) config: {TemplateName}Config,
+    pub(crate) config: {TemplateNameCap}Config,
 }}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -193,13 +193,13 @@ enum Status {{
 
 use Status::Progress;
 
-impl Engine for {TemplateName}Engine {{
+impl Engine for {TemplateNameCap}Engine {{
     fn activate<'a>(self: Pin<&'a mut Self>) -> BoxFuture<'a, EngineResult> {{
         Box::pin(async move {{ self.get_mut().mainloop().await }})
     }}
 
     fn description(self: Pin<&Self>) -> String {{
-        "{TemplateName}Engine".to_owned()
+        "{TemplateNameCap}Engine".to_owned()
     }}
 
     #[inline]
@@ -212,16 +212,16 @@ impl Engine for {TemplateName}Engine {{
 
         match request {{
             control_plane::Request::NewConfig() => {{
-                self.config = {TemplateName}Config {{}};
+                self.config = {TemplateNameCap}Config {{}};
             }}
         }}
         Ok(())
     }}
 }}
 
-impl_vertex_for_engine!({TemplateName}Engine, node);
+impl_vertex_for_engine!({TemplateNameCap}Engine, node);
 
-impl Decompose for {TemplateName}Engine {{
+impl Decompose for {TemplateNameCap}Engine {{
     fn flush(&mut self) -> Result<usize> {{
         let mut work = 0;
         while !self.tx_inputs()[0].is_empty() || !self.rx_inputs()[0].is_empty() {{
@@ -244,7 +244,7 @@ impl Decompose for {TemplateName}Engine {{
     }}
 }}
 
-impl {TemplateName}Engine {{
+impl {TemplateNameCap}Engine {{
     pub(crate) fn restore(
         mut local: ResourceCollection,
         node: DataPathNode,
@@ -253,10 +253,10 @@ impl {TemplateName}Engine {{
         let config = *local
             .remove("config")
             .unwrap()
-            .downcast::<{TemplateName}Config>()
+            .downcast::<{TemplateNameCap}Config>()
             .map_err(|x| anyhow!("fail to downcast, type_name={{:?}}", x.type_name()))?;
 
-        let engine = {TemplateName}Engine {{
+        let engine = {TemplateNameCap}Engine {{
             node,
             indicator: Default::default(),
             config,
@@ -265,7 +265,7 @@ impl {TemplateName}Engine {{
     }}
 }}
 
-impl {TemplateName}Engine {{
+impl {TemplateNameCap}Engine {{
     async fn mainloop(&mut self) -> EngineResult {{
         loop {{
             let mut work = 0;
@@ -282,7 +282,7 @@ impl {TemplateName}Engine {{
     }}
 }}
 
-impl {TemplateName}Engine {{
+impl {TemplateNameCap}Engine {{
     fn check_input_queue(&mut self) -> Result<Status, DatapathError> {{
         use phoenix_common::engine::datapath::TryRecvError;
 
@@ -293,7 +293,7 @@ impl {TemplateName}Engine {{
                         
                         let meta_ref = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }};
 
-                        //!TODO write to file
+                        ///TODO! write to file
                         
                         self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
                     }}
@@ -311,7 +311,7 @@ impl {TemplateName}Engine {{
             Ok(msg) => {{
                 match msg {{
                     EngineRxMessage::Ack(rpc_id, status) => {{                        
-                        //!TODO write to file
+                        ///TODO! write to file
                         self.rx_outputs()[0].send(EngineRxMessage::Ack(rpc_id, status))?;
                     }}
                     EngineRxMessage::RpcMessage(msg) => {{
@@ -360,19 +360,16 @@ phoenix-api-policy-{TemplateName}.workspace = true
 futures.workspace = true
 minstant.workspace = true
 thiserror.workspace = true
-serde = { workspace = true, features = ["derive"] }
+serde = {{ workspace = true, features = ["derive"] }}
 serde_json.workspace = true
 anyhow.workspace = true
 nix.workspace = true
-toml = { workspace = true, features = ["preserve_order"] }
+toml = {{ workspace = true, features = ["preserve_order"] }}
 bincode.workspace = true
 chrono.workspace = true
 """
 
-if __name__ == "__main__":
-    template_name = "nofile_logging"
-    template_name_toml = "nofile-logging"
-    template_name_first_cap = "NofileLogging"
+def gen_template(template_name, template_name_toml, template_name_first_cap):
     target_dir = "./generated/{}".format(template_name)
     os.system(f"rm -rf {target_dir}")
     os.system(f"mkdir -p {target_dir}")
@@ -385,9 +382,37 @@ if __name__ == "__main__":
     with open("module.rs", "w") as f:
         f.write(module_rs.format(TemplateName=template_name_first_cap))
     with open("engine.rs", "w") as f:
-        f.write(engine_rs.format(TemplateName=template_name_first_cap))
+        f.write(engine_rs.format(TemplateNameCap=template_name_first_cap, TemplateName=template_name))
     with open("Cargo.toml.api", "w") as f:
         f.write(api_toml.format(TemplateName=template_name_toml))
     with open("Cargo.toml.policy", "w") as f:
         f.write(policy_toml.format(TemplateName=template_name_toml))
     print("Template {} generated".format(template_name))
+
+def move_template(mrpc_root, template_name, template_name_toml, template_name_first_cap):
+    mrpc_api = mrpc_root + "/phoenix-api/policy/";
+    os.system(f"rm -rf {mrpc_api}/{template_name_toml}")
+    os.system(f"cp -r {mrpc_api}/logging {mrpc_api}/{template_name_toml}")
+    os.system(f"rm {mrpc_api}/{template_name_toml}/Cargo.toml")
+    os.system(f"cp ./Cargo.toml.api {mrpc_api}/{template_name_toml}/Cargo.toml")
+    mrpc_plugin = mrpc_root + "/plugin/policy";
+    os.system(f"rm -rf {mrpc_plugin}/{template_name_toml}")
+    os.system(f"mkdir -p {mrpc_plugin}/{template_name_toml}/src")  
+    os.system(f"cp ./Cargo.toml.policy {mrpc_plugin}/{template_name_toml}/Cargo.toml") 
+    os.system(f"cp ./config.rs {mrpc_plugin}/{template_name_toml}/src/config.rs")
+    os.system(f"cp ./lib.rs {mrpc_plugin}/{template_name_toml}/src/lib.rs")
+    os.system(f"cp ./module.rs {mrpc_plugin}/{template_name_toml}/src/module.rs")
+    os.system(f"cp ./engine.rs {mrpc_plugin}/{template_name_toml}/src/engine.rs") 
+    print("Template {} moved".format(template_name))
+    
+if __name__ == "__main__":
+    template_name = "nofile_logging"
+    template_name_toml = "nofile-logging"
+    template_name_first_cap = "NofileLogging"
+    gen_template(template_name, template_name_toml, template_name_first_cap)
+    move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
+    
+
+    
+    
+    
