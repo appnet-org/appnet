@@ -76,7 +76,7 @@ impl {TemplateName}EngineBuilder {{
     fn new(node: DataPathNode, config: {TemplateName}Config) -> Self {{
         {TemplateName}EngineBuilder {{ node, config }}
     }}
-    /// TODO! LogFile
+    // TODO! LogFile
     fn build(self) -> Result<{TemplateName}Engine> {{
 
         Ok({TemplateName}Engine {{
@@ -293,7 +293,7 @@ impl {TemplateNameCap}Engine {{
                         
                         let meta_ref = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }};
 
-                        ///TODO! write to file
+                        // TODO! write to file
                         
                         self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
                     }}
@@ -311,7 +311,7 @@ impl {TemplateNameCap}Engine {{
             Ok(msg) => {{
                 match msg {{
                     EngineRxMessage::Ack(rpc_id, status) => {{                        
-                        ///TODO! write to file
+                        // TODO! write to file
                         self.rx_outputs()[0].send(EngineRxMessage::Ack(rpc_id, status))?;
                     }}
                     EngineRxMessage::RpcMessage(msg) => {{
