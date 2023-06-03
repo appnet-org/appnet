@@ -1,8 +1,13 @@
 start: statement [";"]
 
-statement: select_statement | create_table_statement | set_statement | create_table_as_statement | insert_statement
+statement: select_statement 
+       | create_table_statement 
+       | set_statement 
+       | create_table_as_statement 
+       | insert_statement
+       | update_statement
 
-select_statement: "SELECT" select_list "FROM" table_name join_clause? ["WHERE" search_condition]
+select_statement: "SELECT" select_list "FROM" table_name join_clause? [where_clause]
 
 select_list: column_name ("," column_name)*
 
@@ -14,15 +19,22 @@ create_table_as_statement: "CREATE" "TABLE" table_name "AS" select_statement
 
 set_statement: "SET" assignment ("," assignment)*
 
-insert_statement: "INSERT INTO" table_name column_list? "VALUES" value_list* | "INSERT INTO" table_name column_list? select_statement
+insert_statement: "INSERT INTO" table_name column_list? "VALUES" value_list* 
+              | "INSERT INTO" table_name column_list? select_statement
+
+update_statement: "UPDATE" table_name "SET" update_list [where_clause]
+
+update_list: assignment ("," assignment)*
+
+where_clause: "WHERE" search_condition
 
 column_list: "(" column_name ("," column_name)* ")"
+
+column_definition: column_name data_type [column_constraints]
 
 value_list: "(" value ("," value)* "),"
 
 assignment: identifier "=" value
-
-column_definition: column_name data_type [column_constraints]
 
 data_type: CNAME | CNAME "(" NUMBER ")" 
 
@@ -35,7 +47,7 @@ constraint: "PRIMARY" "KEY" "(" column_name ")"
        | "NULL"
        | "DEFAULT" value
 
-value: NUMBER | STRING | CNAME | FUNCTION | VALUE_STRING | column_name
+value: NUMBER | CNAME | function | quoted_string | column_name
 
 column_name: CNAME | table_name "." identifier | "*"
 
@@ -52,12 +64,13 @@ comparison_condition: value comparison_operator value
 
 comparison_operator: "=" | "<>" | "<" | ">" | "<=" | ">="
 
-FUNCTION: "random()"
+function: "random()"
 
-VALUE_STRING: /'[^']*'/
+quoted_string: /'[^']*'/
 
-%import common.ESCAPED_STRING -> STRING
-%import common.SIGNED_NUMBER    -> NUMBER
+%import common.SIGNED_NUMBER  -> NUMBER
+%import common.SQL_COMMENT
 %import common.CNAME
 %import common.WS
 %ignore WS
+%ignore SQL_COMMENT
