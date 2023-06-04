@@ -179,10 +179,13 @@ use phoenix_common::storage::{{ResourceCollection, SharedStorage}};
 use super::DatapathError;
 use crate::config::{{{TemplateNameCap}Config}};
 
+{InternalStatesDeclaration}
+
 pub(crate) struct {TemplateNameCap}Engine {{
     pub(crate) node: DataPathNode,
     pub(crate) indicator: Indicator,
     pub(crate) config: {TemplateNameCap}Config,
+    {InternalStatesInStructDeclaration}
 }}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -241,6 +244,7 @@ impl Decompose for {TemplateNameCap}Engine {{
         let mut collections = ResourceCollection::with_capacity(4);
         collections.insert("config".to_string(), Box::new(engine.config));
         (collections, engine.node)
+        {InternalStatesOnDecompose}
     }}
 }}
 
@@ -255,11 +259,12 @@ impl {TemplateNameCap}Engine {{
             .unwrap()
             .downcast::<{TemplateNameCap}Config>()
             .map_err(|x| anyhow!("fail to downcast, type_name={{:?}}", x.type_name()))?;
-
+        {InternalStatesOnRestore}
         let engine = {TemplateNameCap}Engine {{
             node,
             indicator: Default::default(),
             config,
+            {InternalStatesInConstructor}
         }};
         Ok(engine)
     }}
