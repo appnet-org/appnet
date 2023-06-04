@@ -13,5 +13,5 @@ class ADNCompiler:
 
     def compile(self, sql):
         ast = self.parse(sql)
-        print(ast.pretty())
+        # print(ast.pretty())
         return generate_rust_code(ast)

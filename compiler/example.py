@@ -19,6 +19,7 @@ SELECT * FROM input WHERE random() < probability;
 for sql in fault_sqls:
     # Parse the SQL statement
     generated_code = compiler.compile(sql)
+    print(generated_code)
     break
     # print(generated_code.pretty())   
     # Access and process the parsed result as desired
