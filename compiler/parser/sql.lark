@@ -1,17 +1,17 @@
 start: statement [";"]
 
-statement: select_statement 
+?statement: select_statement 
        | create_table_statement 
        | set_statement 
        | create_table_as_statement 
        | insert_statement
        | update_statement
 
-select_statement: "SELECT" select_list "FROM" table_name join_clause? [where_clause]
+select_statement: "SELECT" select_list "FROM" table_name join_clause* where_clause*
 
 select_list: column_name ("," column_name)*
 
-join_clause: "JOIN" table_name "ON" column_name "=" column_name
+join_clause: "JOIN" table_name "ON" value "=" value
 
 create_table_statement: "CREATE" "TABLE" table_name "(" column_definition ("," column_definition)* ")"
 
@@ -30,26 +30,25 @@ where_clause: "WHERE" search_condition
 
 column_list: "(" column_name ("," column_name)* ")"
 
-column_definition: column_name data_type [column_constraints]
+column_definition: column_name data_type [length]
 
 value_list: "(" value ("," value)* "),"
 
 assignment: identifier "=" value
 
-data_type: CNAME | CNAME "(" NUMBER ")" 
+data_type: CNAME 
 
-column_constraints: constraint ("," constraint)*
+length: "(" NUMBER ")" 
 
-constraint: "PRIMARY" "KEY" "(" column_name ")"
-       | "UNIQUE" "(" column_name ")"
-       | "FOREIGN" "KEY" "(" column_name ")" "REFERENCES" table_name "(" column_name ")"
-       | "NOT" "NULL"
-       | "NULL"
-       | "DEFAULT" value
+value: function -> function
+     | column_name 
+     | table_name "." identifier -> column_field
+     | NUMBER -> number 
+     | CNAME -> cname
+     | quoted_string -> string
 
-value: NUMBER | CNAME | function | quoted_string | column_name
 
-column_name: CNAME | table_name "." identifier | "*"
+column_name: "*" -> all | CNAME -> cname 
 
 table_name: CNAME
 
@@ -62,9 +61,14 @@ search_condition: comparison_condition
 
 comparison_condition: value comparison_operator value
 
-comparison_operator: "=" | "<>" | "<" | ">" | "<=" | ">="
+comparison_operator: "=" -> eq
+                   | "<>" -> neq
+                   | "<" -> l
+                   | ">" -> g
+                   | "<=" -> le
+                   | ">=" -> ge
 
-function: "random()"
+function: "random()" -> random_func
 
 quoted_string: /'[^']*'/
 
