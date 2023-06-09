@@ -1,7 +1,5 @@
 # Compiler Design
 
-## Naive Implementation
-
 We translate each SQL statement to corresponding Rust code.
 
 ```bash
