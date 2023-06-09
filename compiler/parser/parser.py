@@ -21,7 +21,7 @@ class ADNTransformer(Transformer):
         # print("create_table_as_statement", c)
         res = {
             "type": "CreateTableAsStatement",
-            "table": c[0]["table_name"],
+            "table_name": c[0]["table_name"],
             "select": {
                 "type": "SelectStatement",
                 "columns": c[1]["columns"],
@@ -38,7 +38,7 @@ class ADNTransformer(Transformer):
     
     def select_statement(self, s):
         # (s,) = s
-        print("select_statement", s)
+        #print("select_statement", s)
         res = {
             "type": "SelectStatement",
             "columns": s[0]["columns"],
@@ -55,7 +55,7 @@ class ADNTransformer(Transformer):
         (n,) = n
         # print("set_statement", n)
         res = {
-            "type": "set_statement",
+            "type": "SetStatement",
             "variable": n["variable"],
             "value": n["value"],
             "data_type": n["data_type"]
@@ -66,7 +66,7 @@ class ADNTransformer(Transformer):
     def create_table_statement(self, c):
         # print("create_table_statement", c)
         res = {
-            "type": "create_table_statement",
+            "type": "CreateTableStatement",
             "table_name": c[0]["table_name"],
             "columns": c[1:]
         }
@@ -75,7 +75,7 @@ class ADNTransformer(Transformer):
     def insert_statement(self, i):
         # print("insert_statement", i)
         res = {
-            "type": "insert_statement",
+            "type": "InsertStatement",
             "table_name": i[0]["table_name"],
             "columns": i[1]["columns"],
             "values": i[2:]
