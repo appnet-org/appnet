@@ -3,7 +3,7 @@
 We translate each SQL statement to corresponding Rust code.
 
 ```bash
-python main.py
+python3 main.py -p [ENGINE_NAME]
 # you will find the generated Rust code in ./generated
 # split, and copy the code to ./compiler_test/src/main{number}.rs
 # This is already done in this repo.

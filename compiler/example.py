@@ -1,6 +1,6 @@
 
 fault_sqls = [
-"""SET probability = 0.2""",
+"""SET probability = 0.2;""",
 """
 CREATE TABLE output AS 
 SELECT * FROM input WHERE random() < probability;
