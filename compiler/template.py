@@ -307,8 +307,12 @@ impl {TemplateNameCap}Engine {{
                     EngineTxMessage::RpcMessage(msg) => {{
                         let meta_ref = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }};
                         // TODO! write to file
+                        let mut input = Vec::new();
+                        input.push(msg);
                         {OnTxRpc}
-                        self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
+                        for msg in output {
+                            self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
+                        }
                     }}
                     m => self.tx_outputs()[0].send(m)?,
                 }}
@@ -403,7 +407,7 @@ def mock_internal_state(declaration, name, type, init):
                                         format!("{}",meta_ref.func_id), 
                                         format!("{:?}",meta_ref)));
         """,
-        "OnRxRpc": r"""/// TODO! """ 
+        "OnRxRpc": r"""// todo """ 
     }
 
 def gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap):

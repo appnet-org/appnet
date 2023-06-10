@@ -192,25 +192,21 @@ def init_ctx():
                 "name": "input",
                 "type": "Vec",
                 "struct": {
-                    "name": "RpcMessage",
+                    "name": "RpcMessageTx",
                     "fields": [
-                        {"name": "event_type", "type": "String"},
-                        {"name": "source", "type": "String"},
-                        {"name": "destination", "type": "String"},
-                        {"name": "payload", "type": "String"},
+                        {"name": "meta_buf_ptr", "type": "MetaBufferPtr"},
+                        {"name": "addr_backend", "type": "usize"},
                     ]
                 }     
             },
             "output": {
                 "name": "output",
                 "type": "Vec",
-                "struct": {
-                    "name": "RpcMessage",
+                 "struct": {
+                    "name": "RpcMessageTx",
                     "fields": [
-                        {"name": "event_type", "type": "String"},
-                        {"name": "source", "type": "String"},
-                        {"name": "destination", "type": "String"},
-                        {"name": "payload", "type": "String"},
+                        {"name": "meta_buf_ptr", "type": "MetaBufferPtr"},
+                        {"name": "addr_backend", "type": "usize"},
                     ]
                 } 
             }
