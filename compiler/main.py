@@ -1,132 +1,40 @@
-from compile import *
-from gen import *
-import os
+from compiler import *
+from example import logging_sqls, acl_sqls, fault_sqls
+import argparse
+import os, re
 
 if __name__ == "__main__":
     os.system("mkdir -p ./generated")
     os.system("rm -f ./generated/*")
-    
-    logging_asts = [{
-    "type": "CreateTableStatement",
-    "table": "rpc_events",
-    "columns": [
-        {"name": "timestamp", "type": "TIMESTAMP"},
-        {"name": "event_type", "type": "VARCHAR", "length": 50},
-        {"name": "source", "type": "VARCHAR", "length": 50},
-        {"name": "destination", "type": "VARCHAR", "length": 50},
-        {"name": "rpc", "type": "VARCHAR", "length": 50}
-    ]
-    },
-    {
-        "type": "InsertStatement",
-        "table": "rpc_events",
-        "columns": ["timestamp", "event_type", "source", "destination", "rpc"],
-        "select": {
-            "type": "SelectStatement",
-            "columns": ["CURRENT_TIMESTAMP", "event_type", "source", "destination", "payload"],
-            "from": "input"
-        }
-    },
-    {
-        "type": "CreateTableAsStatement",
-        "table": "output",
-        "select": {
-            "type": "SelectStatement",
-            "columns": ["*"],
-            "from": "input"
-        }
-    }]
-    print("Compiling logging statements...")
 
-    ctx = init_ctx()
-    for ast in logging_asts:
-        rust_code = compile_sql_to_rust(ast, ctx)
-        #print(rust_code)
-        with open("./generated/logging.rs", "a") as f:
-            f.write(rust_code + '\n')
+    # Parse command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', '--engine', type=str, help='Engine name')
+    args = parser.parse_args()
+    engine_name = args.engine
 
-    acl_asts = [{
-    "type": "CreateTableStatement",
-    "table": "acl",
-    "columns": [
-        {"name": "name", "type": "VARCHAR", "length": 50},
-        {"name": "permission", "type": "VARCHAR", "length": 2},
-    ]
-    },
-    {
-    "type": "InsertStatement",
-    "table": "acl",
-    "columns": ["permission", "name"],
-    "values": [
-     #   {"permission": "N", "name": "Apple"},
-        {"permission": "Y", "name": "Banana"}
-    ]
-    },
-    {
-    "type": "CreateTableAsSelect",
-    "table": "output",
-    "select": {
-        "type": "SelectJoinStatement",
-        "from": "input",
-        "join": {
-            "type": "JoinOn",
-            "table": "acl",
-            "condition": {
-                "left": {"type": "Column", "name": "input.source"},
-                "operator": "=",
-                "right": {"type": "Column", "name": "acl.name"}
-            }
-        },
-        "where": {
-            "type": "BinaryExpression",
-            "left": {"type": "Column", "name": "acl.permission"},
-            "operator": "=",
-            "right": {"type": "Literal", "value": "\"Y\""}
-        }
-    }
-    }]
-    print()
-    print("Compiling acl statements...")
-    ctx = init_ctx()
-    for ast in acl_asts:
-        rust_code = compile_sql_to_rust(ast, ctx)
-        #print(rust_code)
-        with open("./generated/acl.rs", "a") as f:
-            f.write(rust_code + '\n')
+    with open(f'../elements/{engine_name}.sql', 'r') as file:
+        sql_file_content = file.read()
 
-    
-    fault_asts = [
-    {
-    "type": "SetStatement",
-    "variable": "@probability",
-    "value": "0.2"
-    },
-    {
-    "type": "CreateTableAsSelect",
-    "table": "output",
-    "select": {
-        "type": "SelectWhereStatement",
-        "from": "input",
-        "where": {
-            "type": "BinaryExpression",
-            "left": {"type": "Function", "name": "random"},
-            "operator": "<",
-            "right": {"type": "Variable", "name": "@probability"}
-        }
-    }
-    }]
-    print()
-    print("Compiling fault statements...")
+    # Remove comments from the SQL file
+    sql_file_content = re.sub(r'/\*.*?\*/', '', sql_file_content, flags=re.DOTALL)  # Remove /* ... */ comments
+    sql_statements = re.sub(r'--.*', '', sql_file_content).split(';')  # Remove -- comments and split statements
+
+    # Remove empty statements and leading/trailing whitespace
+    sql_statements = [statement.strip().replace("\n", " ") for statement in sql_statements if statement.strip()]
+
+    compiler = ADNCompiler(verbose=False)
+
+
+    print(f"Compiling {engine_name} statements...")
     ctx = init_ctx()
-    for ast in fault_asts:
-        rust_code = compile_sql_to_rust(ast, ctx)
-        #print(rust_code)
-        with open("./generated/fault.rs", "a") as f:
+    for sql in sql_statements:
+        rust_code = compiler.compile(sql, ctx)
+        with open(f"./generated/{engine_name}.rs", "a") as f:
             f.write(rust_code + '\n')
-    
-    engines = ["logging", "acl", "fault"]        
-    for e in engines:
-        generate(e)
-        os.system(f"rustfmt ./generated/{e}_engine.rs")
-        os.system(f"cp ./generated/{e}_engine.rs ./compiler_test/src/{e}_engine.rs")
+        
+        
+    compiler.generate(engine_name)
+    os.system(f"rustfmt ./generated/{engine_name}_engine.rs")
+    os.system(f"cp ./generated/{engine_name}_engine.rs ./compiler_test/src/{engine_name}_engine.rs")
     
