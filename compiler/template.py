@@ -1,11 +1,15 @@
 import os
 
-# template_name = "{TemplateName}"
+include=r"""
+use chrono::prelude::*;
+///use itertools::iproduct;
+"""
 
 config_rs="""
 use chrono::{{Datelike, Timelike, Utc}};
 use phoenix_common::log;
 use serde::{{Deserialize, Serialize}};
+{include}
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -24,6 +28,7 @@ impl {TemplateName}Config {{
 lib_rs="""
 #![feature(peer_credentials_unix_socket)]
 use thiserror::Error;
+{include}
 
 pub use phoenix_common::{{InitFnResult, PhoenixAddon}};
 
@@ -67,6 +72,8 @@ use phoenix_common::storage::ResourceCollection;
 use super::engine::{TemplateName}Engine;
 use crate::config::{TemplateName}Config;
 
+{include}
+
 pub(crate) struct {TemplateName}EngineBuilder {{
     node: DataPathNode,
     config: {TemplateName}Config,
@@ -78,11 +85,12 @@ impl {TemplateName}EngineBuilder {{
     }}
     // TODO! LogFile
     fn build(self) -> Result<{TemplateName}Engine> {{
-
+        {InternalStatesOnBuild}
         Ok({TemplateName}Engine {{
             node: self.node,
             indicator: Default::default(),
-            config: self.config,
+            config: self.config, 
+            {InternalStatesInConstructor}
         }})
     }}
 }}
@@ -92,8 +100,8 @@ pub struct {TemplateName}Addon {{
 }}
 
 impl {TemplateName}Addon {{
-    pub const {TemplateName}_ENGINE: EngineType = EngineType("{TemplateName}Engine");
-    pub const ENGINES: &'static [EngineType] = &[{TemplateName}Addon::{TemplateName}_ENGINE];
+    pub const {TemplateNameAllCap}_ENGINE: EngineType = EngineType("{TemplateName}Engine");
+    pub const ENGINES: &'static [EngineType] = &[{TemplateName}Addon::{TemplateNameAllCap}_ENGINE];
 }}
 
 impl {TemplateName}Addon {{
@@ -132,7 +140,7 @@ impl PhoenixAddon for {TemplateName}Addon {{
         _pid: Pid,
         node: DataPathNode,
     ) -> Result<Box<dyn Engine>> {{
-        if ty != {TemplateName}Addon::{TemplateName}_ENGINE {{
+        if ty != {TemplateName}Addon::{TemplateNameAllCap}_ENGINE {{
             bail!("invalid engine type {{:?}}", ty)
         }}
 
@@ -148,7 +156,7 @@ impl PhoenixAddon for {TemplateName}Addon {{
         node: DataPathNode,
         prev_version: Version,
     ) -> Result<Box<dyn Engine>> {{
-        if ty != {TemplateName}Addon::{TemplateName}_ENGINE {{
+        if ty != {TemplateName}Addon::{TemplateNameAllCap}_ENGINE {{
             bail!("invalid engine type {{:?}}", ty)
         }}
 
@@ -178,6 +186,8 @@ use phoenix_common::storage::{{ResourceCollection, SharedStorage}};
 
 use super::DatapathError;
 use crate::config::{{{TemplateNameCap}Config}};
+
+{include}
 
 {InternalStatesDeclaration}
 
@@ -295,11 +305,9 @@ impl {TemplateNameCap}Engine {{
             Ok(msg) => {{
                 match msg {{
                     EngineTxMessage::RpcMessage(msg) => {{
-                        
                         let meta_ref = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }};
-
                         // TODO! write to file
-                        
+                        {OnTxRpc}
                         self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
                     }}
                     m => self.tx_outputs()[0].send(m)?,
@@ -317,6 +325,7 @@ impl {TemplateNameCap}Engine {{
                 match msg {{
                     EngineRxMessage::Ack(rpc_id, status) => {{                        
                         // TODO! write to file
+                        {OnRxRpc}
                         self.rx_outputs()[0].send(EngineRxMessage::Ack(rpc_id, status))?;
                     }}
                     EngineRxMessage::RpcMessage(msg) => {{
@@ -373,21 +382,45 @@ toml = {{ workspace = true, features = ["preserve_order"] }}
 bincode.workspace = true
 chrono.workspace = true
 """
+ 
+# name: table_rpc_events
+# type: Vec<struct_rpc_events>
+# init: table_rpc_events = Vec::new()
+#
+def mock_internal_state(declaration, name, type, init):
+    return {
+        "InternalStatesDeclaration": declaration,
+        "InternalStatesOnBuild": f"let {init};\n ",
+        "InternalStatesOnRestore": f"let {init};\n",
+        "InternalStatesOnDecompose": "",
+        "InternalStatesInConstructor": f"{name},",
+        "InternalStatesInStructDeclaration": f"pub(crate) {name}:{type},",
+        "OnTxRpc": r"""
+            self.table_rpc_events.push(
+                struct_rpc_events::new(Utc::now(), 
+                                        "TxRPC".to_string(),
+                                        format!("{}",meta_ref.service_id),
+                                        format!("{}",meta_ref.func_id), 
+                                        format!("{:?}",meta_ref)));
+        """,
+        "OnRxRpc": r"""/// TODO! """ 
+    }
 
-def gen_template(template_name, template_name_toml, template_name_first_cap):
+def gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap):
     target_dir = "./generated/{}".format(template_name)
     os.system(f"rm -rf {target_dir}")
     os.system(f"mkdir -p {target_dir}")
     os.chdir(target_dir)
     print("Current dir: {}".format(os.getcwd()))
     with open("config.rs", "w") as f:
-        f.write(config_rs.format(TemplateName=template_name_first_cap))
+        f.write(config_rs.format(include=include, TemplateName=template_name_first_cap))
     with open("lib.rs", "w") as f:
-        f.write(lib_rs.format(TemplateName=template_name_first_cap))
+        f.write(lib_rs.format(include=include, TemplateName=template_name_first_cap))
     with open("module.rs", "w") as f:
-        f.write(module_rs.format(TemplateName=template_name_first_cap))
+        f.write(module_rs.format(include=include, TemplateName=template_name_first_cap, TemplateNameAllCap=template_name_all_cap, 
+                                 InternalStatesOnBuild=ctx["InternalStatesOnBuild"], InternalStatesInConstructor=ctx["InternalStatesInConstructor"]))
     with open("engine.rs", "w") as f:
-        f.write(engine_rs.format(TemplateNameCap=template_name_first_cap, TemplateName=template_name))
+        f.write(engine_rs.format(include=include, TemplateNameCap=template_name_first_cap, TemplateName=template_name, InternalStatesDeclaration=ctx["InternalStatesDeclaration"], InternalStatesInStructDeclaration=ctx["InternalStatesInStructDeclaration"], InternalStatesOnDecompose=ctx["InternalStatesOnDecompose"], InternalStatesOnRestore=ctx["InternalStatesOnRestore"], OnTxRpc=ctx["OnTxRpc"], OnRxRpc=ctx["OnRxRpc"], InternalStatesInConstructor=ctx["InternalStatesInConstructor"]))
     with open("Cargo.toml.api", "w") as f:
         f.write(api_toml.format(TemplateName=template_name_toml))
     with open("Cargo.toml.policy", "w") as f:
@@ -404,6 +437,11 @@ def move_template(mrpc_root, template_name, template_name_toml, template_name_fi
     os.system(f"rm -rf {mrpc_plugin}/{template_name_toml}")
     os.system(f"mkdir -p {mrpc_plugin}/{template_name_toml}/src")  
     os.system(f"cp ./Cargo.toml.policy {mrpc_plugin}/{template_name_toml}/Cargo.toml") 
+    
+    os.system(f"rustfmt --edition 2018  ./config.rs")
+    os.system(f"rustfmt --edition 2018  ./lib.rs")
+    os.system(f"rustfmt --edition 2018  ./module.rs")
+    os.system(f"rustfmt --edition 2018  ./engine.rs")
     os.system(f"cp ./config.rs {mrpc_plugin}/{template_name_toml}/src/config.rs")
     os.system(f"cp ./lib.rs {mrpc_plugin}/{template_name_toml}/src/lib.rs")
     os.system(f"cp ./module.rs {mrpc_plugin}/{template_name_toml}/src/module.rs")
@@ -414,7 +452,31 @@ if __name__ == "__main__":
     template_name = "nofile_logging"
     template_name_toml = "nofile-logging"
     template_name_first_cap = "NofileLogging"
-    gen_template(template_name, template_name_toml, template_name_first_cap)
+    template_name_all_cap = "NOFILE_LOGGING"
+    ctx = mock_internal_state(
+        r"""
+pub struct struct_rpc_events {
+    pub timestamp: DateTime<Utc>,
+    pub event_type: String,
+    pub source: String,
+    pub destination: String,
+    pub rpc: String,
+}
+
+impl struct_rpc_events {
+     pub fn new(timestamp: DateTime<Utc>, event_type: String, source: String, destination: String, rpc: String) -> struct_rpc_events {
+         struct_rpc_events {
+             timestamp: timestamp,
+             event_type: event_type,
+             source: source,
+             destination: destination,
+             rpc: rpc,
+         }
+     }
+}
+
+        """, "table_rpc_events", "Vec<struct_rpc_events>", "table_rpc_events = Vec::new()")
+    gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
     move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
     
 
