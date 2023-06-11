@@ -1,6 +1,6 @@
-import os
 
 include=r"""
+use phoenix_common::engine::datapath::RpcMessageTx;
 use chrono::prelude::*;
 ///use itertools::iproduct;
 """
@@ -9,14 +9,14 @@ config_rs="""
 use chrono::{{Datelike, Timelike, Utc}};
 use phoenix_common::log;
 use serde::{{Deserialize, Serialize}};
-{include}
+{Include}
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct {TemplateName}Config {{}}
+pub struct {TemplateNameFirstCap}Config {{}}
 
 
-impl {TemplateName}Config {{
+impl {TemplateNameFirstCap}Config {{
     /// Get config from toml file
     pub fn new(config: Option<&str>) -> anyhow::Result<Self> {{
         let config = toml::from_str(config.unwrap_or(""))?;
@@ -28,7 +28,7 @@ impl {TemplateName}Config {{
 lib_rs="""
 #![feature(peer_credentials_unix_socket)]
 use thiserror::Error;
-{include}
+{Include}
 
 pub use phoenix_common::{{InitFnResult, PhoenixAddon}};
 
@@ -49,13 +49,13 @@ impl<T> From<SendError<T>> for DatapathError {{
     }}
 }}
 
-use crate::config::{TemplateName}Config;
-use crate::module::{TemplateName}Addon;
+use crate::config::{TemplateNameFirstCap}Config;
+use crate::module::{TemplateNameFirstCap}Addon;
 
 #[no_mangle]
 pub fn init_addon(config_string: Option<&str>) -> InitFnResult<Box<dyn PhoenixAddon>> {{
-    let config = {TemplateName}Config::new(config_string)?;
-    let addon = {TemplateName}Addon::new(config);
+    let config = {TemplateNameFirstCap}Config::new(config_string)?;
+    let addon = {TemplateNameFirstCap}Addon::new(config);
     Ok(Box::new(addon))
 }}
 """
@@ -69,24 +69,24 @@ use phoenix_common::engine::datapath::DataPathNode;
 use phoenix_common::engine::{{Engine, EngineType}};
 use phoenix_common::storage::ResourceCollection;
 
-use super::engine::{TemplateName}Engine;
-use crate::config::{TemplateName}Config;
+use super::engine::{TemplateNameFirstCap}Engine;
+use crate::config::{TemplateNameFirstCap}Config;
 
-{include}
+{Include}
 
-pub(crate) struct {TemplateName}EngineBuilder {{
+pub(crate) struct {TemplateNameFirstCap}EngineBuilder {{
     node: DataPathNode,
-    config: {TemplateName}Config,
+    config: {TemplateNameFirstCap}Config,
 }}
 
-impl {TemplateName}EngineBuilder {{
-    fn new(node: DataPathNode, config: {TemplateName}Config) -> Self {{
-        {TemplateName}EngineBuilder {{ node, config }}
+impl {TemplateNameFirstCap}EngineBuilder {{
+    fn new(node: DataPathNode, config: {TemplateNameFirstCap}Config) -> Self {{
+        {TemplateNameFirstCap}EngineBuilder {{ node, config }}
     }}
     // TODO! LogFile
-    fn build(self) -> Result<{TemplateName}Engine> {{
+    fn build(self) -> Result<{TemplateNameFirstCap}Engine> {{
         {InternalStatesOnBuild}
-        Ok({TemplateName}Engine {{
+        Ok({TemplateNameFirstCap}Engine {{
             node: self.node,
             indicator: Default::default(),
             config: self.config, 
@@ -95,22 +95,22 @@ impl {TemplateName}EngineBuilder {{
     }}
 }}
 
-pub struct {TemplateName}Addon {{
-    config: {TemplateName}Config,
+pub struct {TemplateNameFirstCap}Addon {{
+    config: {TemplateNameFirstCap}Config,
 }}
 
-impl {TemplateName}Addon {{
-    pub const {TemplateNameAllCap}_ENGINE: EngineType = EngineType("{TemplateName}Engine");
-    pub const ENGINES: &'static [EngineType] = &[{TemplateName}Addon::{TemplateNameAllCap}_ENGINE];
+impl {TemplateNameFirstCap}Addon {{
+    pub const {TemplateNameAllCap}_ENGINE: EngineType = EngineType("{TemplateNameFirstCap}Engine");
+    pub const ENGINES: &'static [EngineType] = &[{TemplateNameFirstCap}Addon::{TemplateNameAllCap}_ENGINE];
 }}
 
-impl {TemplateName}Addon {{
-    pub fn new(config: {TemplateName}Config) -> Self {{
-        {TemplateName}Addon {{ config }}
+impl {TemplateNameFirstCap}Addon {{
+    pub fn new(config: {TemplateNameFirstCap}Config) -> Self {{
+        {TemplateNameFirstCap}Addon {{ config }}
     }}
 }}
 
-impl PhoenixAddon for {TemplateName}Addon {{
+impl PhoenixAddon for {TemplateNameFirstCap}Addon {{
     fn check_compatibility(&self, _prev: Option<&Version>) -> bool {{
         true
     }}
@@ -126,7 +126,7 @@ impl PhoenixAddon for {TemplateName}Addon {{
     fn migrate(&mut self, _prev_addon: Box<dyn PhoenixAddon>) {{}}
 
     fn engines(&self) -> &[EngineType] {{
-        {TemplateName}Addon::ENGINES
+        {TemplateNameFirstCap}Addon::ENGINES
     }}
 
     fn update_config(&mut self, config: &str) -> Result<()> {{
@@ -140,11 +140,11 @@ impl PhoenixAddon for {TemplateName}Addon {{
         _pid: Pid,
         node: DataPathNode,
     ) -> Result<Box<dyn Engine>> {{
-        if ty != {TemplateName}Addon::{TemplateNameAllCap}_ENGINE {{
+        if ty != {TemplateNameFirstCap}Addon::{TemplateNameAllCap}_ENGINE {{
             bail!("invalid engine type {{:?}}", ty)
         }}
 
-        let builder = {TemplateName}EngineBuilder::new(node, self.config);
+        let builder = {TemplateNameFirstCap}EngineBuilder::new(node, self.config);
         let engine = builder.build()?;
         Ok(Box::new(engine))
     }}
@@ -156,11 +156,11 @@ impl PhoenixAddon for {TemplateName}Addon {{
         node: DataPathNode,
         prev_version: Version,
     ) -> Result<Box<dyn Engine>> {{
-        if ty != {TemplateName}Addon::{TemplateNameAllCap}_ENGINE {{
+        if ty != {TemplateNameFirstCap}Addon::{TemplateNameAllCap}_ENGINE {{
             bail!("invalid engine type {{:?}}", ty)
         }}
 
-        let engine = {TemplateName}Engine::restore(local, node, prev_version)?;
+        let engine = {TemplateNameFirstCap}Engine::restore(local, node, prev_version)?;
         Ok(Box::new(engine))
     }}
 }}
@@ -187,7 +187,7 @@ use phoenix_common::storage::{{ResourceCollection, SharedStorage}};
 use super::DatapathError;
 use crate::config::{{{TemplateNameCap}Config}};
 
-{include}
+{Include}
 
 {InternalStatesDeclaration}
 
@@ -310,9 +310,9 @@ impl {TemplateNameCap}Engine {{
                         let mut input = Vec::new();
                         input.push(msg);
                         {OnTxRpc}
-                        for msg in output {
+                        for msg in output {{
                             self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
-                        }
+                        }}
                     }}
                     m => self.tx_outputs()[0].send(m)?,
                 }}
@@ -387,103 +387,3 @@ bincode.workspace = true
 chrono.workspace = true
 """
  
-# name: table_rpc_events
-# type: Vec<struct_rpc_events>
-# init: table_rpc_events = Vec::new()
-#
-def mock_internal_state(declaration, name, type, init):
-    return {
-        "InternalStatesDeclaration": declaration,
-        "InternalStatesOnBuild": f"let mut {init};\n ",
-        "InternalStatesOnRestore": f"let mut {init};\n",
-        "InternalStatesOnDecompose": "",
-        "InternalStatesInConstructor": f"{name},",
-        "InternalStatesInStructDeclaration": f"pub(crate) {name}:{type},",
-        "OnTxRpc": r"""
-            self.table_rpc_events.push(
-                struct_rpc_events::new(Utc::now(), 
-                                        "TxRPC".to_string(),
-                                        format!("{}",meta_ref.service_id),
-                                        format!("{}",meta_ref.func_id), 
-                                        format!("{:?}",meta_ref)));
-        """,
-        "OnRxRpc": r"""// todo """ 
-    }
-
-def gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap):
-    target_dir = "./generated/{}".format(template_name)
-    os.system(f"rm -rf {target_dir}")
-    os.system(f"mkdir -p {target_dir}")
-    os.chdir(target_dir)
-    print("Current dir: {}".format(os.getcwd()))
-    with open("config.rs", "w") as f:
-        f.write(config_rs.format(include=include, TemplateName=template_name_first_cap))
-    with open("lib.rs", "w") as f:
-        f.write(lib_rs.format(include=include, TemplateName=template_name_first_cap))
-    with open("module.rs", "w") as f:
-        f.write(module_rs.format(include=include, TemplateName=template_name_first_cap, TemplateNameAllCap=template_name_all_cap, 
-                                 InternalStatesOnBuild=ctx["InternalStatesOnBuild"], InternalStatesInConstructor=ctx["InternalStatesInConstructor"]))
-    with open("engine.rs", "w") as f:
-        f.write(engine_rs.format(include=include, TemplateNameCap=template_name_first_cap, TemplateName=template_name, InternalStatesDeclaration=ctx["InternalStatesDeclaration"], InternalStatesInStructDeclaration=ctx["InternalStatesInStructDeclaration"], InternalStatesOnDecompose=ctx["InternalStatesOnDecompose"], InternalStatesOnRestore=ctx["InternalStatesOnRestore"], OnTxRpc=ctx["OnTxRpc"], OnRxRpc=ctx["OnRxRpc"], InternalStatesInConstructor=ctx["InternalStatesInConstructor"]))
-    with open("Cargo.toml.api", "w") as f:
-        f.write(api_toml.format(TemplateName=template_name_toml))
-    with open("Cargo.toml.policy", "w") as f:
-        f.write(policy_toml.format(TemplateName=template_name_toml))
-    print("Template {} generated".format(template_name))
-
-def move_template(mrpc_root, template_name, template_name_toml, template_name_first_cap):
-    mrpc_api = mrpc_root + "/phoenix-api/policy/";
-    os.system(f"rm -rf {mrpc_api}/{template_name_toml}")
-    os.system(f"cp -r {mrpc_api}/logging {mrpc_api}/{template_name_toml}")
-    os.system(f"rm {mrpc_api}/{template_name_toml}/Cargo.toml")
-    os.system(f"cp ./Cargo.toml.api {mrpc_api}/{template_name_toml}/Cargo.toml")
-    mrpc_plugin = mrpc_root + "/plugin/policy";
-    os.system(f"rm -rf {mrpc_plugin}/{template_name_toml}")
-    os.system(f"mkdir -p {mrpc_plugin}/{template_name_toml}/src")  
-    os.system(f"cp ./Cargo.toml.policy {mrpc_plugin}/{template_name_toml}/Cargo.toml") 
-    
-    os.system(f"rustfmt --edition 2018  ./config.rs")
-    os.system(f"rustfmt --edition 2018  ./lib.rs")
-    os.system(f"rustfmt --edition 2018  ./module.rs")
-    os.system(f"rustfmt --edition 2018  ./engine.rs")
-    os.system(f"cp ./config.rs {mrpc_plugin}/{template_name_toml}/src/config.rs")
-    os.system(f"cp ./lib.rs {mrpc_plugin}/{template_name_toml}/src/lib.rs")
-    os.system(f"cp ./module.rs {mrpc_plugin}/{template_name_toml}/src/module.rs")
-    os.system(f"cp ./engine.rs {mrpc_plugin}/{template_name_toml}/src/engine.rs") 
-    print("Template {} moved".format(template_name))
-    
-if __name__ == "__main__":
-    template_name = "nofile_logging"
-    template_name_toml = "nofile-logging"
-    template_name_first_cap = "NofileLogging"
-    template_name_all_cap = "NOFILE_LOGGING"
-    ctx = mock_internal_state(
-        r"""
-pub struct struct_rpc_events {
-    pub timestamp: DateTime<Utc>,
-    pub event_type: String,
-    pub source: String,
-    pub destination: String,
-    pub rpc: String,
-}
-
-impl struct_rpc_events {
-     pub fn new(timestamp: DateTime<Utc>, event_type: String, source: String, destination: String, rpc: String) -> struct_rpc_events {
-         struct_rpc_events {
-             timestamp: timestamp,
-             event_type: event_type,
-             source: source,
-             destination: destination,
-             rpc: rpc,
-         }
-     }
-}
-
-        """, "table_rpc_events", "Vec<struct_rpc_events>", "table_rpc_events = Vec::new()")
-    gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
-    move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
-    
-
-    
-    
-    

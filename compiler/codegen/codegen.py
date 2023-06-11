@@ -44,11 +44,11 @@ def input_mapping(fields):
     elif fields == "event_type":
         return to_str_debug("meta_ref.msg_type")
     elif fields == "src":
-        return to_str_debug("meta_ref.connid")
+        return to_str_debug("meta_ref.conn_id")
     elif fields == "dst":
-        return to_str_debug("meta_ref.connid")
+        return to_str_debug("meta_ref.conn_id")
     elif fields == "rpc":
-        return to_str("msg.addr_backend")
+        return to_str("req.addr_backend.clone()")
     elif fields == "meta_buf_ptr":
         return "req.meta_buf_ptr.clone()"
     elif fields == "addr_backend":
