@@ -4,8 +4,8 @@ import argparse
 import os, re
 
 if __name__ == "__main__":
+    os.system("rm -rf ./generated")
     os.system("mkdir -p ./generated")
-    os.system("rm -f ./generated/*")
 
     # Parse command line arguments
     parser = argparse.ArgumentParser()

@@ -23,4 +23,4 @@ SELECT CURRENT_TIMESTAMP, event_type, src, dst, rpc
 FROM input;
 
 CREATE TABLE output AS
-SELECT * from input; 
+SELECT * FROM input; 

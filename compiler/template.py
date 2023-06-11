@@ -394,8 +394,8 @@ chrono.workspace = true
 def mock_internal_state(declaration, name, type, init):
     return {
         "InternalStatesDeclaration": declaration,
-        "InternalStatesOnBuild": f"let {init};\n ",
-        "InternalStatesOnRestore": f"let {init};\n",
+        "InternalStatesOnBuild": f"let mut {init};\n ",
+        "InternalStatesOnRestore": f"let mut {init};\n",
         "InternalStatesOnDecompose": "",
         "InternalStatesInConstructor": f"{name},",
         "InternalStatesInStructDeclaration": f"pub(crate) {name}:{type},",

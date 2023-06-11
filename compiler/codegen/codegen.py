@@ -3,7 +3,12 @@ def begin_sep(sec):
 
 def end_sep(sec):
     return f"\n///@@ END_OF {sec} @@\n"
-    
+
+def to_str_debug(x):
+    return f'format!("{{:?}}", {x})'
+
+def to_str(x):
+    return f'format!("{{}}", {x})'
 
 def compile_sql_to_rust(ast, ctx):
     if ast["type"] == "CreateTableAsStatement":
@@ -32,6 +37,25 @@ def type_mapping(sql_type):
         return "String"
     else:
         raise ValueError("Unknown type")
+
+def input_mapping(fields):
+    if fields == "CURRENT_TIMESTAMP":
+        return "Utc::now()"
+    elif fields == "event_type":
+        return to_str_debug("meta_ref.msg_type")
+    elif fields == "src":
+        return to_str_debug("meta_ref.connid")
+    elif fields == "dst":
+        return to_str_debug("meta_ref.connid")
+    elif fields == "rpc":
+        return to_str("msg.addr_backend")
+    elif fields == "meta_buf_ptr":
+        return "req.meta_buf_ptr.clone()"
+    elif fields == "addr_backend":
+        return "req.addr_backend.clone()"
+    else:
+        print(fields)
+        raise ValueError("Unknown field")
 
 def handle_create_table_statement(ast, ctx):
     table_name = ast["table_name"]
@@ -74,7 +98,9 @@ def handle_create_table_statement(ast, ctx):
     rust_impl += f"     }}\n"
     rust_impl += f"}}\n"
     
-    rust_vec = begin_sep("init") + f"self.{vec_name} = Vec::new();" + end_sep("init")
+    rust_vec = begin_sep("name") + f"{vec_name}" + end_sep("name") 
+    rust_vec += begin_sep("type") + f"{table['type']}<{struct_name}>" + end_sep("type")
+    rust_vec += begin_sep("init") + f"{vec_name} = Vec::new()" + end_sep("init")
 
     rust_internal = begin_sep("internal") + f"pub {vec_name}: Vec<{struct_name}>," + end_sep("internal")
     return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_vec + "\n" + rust_internal + "\n" + begin_sep("process")
@@ -115,8 +141,12 @@ def handle_select_statement(node, ctx):
         columns = [i["name"] for i in table_from["struct"]["fields"]]
     else:
         columns = node["columns"]
-    columns = [f"req.{i}.clone()" for i in columns]
-    columns = ', '.join(columns).replace("req.CURRENT_TIMESTAMP.clone()", "Utc::now()")
+    if table_from_name == "input":
+        columns = [input_mapping(i) for i in columns]
+        columns = ', '.join(columns)
+    else:
+        columns = [f"req.{i}.clone()" for i in columns]
+        columns = ', '.join(columns).replace("req.CURRENT_TIMESTAMP.clone()", "Utc::now()")
     if node.get("to") is not None:
         table_to = node["to"]
         if ctx["tables"].get(table_to) is None:
