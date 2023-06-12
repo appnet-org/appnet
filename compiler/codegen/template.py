@@ -103,9 +103,11 @@ def move_template(mrpc_root, template_name, template_name_toml, template_name_fi
     os.system(f"cp ./lib.rs {mrpc_plugin}/{template_name_toml}/src/lib.rs")
     os.system(f"cp ./module.rs {mrpc_plugin}/{template_name_toml}/src/module.rs")
     os.system(f"cp ./engine.rs {mrpc_plugin}/{template_name_toml}/src/engine.rs") 
-    print("Template {} moved".format(template_name))
+    print("Template {} moved to mrpc folder".format(template_name))
     
 def generate(name):
+    if name != "logging":
+        raise ValueError("Only logging is supported")
     template_name = "nofile_logging"
     template_name_toml = "nofile-logging"
     template_name_first_cap = "NofileLogging"
