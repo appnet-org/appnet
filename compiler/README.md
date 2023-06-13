@@ -2,15 +2,24 @@
 
 We translate each SQL statement to corresponding Rust code.
 
+First we need to clone  mrpc repo.
+
 ```bash
-python3 main.py -p [ENGINE_NAME]
-# you will find the generated Rust code in ./generated
-# split, and copy the code to ./compiler_test/src/main{number}.rs
-# This is already done in this repo.
-cd compiler_test
-cargo run --bin logging # acl, fault
-# see the result
+# in ~
+git clone https://github.com/livingshade/phoenix.git
+cd phoenix
+git switch adn
+# Change the path of phoenix(mrpc) in `compiler/codegen/template.py` before running.
 ```
+
+```bash
+# in compiler
+python3 main.py -p [ENGINE_NAME]
+#! Currently, ENGINE_NAME must be `logging`
+# Change working directory to `phoenix`, you will found generated `nofile-logging` engine.
+```
+
+Then, refer to tutorial in `phoenix/mdbooks` to add the `nofile-logging` engine.
 
 ### todos
 
@@ -20,7 +29,13 @@ cargo run --bin logging # acl, fault
 
 ## Logging
 
+Currently, we only support logging element.
 
+We can generated Rust code that store each inbound RPC message into a vector(table).
+
+- We does not write to a file or to stdout, so it is "invisible". Maybe we need to change SQL sematic, i.e. add keyword like `print`.
+
+- We does not parse the rpc data, so currently only metadata is stored. Since RPC format depends on its protobuf config, and we have not yet import that config into our code.
 
 ### SQL Code 
 

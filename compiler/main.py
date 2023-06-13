@@ -4,12 +4,12 @@ import argparse
 import os, re
 
 if __name__ == "__main__":
+    os.system("rm -rf ./generated")
     os.system("mkdir -p ./generated")
-    os.system("rm -f ./generated/*")
 
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--engine', type=str, help='Engine name')
+    parser.add_argument('-e', '--engine', type=str, help='Engine name', required=True)
     args = parser.parse_args()
     engine_name = args.engine
 
@@ -35,6 +35,6 @@ if __name__ == "__main__":
         
         
     compiler.generate(engine_name)
-    os.system(f"rustfmt ./generated/{engine_name}_engine.rs")
-    os.system(f"cp ./generated/{engine_name}_engine.rs ./compiler_test/src/{engine_name}_engine.rs")
+    #os.system(f"rustfmt ./generated/{engine_name}_engine.rs")
+    #os.system(f"cp ./generated/{engine_name}_engine.rs ./compiler_test/src/{engine_name}_engine.rs")
     
