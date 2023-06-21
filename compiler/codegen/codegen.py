@@ -64,7 +64,7 @@ def handle_create_table_statement(ast, ctx):
     vec_name = "table_" + ast["table_name"]
     struct_name = "struct_" + ast["table_name"]
     table = {
-        "name": "self." + vec_name,
+        "name": vec_name,
         "type": "Vec",
         "struct": {
             "name": struct_name,

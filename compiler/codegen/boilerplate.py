@@ -23,6 +23,26 @@ impl {TemplateNameFirstCap}Config {{
         Ok(config)
     }}
 }}
+
+
+pub fn create_log_file() -> std::fs::File {{
+    std::fs::create_dir_all("/tmp/phoenix/log").expect("mkdir failed");
+    let now = Utc::now();
+    let date_string = format!(
+        "{{}}-{{}}-{{}}-{{}}-{{}}-{{}}",
+        now.year(),
+        now.month(),
+        now.day(),
+        now.hour(),
+        now.minute(),
+        now.second()
+    );
+    let file_name = format!("/tmp/phoenix/log/logging_engine_{{}}.log", date_string);
+    ///log::info!("create log file {{}}", file_name);
+    let log_file = std::fs::File::create(file_name).expect("create file failed");
+    log_file
+}}
+
 """
 
 lib_rs="""
@@ -185,7 +205,7 @@ use phoenix_common::module::Version;
 use phoenix_common::storage::{{ResourceCollection, SharedStorage}};
 
 use super::DatapathError;
-use crate::config::{{{TemplateNameCap}Config}};
+use crate::config::{{create_log_file, {TemplateNameCap}Config}};
 
 {Include}
 

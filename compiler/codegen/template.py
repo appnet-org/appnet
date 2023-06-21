@@ -9,14 +9,15 @@ from string import Formatter
 # init: table_rpc_events = Vec::new()
 #
 def fill_internal_states(declaration, name, type, init, process):
+    assert(len(name) == len(type))
     return {
-        "InternalStatesDeclaration": declaration,
-        "InternalStatesOnBuild": f"let mut {init};\n ",
-        "InternalStatesOnRestore": f"let mut {init};\n",
+        "InternalStatesDeclaration": "".join(declaration),
+        "InternalStatesOnBuild": "".join([f"let mut {i};\n" for i in init]),
+        "InternalStatesOnRestore": "".join([f"let mut {i};\n" for i in init]),
         "InternalStatesOnDecompose": "",
-        "InternalStatesInConstructor": f"{name},",
-        "InternalStatesInStructDeclaration": f"pub(crate) {name}:{type},",
-        "OnTxRpc": process,
+        "InternalStatesInConstructor": "".join([f"{i},\n" for i in name]),
+        "InternalStatesInStructDeclaration": "".join([f"pub(crate) {i[0]}:{i[1]},\n" for i in zip(name, type)]),
+        "OnTxRpc": "".join(process),
         "OnRxRpc": r"""// todo """ 
     }
 
@@ -54,7 +55,7 @@ def parse_intermediate_code(name):
                     if i.strip() != "":
                         ctx[current].append(i)
     
-    ctx = fill_internal_states("".join(ctx["declaration"]), "".join(ctx["name"]), "".join(ctx["type"]), "".join(ctx["init"]), "".join(ctx["process"]))
+    ctx = fill_internal_states(ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"])
     
     return ctx
         
