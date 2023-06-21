@@ -4,7 +4,7 @@
 Internal state: 
     rpc_events: A table to store rpc events
 */
-CREATE TABLE rpc_events (
+CREATE TABLE rpc_events_file (
   timestamp TIMESTAMP,
   event_type VARCHAR(50),
   source VARCHAR(50),

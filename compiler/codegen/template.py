@@ -115,7 +115,7 @@ def generate(name):
     template_name_all_cap = "NOFILE_LOGGING"
     ctx = parse_intermediate_code("logging")
     gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
-    move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
+    move_template("/Users/lbr/Desktop/code/uw/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
     
 
     
