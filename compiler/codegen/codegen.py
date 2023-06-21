@@ -46,7 +46,7 @@ def handle_insert_statement(node, ctx):
         rust_code = f"for event in {select_statement} {{"
         if table_name.endswith("file"):
             file_name = table["file_field"]
-            rust_code += f"write!(self.{file_name}, \"{{}}\", {vec_name});"
+            rust_code += f"write!(self.{file_name}, \"{{}}\", event);"
         else:
             rust_code += f"{vec_name}.push(event);"
         rust_code += f"}}"

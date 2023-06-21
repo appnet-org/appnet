@@ -50,8 +50,7 @@ def generate_create_for_vec(ast, ctx, table_name):
     rust_vec += begin_sep("type") + f"{table['type']}<{struct_name}>" + end_sep("type")
     rust_vec += begin_sep("init") + f"{vec_name} = Vec::new()" + end_sep("init")
 
-    rust_internal = begin_sep("internal") + f"pub {vec_name}: Vec<{struct_name}>," + end_sep("internal")
-    return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_vec + "\n" + rust_internal + "\n" + begin_sep("process")
+    return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_vec + "\n" + begin_sep("process")
  
     
 def generate_create_for_file(ast, ctx, table_name):
@@ -71,11 +70,7 @@ def generate_create_for_file(ast, ctx, table_name):
     else:
         raise ValueError("Table already exists")
 
-    columns = ast["columns"]
-    columns.append({
-        "column_name": "log_file",
-        "data_type": "FILE",
-    })
+    file_field = table["file_field"]
 
     rust_struct = generate_struct_declaration(struct_name, ast["columns"], table)
     
@@ -83,14 +78,18 @@ def generate_create_for_file(ast, ctx, table_name):
     rust_impl += "\n"
     
     rust_impl += f"impl fmt::Display for {struct_name} {{\n"
-    rust_impl += f"     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {{"
+    rust_impl += f"     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {{\n"
     fields = table["struct"]["fields"]
     for field in fields:
         name = field["name"]
-        rust_impl += f"         write!(f, \"{{}},\", self.{name});"
-    rust_impl += f"     }}"
+        if name != file_field:
+            rust_impl += f"         write!(f, \"{{}},\", self.{name});\n"
+    rust_impl += f"     }}\n"
     rust_impl += f"}}\n"
     
-    rust_internal = ""
-    
-    return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_internal + "\n" + begin_sep("process")
+    rust_file = begin_sep("type") + "File" + end_sep("type");
+    rust_file += begin_sep("name") + f"{file_field}" + end_sep("name")
+    rust_file += begin_sep("init") + f"{file_field} = create_log_file()" + end_sep("init") 
+
+
+    return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_file + "\n" + begin_sep("process")

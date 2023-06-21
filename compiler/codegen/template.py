@@ -41,6 +41,7 @@ def parse_intermediate_code(name):
                     if j[2] == "declaration":
                         current = "declaration"
                     elif j[2] == "internal":
+                        print("Warning: No Internal Should Be Generated")
                         current = "internal"
                     elif j[2] == "init":
                         current = "init"
