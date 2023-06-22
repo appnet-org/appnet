@@ -6,20 +6,18 @@ Internal state:
 */
 CREATE TABLE acl (
   name VARCHAR(255),
-  permission VARCHAR(2),
+  permission VARCHAR(2)
 );
 
 /*
 Initilization:
     Insert the access control rules into the acl table
 */
-INSERT INTO acl (permission, name) VALUES
-('N', 'Apple'),
-('Y', 'Banana'),
+INSERT INTO acl (permission, name) VALUES ('N', 'Apple') ('Y', 'Banana');
 
 /*
 Processing Logic: block users that do not have permission
 */
 CREATE TABLE output AS
-SELECT * from input JOIN acl on input.name = acl.name
-WHERE acl.permission = "Y";
+SELECT * FROM input JOIN acl ON input.name = acl.name
+WHERE acl.permission = 'Y';

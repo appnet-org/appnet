@@ -108,13 +108,19 @@ def move_template(mrpc_root, template_name, template_name_toml, template_name_fi
     print("Template {} moved to mrpc folder".format(template_name))
     
 def generate(name):
-    if name != "logging":
-        raise ValueError("Only logging is supported")
-    template_name = "nofile_logging"
-    template_name_toml = "nofile-logging"
-    template_name_first_cap = "NofileLogging"
-    template_name_all_cap = "NOFILE_LOGGING"
-    ctx = parse_intermediate_code("logging")
+    if name == "logging":
+        template_name = "nofile_logging"
+        template_name_toml = "nofile-logging"
+        template_name_first_cap = "NofileLogging"
+        template_name_all_cap = "NOFILE_LOGGING"
+    elif name == "acl":
+        template_name = "hello_acl"
+        template_name_toml = "hello-acl"
+        template_name_first_cap = "HelloAcl"
+        template_name_all_cap = "HELLO_ACL"
+    else:
+        raise ValueError("Unknown template name")
+    ctx = parse_intermediate_code(name)
     gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
     move_template("/Users/lbr/Desktop/code/uw/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
     

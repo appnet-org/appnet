@@ -19,7 +19,7 @@ create_table_as_statement: "CREATE" "TABLE" table_name "AS" select_statement
 
 set_statement: "SET" assignment ("," assignment)*
 
-insert_statement: "INSERT INTO" table_name column_list? "VALUES" value_list* 
+insert_statement: "INSERT INTO" table_name column_list? "VALUES" value_list*
               | "INSERT INTO" table_name column_list? select_statement
 
 update_statement: "UPDATE" table_name "SET" update_list [where_clause]
@@ -32,7 +32,7 @@ column_list: "(" column_name ("," column_name)* ")"
 
 column_definition: column_name data_type [length]
 
-value_list: "(" value ("," value)* "),"
+value_list: "(" value ("," value)* ")" 
 
 assignment: identifier "=" value
 
