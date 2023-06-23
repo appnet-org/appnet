@@ -84,6 +84,7 @@ def generate_create_for_file(ast, ctx, table_name):
         name = field["name"]
         if name != file_field:
             rust_impl += f"         write!(f, \"{{}},\", self.{name});\n"
+    rust_impl += f"         write!(f, \"\\n\")\n"
     rust_impl += f"     }}\n"
     rust_impl += f"}}\n"
     

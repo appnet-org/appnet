@@ -90,7 +90,7 @@ use phoenix_common::engine::{{Engine, EngineType}};
 use phoenix_common::storage::ResourceCollection;
 
 use super::engine::{TemplateNameFirstCap}Engine;
-use crate::config::{TemplateNameFirstCap}Config;
+use crate::config::{{create_log_file, {TemplateNameFirstCap}Config}};
 
 {Include}
 
@@ -192,6 +192,8 @@ use futures::future::BoxFuture;
 use std::io::Write;
 use std::os::unix::ucred::UCred;
 use std::pin::Pin;
+use std::fmt;
+use std::fs::File;
 
 use phoenix_api_policy_{TemplateName}::control_plane;
 
