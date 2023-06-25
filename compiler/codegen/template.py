@@ -9,14 +9,15 @@ from string import Formatter
 # init: table_rpc_events = Vec::new()
 #
 def fill_internal_states(declaration, name, type, init, process):
+    assert(len(name) == len(type))
     return {
-        "InternalStatesDeclaration": declaration,
-        "InternalStatesOnBuild": f"let mut {init};\n ",
-        "InternalStatesOnRestore": f"let mut {init};\n",
+        "InternalStatesDeclaration": "".join(declaration),
+        "InternalStatesOnBuild": "".join([f"let mut {i};\n" for i in init]),
+        "InternalStatesOnRestore": "".join([f"let mut {i};\n" for i in init]),
         "InternalStatesOnDecompose": "",
-        "InternalStatesInConstructor": f"{name},",
-        "InternalStatesInStructDeclaration": f"pub(crate) {name}:{type},",
-        "OnTxRpc": process,
+        "InternalStatesInConstructor": "".join([f"{i},\n" for i in name]),
+        "InternalStatesInStructDeclaration": "".join([f"pub(crate) {i[0]}:{i[1]},\n" for i in zip(name, type)]),
+        "OnTxRpc": "".join(process),
         "OnRxRpc": r"""// todo """ 
     }
 
@@ -40,6 +41,7 @@ def parse_intermediate_code(name):
                     if j[2] == "declaration":
                         current = "declaration"
                     elif j[2] == "internal":
+                        print("Warning: No Internal Should Be Generated")
                         current = "internal"
                     elif j[2] == "init":
                         current = "init"
@@ -54,7 +56,7 @@ def parse_intermediate_code(name):
                     if i.strip() != "":
                         ctx[current].append(i)
     
-    ctx = fill_internal_states("".join(ctx["declaration"]), "".join(ctx["name"]), "".join(ctx["type"]), "".join(ctx["init"]), "".join(ctx["process"]))
+    ctx = fill_internal_states(ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"])
     
     return ctx
         
@@ -106,13 +108,19 @@ def move_template(mrpc_root, template_name, template_name_toml, template_name_fi
     print("Template {} moved to mrpc folder".format(template_name))
     
 def generate(name):
-    if name != "logging":
-        raise ValueError("Only logging is supported")
-    template_name = "nofile_logging"
-    template_name_toml = "nofile-logging"
-    template_name_first_cap = "NofileLogging"
-    template_name_all_cap = "NOFILE_LOGGING"
-    ctx = parse_intermediate_code("logging")
+    if name == "logging":
+        template_name = "nofile_logging"
+        template_name_toml = "nofile-logging"
+        template_name_first_cap = "NofileLogging"
+        template_name_all_cap = "NOFILE_LOGGING"
+    elif name == "acl":
+        template_name = "hello_acl"
+        template_name_toml = "hello-acl"
+        template_name_first_cap = "HelloAcl"
+        template_name_all_cap = "HELLO_ACL"
+    else:
+        raise ValueError("Unknown template name")
+    ctx = parse_intermediate_code(name)
     gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
     move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
     
