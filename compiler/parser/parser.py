@@ -135,7 +135,8 @@ class ADNTransformer(Transformer):
     
     def quoted_string(self, s):
         (s,) = s
-        return s.value
+        res = {"data_type": "string", "value": s.value}
+        return res
     
     def string(self, s):
         return s[0]
@@ -182,7 +183,25 @@ class ADNTransformer(Transformer):
             "operator": c[1]
         }
         return res
+
+    def eq(self, c):
+        return "=="
     
+    def neq(self, c):
+        return "!="
+
+    def g(self, c):
+        return ">"
+    
+    def l(self, c):
+        return "<"
+
+    def ge(self, c):
+        return ">="
+    
+    def le(self, c):
+        return "<="
+
     def search_condition(self, s):
         # print("search_condition", s)
         (s,) = s
@@ -200,9 +219,9 @@ class ADNTransformer(Transformer):
             "type": "JoinOn",
             "table": j[0]["table_name"],
             "condition": {
-                "left": {"type": "Column", "name": f"{j[1]['table_name']}.{j[1]['column_name']}"},
+                "left": {"data_type": "Column", "table_name": j[1]['table_name'], "column_name" : j[1]['column_name']},
                 "operator": "=",
-                "right": {"type": "Column", "name": f"{j[2]['table_name']}.{j[2]['column_name']}"},
+                "right":{"data_type": "Column", "table_name": j[2]['table_name'], "column_name" : j[2]['column_name']},
             }
         })
         return res
@@ -210,6 +229,7 @@ class ADNTransformer(Transformer):
     def column_field(self, c):
         # print("column_field", c)
         res = {
+            "data_type": "Column",
             "table_name": c[0]["table_name"],
             "column_name": c[1]["variable"]
         }

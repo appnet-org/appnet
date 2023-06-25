@@ -7,7 +7,7 @@ def generate_struct_declaration(struct_name, columns, table):
         table["struct"]["fields"].append({"name": column["column_name"], "type": rust_type})
         rust_struct += f"    pub {column['column_name']}: {rust_type},\n"
     rust_struct += "}\n" 
-    return rust_struct
+    return rust_struct, struct_name
 
 def generate_new(struct_name, columns):
     rust_impl = f"impl {struct_name} {{\n"
@@ -42,15 +42,15 @@ def generate_create_for_vec(ast, ctx, table_name):
     else:
         raise ValueError("Table already exists")
     
-    rust_struct = generate_struct_declaration(struct_name, ast["columns"], table)
-
+    rust_struct, rust_extern = generate_struct_declaration(struct_name, ast["columns"], table)
+    rust_extern = begin_sep("declaration") + rust_extern + end_sep("declaration")
     rust_impl = generate_new(struct_name, ast["columns"])
     
     rust_vec = begin_sep("name") + f"{vec_name}" + end_sep("name") 
     rust_vec += begin_sep("type") + f"{table['type']}<{struct_name}>" + end_sep("type")
     rust_vec += begin_sep("init") + f"{vec_name} = Vec::new()" + end_sep("init")
 
-    return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_vec + "\n" + begin_sep("process")
+    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_vec + "\n" + begin_sep("process")
  
     
 def generate_create_for_file(ast, ctx, table_name):
@@ -72,8 +72,9 @@ def generate_create_for_file(ast, ctx, table_name):
 
     file_field = table["file_field"]
 
-    rust_struct = generate_struct_declaration(struct_name, ast["columns"], table)
-    
+    rust_struct, rust_extern = generate_struct_declaration(struct_name, ast["columns"], table)
+    rust_extern = begin_sep("declaration") + rust_extern + end_sep("declaration")
+ 
     rust_impl = generate_new(struct_name, ast["columns"]);
     rust_impl += "\n"
     
@@ -93,4 +94,4 @@ def generate_create_for_file(ast, ctx, table_name):
     rust_file += begin_sep("init") + f"{file_field} = create_log_file()" + end_sep("init") 
 
 
-    return begin_sep("declaration") + rust_struct + "\n" + rust_impl + "\n" + end_sep("declaration") + "\n" + rust_file + "\n" + begin_sep("process")
+    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_file + "\n" + begin_sep("process")

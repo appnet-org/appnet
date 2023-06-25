@@ -8,15 +8,16 @@ from string import Formatter
 # type: Vec<struct_rpc_events>
 # init: table_rpc_events = Vec::new()
 #
-def fill_internal_states(declaration, name, type, init, process):
+def fill_internal_states(definition, declaration, name, type, init, process):
     assert(len(name) == len(type))
     return {
-        "InternalStatesDeclaration": "".join(declaration),
-        "InternalStatesOnBuild": "".join([f"let mut {i};\n" for i in init]),
-        "InternalStatesOnRestore": "".join([f"let mut {i};\n" for i in init]),
+        "InternalStatesDefinition": "".join(definition),
+        "InternalStatesDeclaration": "".join([f"use crate::engine::{i};\n" for i in declaration]),
+        "InternalStatesOnBuild": "".join([f"let mut {i};\n" if '=' in i else f"{i};\n" for i in init]),
+        "InternalStatesOnRestore":"".join([f"let mut {i};\n" if '=' in i else f"{i};\n" for i in init]),
         "InternalStatesOnDecompose": "",
         "InternalStatesInConstructor": "".join([f"{i},\n" for i in name]),
-        "InternalStatesInStructDeclaration": "".join([f"pub(crate) {i[0]}:{i[1]},\n" for i in zip(name, type)]),
+        "InternalStatesInStructDefinition": "".join([f"pub(crate) {i[0]}:{i[1]},\n" for i in zip(name, type)]),
         "OnTxRpc": "".join(process),
         "OnRxRpc": r"""// todo """ 
     }
@@ -24,6 +25,7 @@ def fill_internal_states(declaration, name, type, init, process):
 
 def parse_intermediate_code(name):
     ctx = {
+        "definition": [],
         "declaration": [],
         "internal": [],
         "init": [],
@@ -51,12 +53,17 @@ def parse_intermediate_code(name):
                         current = "type"
                     elif j[2] == "name":
                         current = "name"
+                    elif j[2] == "definition":
+                        current = "definition"
+                elif j[1] == "END_OF":
+                    assert(j[2] == current)
+                    current = "process"
             else:
                 if current is not None:
                     if i.strip() != "":
-                        ctx[current].append(i)
-    
-    ctx = fill_internal_states(ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"])
+                        ctx[current].append(i.strip('\n'))
+
+    ctx = fill_internal_states(ctx["definition"], ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"])
     
     return ctx
         

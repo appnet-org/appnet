@@ -2,7 +2,7 @@
 include=r"""
 use phoenix_common::engine::datapath::RpcMessageTx;
 use chrono::prelude::*;
-///use itertools::iproduct;
+use itertools::iproduct;
 """
 
 config_rs="""
@@ -10,6 +10,8 @@ use chrono::{{Datelike, Timelike, Utc}};
 use phoenix_common::log;
 use serde::{{Deserialize, Serialize}};
 {Include}
+{InternalStatesDeclaration}
+
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -48,6 +50,7 @@ pub fn create_log_file() -> std::fs::File {{
 lib_rs="""
 #![feature(peer_credentials_unix_socket)]
 use thiserror::Error;
+{InternalStatesDeclaration}
 {Include}
 
 pub use phoenix_common::{{InitFnResult, PhoenixAddon}};
@@ -91,7 +94,7 @@ use phoenix_common::storage::ResourceCollection;
 
 use super::engine::{TemplateNameFirstCap}Engine;
 use crate::config::{{create_log_file, {TemplateNameFirstCap}Config}};
-
+{InternalStatesDeclaration}
 {Include}
 
 pub(crate) struct {TemplateNameFirstCap}EngineBuilder {{
@@ -211,13 +214,13 @@ use crate::config::{{create_log_file, {TemplateNameCap}Config}};
 
 {Include}
 
-{InternalStatesDeclaration}
+{InternalStatesDefinition}
 
 pub(crate) struct {TemplateNameCap}Engine {{
     pub(crate) node: DataPathNode,
     pub(crate) indicator: Indicator,
     pub(crate) config: {TemplateNameCap}Config,
-    {InternalStatesInStructDeclaration}
+    {InternalStatesInStructDefinition}
 }}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -383,6 +386,7 @@ edition = "2021"
 phoenix-api.workspace = true
 
 serde.workspace = true
+itertools.workspace = true
 """
 
 policy_toml="""
@@ -407,5 +411,6 @@ nix.workspace = true
 toml = {{ workspace = true, features = ["preserve_order"] }}
 bincode.workspace = true
 chrono.workspace = true
+itertools.workspace = true
 """
  
