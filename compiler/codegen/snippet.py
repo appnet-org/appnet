@@ -52,7 +52,6 @@ def generate_create_for_vec(ast, ctx, table_name):
 
     return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_vec + "\n" + begin_sep("process")
  
-    
 def generate_create_for_file(ast, ctx, table_name):
     file_name = "table_" + table_name
     struct_name = "struct_" + table_name
@@ -95,3 +94,20 @@ def generate_create_for_file(ast, ctx, table_name):
 
 
     return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_file + "\n" + begin_sep("process")
+
+def generate_rpc_fields_getter():
+    """
+    #[inline]
+fn hello_request_name(req: &hello::HelloRequest) -> &str {
+    let buf = &req.name as &[u8];
+    std::str::from_utf8(buf).unwrap()
+}
+    """
+    # currently only support str
+    template = """
+#[inline]
+fn {rpc_type}_request_{field_name}(req: &{rpc_req_type}) -> &str {{
+    let buf = &req.{field_name} as &[u8];
+    std::str::from_utf8(buf).unwrap()
+}}
+    """

@@ -78,6 +78,7 @@ def handle_select_simple_statement(node, ctx):
     else:
         columns = node["columns"]
     if table_from_name == "input":
+        # TODO test protobuf
         columns = [input_mapping(i) for i in columns]
         columns = ', '.join(columns)
     else:
@@ -108,13 +109,13 @@ def handle_create_table_as_statement(node, ctx):
         return f"let {new_table}: Vec<_> = {select_statement};"
     else:
         raise ValueError("Unsupported select statement type")
-    
+
 def handle_select_join_statement(node, ctx):
-    print(node)
     join_condition = handle_binary_expression(node["join"], ctx)
     where_condition = handle_binary_expression(node["where"], ctx)
     join_table_name = node["join"]["table"] 
     from_table_name = node["from"]
+    from_table_name = ctx["tables"][from_table_name]["name"]
     if ctx["tables"].get(join_table_name) is None:
         raise ValueError("Table does not exist")
     if ctx["tables"].get(from_table_name) is None:
@@ -122,9 +123,10 @@ def handle_select_join_statement(node, ctx):
     join_vec_name = ctx["tables"][join_table_name]["name"]
     from_vec_name = ctx["tables"][from_table_name]["name"]
     if from_vec_name != "input" and from_vec_name != "output":
-        from_vec_name = f"self.{from_table_name}"
+        from_vec_name = f"self.{from_vec_name}"
     if join_vec_name != "input" and join_vec_name != "output":
-        join_vec_name = f"self.{join_table_name}"
+        join_vec_name = f"self.{join_vec_name}"
+    #gen_filter_function(from_table_name, join_table_name, join_condition)
     return f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).filter(|&({from_table_name}, {join_table_name})| {join_condition} && {where_condition}).map(|(l, _)| l.clone()).collect()"
 
 def handle_binary_expression(node, ctx):
@@ -202,5 +204,15 @@ def init_ctx():
         },
         "vars": {
             
+        },
+        "proto": {
+            "definition": r"""
+pub mod hello {
+    include!("rpc_hello.rs");
+}
+            """,
+            "declaration": r"",
+            "req_type": "hello::HelloRequest",
+            "resp_type": "hello::HelloResponse",
         }
     }

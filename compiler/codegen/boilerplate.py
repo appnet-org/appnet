@@ -214,6 +214,8 @@ use crate::config::{{create_log_file, {TemplateNameCap}Config}};
 
 {Include}
 
+{ProtoDefinition}
+
 {InternalStatesDefinition}
 
 pub(crate) struct {TemplateNameCap}Engine {{
@@ -322,11 +324,18 @@ impl {TemplateNameCap}Engine {{
     }}
 }}
 
+#[inline]
+fn materialize_nocopy(msg: &RpcMessageTx) -> &{ProtoRpcRequestType} {{
+    let req_ptr = msg.addr_backend as *mut {ProtoRpcRequestType};
+    let req = unsafe {{ req_ptr.as_ref().unwrap() }};
+    return req;
+}}
+
 impl {TemplateNameCap}Engine {{
     fn check_input_queue(&mut self) -> Result<Status, DatapathError> {{
         use phoenix_common::engine::datapath::TryRecvError;
 
-        match self.tx_inputs()[0].try_recv() {{
+        match self.tx_inputs()[0].try_recv() {{ 
             Ok(msg) => {{
                 match msg {{
                     EngineTxMessage::RpcMessage(msg) => {{
@@ -374,6 +383,38 @@ impl {TemplateNameCap}Engine {{
 }}
 """
 
+proto_rs=r"""
+///  The request message containing the user's name.
+#[repr(C)]
+#[derive(Debug, Clone, ::mrpc_derive::Message)]
+pub struct HelloRequest {
+    #[prost(bytes = "vec", tag = "1")]
+    pub name: ::mrpc_marshal::shadow::Vec<u8>,
+}
+///  The response message containing the greetings
+#[repr(C)]
+#[derive(Debug, ::mrpc_derive::Message)]
+pub struct HelloReply {
+    #[prost(bytes = "vec", tag = "1")]
+    pub message: ::mrpc_marshal::shadow::Vec<u8>,
+}
+
+// ///  The request message containing the user's name.
+// #[repr(C)]
+// #[derive(Debug, Clone, ::mrpc_derive::Message)]
+// pub struct HelloRequest {
+//     #[prost(bytes = "vec", tag = "1")]
+//     pub name: ::mrpc::alloc::Vec<u8>,
+// }
+// ///  The response message containing the greetings
+// #[repr(C)]
+// #[derive(Debug, ::mrpc_derive::Message)]
+// pub struct HelloReply {
+//     #[prost(bytes = "vec", tag = "1")]
+//     pub message: ::mrpc::alloc::Vec<u8>,
+// }
+"""
+
 api_toml="""
 [package]
 name = "phoenix-api-policy-{TemplateName}"
@@ -400,6 +441,10 @@ edition = "2021"
 [dependencies]
 phoenix_common.workspace = true
 phoenix-api-policy-{TemplateName}.workspace = true
+mrpc-marshal.workspace = true
+mrpc-derive.workspace = true
+shm.workspace = true
+phoenix-api = {{ workspace = true, features = ["mrpc"] }}
 
 futures.workspace = true
 minstant.workspace = true
@@ -413,4 +458,5 @@ bincode.workspace = true
 chrono.workspace = true
 itertools.workspace = true
 """
+ 
  

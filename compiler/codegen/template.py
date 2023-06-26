@@ -11,6 +11,14 @@ from string import Formatter
 def fill_internal_states(definition, declaration, name, type, init, process):
     assert(len(name) == len(type))
     return {
+        "ProtoDefinition": r"""
+pub mod hello {
+    // The string specified here must match the proto package name
+    include!("proto.rs");
+}
+        """,
+        "ProtoRpcRequestType": "hello::HelloRequest",
+        "ProtoRpcResponseType": "hello::HelloResponse",
         "InternalStatesDefinition": "".join(definition),
         "InternalStatesDeclaration": "".join([f"use crate::engine::{i};\n" for i in declaration]),
         "InternalStatesOnBuild": "".join([f"let mut {i};\n" if '=' in i else f"{i};\n" for i in init]),
@@ -87,6 +95,8 @@ def gen_template(ctx, template_name, template_name_toml, template_name_first_cap
     with open("engine.rs", "w") as f:
         #print([i[1] for i in Formatter().parse(engine_rs)  if i[1] is not None])
         f.write(engine_rs.format(Include=include, **ctx))
+    with open("proto.rs", "w") as f:
+        f.write(proto_rs)
     with open("Cargo.toml.api", "w") as f:
         f.write(api_toml.format(TemplateName=template_name_toml))
     with open("Cargo.toml.policy", "w") as f:
@@ -108,10 +118,12 @@ def move_template(mrpc_root, template_name, template_name_toml, template_name_fi
     os.system(f"rustfmt --edition 2018  ./lib.rs")
     os.system(f"rustfmt --edition 2018  ./module.rs")
     os.system(f"rustfmt --edition 2018  ./engine.rs")
+    os.system(f"rustfmt --edition 2018  ./proto.rs")
     os.system(f"cp ./config.rs {mrpc_plugin}/{template_name_toml}/src/config.rs")
     os.system(f"cp ./lib.rs {mrpc_plugin}/{template_name_toml}/src/lib.rs")
     os.system(f"cp ./module.rs {mrpc_plugin}/{template_name_toml}/src/module.rs")
     os.system(f"cp ./engine.rs {mrpc_plugin}/{template_name_toml}/src/engine.rs") 
+    os.system(f"cp ./proto.rs {mrpc_plugin}/{template_name_toml}/src/proto.rs")
     print("Template {} moved to mrpc folder".format(template_name))
     
 def generate(name):
