@@ -96,18 +96,70 @@ def generate_create_for_file(ast, ctx, table_name):
     return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_file + "\n" + begin_sep("process")
 
 def generate_rpc_fields_getter():
-    """
-    #[inline]
-fn hello_request_name(req: &hello::HelloRequest) -> &str {
-    let buf = &req.name as &[u8];
-    std::str::from_utf8(buf).unwrap()
-}
-    """
-    # currently only support str
-    template = """
-#[inline]
-fn {rpc_type}_request_{field_name}(req: &{rpc_req_type}) -> &str {{
-    let buf = &req.{field_name} as &[u8];
-    std::str::from_utf8(buf).unwrap()
+    pass
+  
+  
+ 
+def decorate_condition(cond, proto_ctx):
+    proto = proto_ctx["name"]
+    if cond["lt"] == "input":
+        lc = cond["lc"]
+        if input_mapping(lc) == True:
+            left = f"{proto}_request_{lc}_readonly(rpc_message)"
+        else:
+            raise NotImplementedError("Not implemented")
+    elif cond["lt"] == "Literal":
+        left = cond["lc"]
+    else:
+        left = f"join.{cond['lc']}"
+
+    if cond["rt"] == "input":
+        rc = cond["rc"]
+        if input_mapping(rc) == True:
+            right = f"{proto}_request_{rc}_readonly(rpc_message)"
+        else:
+            raise NotImplementedError("Not implemented")
+    elif cond["rt"] == "Literal":
+        right = cond["rc"]
+    else:
+        right = f"join.{cond['rc']}"
+    return f"{left} {cond['op']} {right}"
+
+def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
+    if lt != "input":
+        raise ValueError("Only support when left table is input")
+    
+    join_cond = decorate_condition(join_cond, proto_ctx)
+    filter_cond = decorate_condition(filter_cond, proto_ctx)    
+    proto = proto_ctx["name"]
+    proto_req_type = proto_ctx["req_type"]
+    return f"""
+|(msg, join)| {{
+    let rpc_message = materialize_nocopy(&msg);
+    let conn_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.conn_id;
+    let call_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.call_id;
+    let rpc_id = RpcId::new(conn_id, call_id); 
+    if {join_cond} {{
+        if {filter_cond} {{
+            let error = EngineRxMessage::Ack(
+                rpc_id,
+                TransportStatus::Error(unsafe {{
+                    NonZeroU32::new_unchecked(403)
+                }}),
+            );
+            RpcMessageGeneral::RxMessage(error)
+        }} else {{
+            let raw_ptr: *const {proto_req_type} = rpc_message;
+            let new_msg = RpcMessageTx {{
+                meta_buf_ptr: msg.meta_buf_ptr.clone(),
+                addr_backend: raw_ptr.addr(),
+            }};
+            RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage(
+                new_msg,
+            ))
+        }}
+    }} else {{
+        RpcMessageGeneral::Pass
+    }}  
 }}
-    """
+"""

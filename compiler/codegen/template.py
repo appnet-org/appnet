@@ -8,17 +8,21 @@ from string import Formatter
 # type: Vec<struct_rpc_events>
 # init: table_rpc_events = Vec::new()
 #
-def fill_internal_states(definition, declaration, name, type, init, process):
+def fill_internal_states(definition, declaration, name, type, init, process, proto):
     assert(len(name) == len(type))
+    proto_fc = proto[0].upper() + proto[1:]
     return {
-        "ProtoDefinition": r"""
-pub mod hello {
-    // The string specified here must match the proto package name
-    include!("proto.rs");
-}
+        "ProtoDefinition": proto,
+        # todo! field name should be configurable
+        # todo! multiple type should be supported
+        "ProtoGetters": f"""
+fn {proto}_request_name_readonly(req: &{proto}::{proto_fc}Request) -> String {{
+    let buf = &req.name as &[u8];
+    String::from_utf8_lossy(buf).to_string().clone()
+}}
         """,
-        "ProtoRpcRequestType": "hello::HelloRequest",
-        "ProtoRpcResponseType": "hello::HelloResponse",
+        "ProtoRpcRequestType": f"{proto}::{proto_fc}Request",
+        "ProtoRpcResponseType": f"{proto}::{proto_fc}Response",
         "InternalStatesDefinition": "".join(definition),
         "InternalStatesDeclaration": "".join([f"use crate::engine::{i};\n" for i in declaration]),
         "InternalStatesOnBuild": "".join([f"let mut {i};\n" if '=' in i else f"{i};\n" for i in init]),
@@ -71,7 +75,7 @@ def parse_intermediate_code(name):
                     if i.strip() != "":
                         ctx[current].append(i.strip('\n'))
 
-    ctx = fill_internal_states(ctx["definition"], ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"])
+    ctx = fill_internal_states(ctx["definition"], ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"], "hello")
     
     return ctx
         

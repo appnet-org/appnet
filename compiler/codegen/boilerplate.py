@@ -1,6 +1,5 @@
 
 include=r"""
-use phoenix_common::engine::datapath::RpcMessageTx;
 use chrono::prelude::*;
 use itertools::iproduct;
 """
@@ -49,7 +48,10 @@ pub fn create_log_file() -> std::fs::File {{
 
 lib_rs="""
 #![feature(peer_credentials_unix_socket)]
+#![feature(ptr_internals)]
+#![feature(strict_provenance)]
 use thiserror::Error;
+
 {InternalStatesDeclaration}
 {Include}
 
@@ -192,29 +194,41 @@ impl PhoenixAddon for {TemplateNameFirstCap}Addon {{
 engine_rs="""
 use anyhow::{{anyhow, Result}};
 use futures::future::BoxFuture;
-use std::io::Write;
-use std::os::unix::ucred::UCred;
-use std::pin::Pin;
+use phoenix_api::rpc::{{RpcId, TransportStatus}};
 use std::fmt;
 use std::fs::File;
+use std::io::Write;
+use std::num::NonZeroU32;
+use std::os::unix::ucred::UCred;
+use std::pin::Pin;
 
 use phoenix_api_policy_{TemplateName}::control_plane;
 
-use phoenix_common::engine::datapath::message::{{EngineRxMessage, EngineTxMessage}};
+
+use phoenix_common::engine::datapath::message::{{
+    EngineRxMessage, EngineTxMessage, RpcMessageGeneral,
+}};
 
 use phoenix_common::engine::datapath::node::DataPathNode;
 use phoenix_common::engine::{{future, Decompose, Engine, EngineResult, Indicator, Vertex}};
 use phoenix_common::envelop::ResourceDowncast;
 use phoenix_common::impl_vertex_for_engine;
+use phoenix_common::log;
 use phoenix_common::module::Version;
+
 use phoenix_common::storage::{{ResourceCollection, SharedStorage}};
+use phoenix_common::engine::datapath::RpcMessageTx;
 
 use super::DatapathError;
 use crate::config::{{create_log_file, {TemplateNameCap}Config}};
 
 {Include}
 
-{ProtoDefinition}
+pub mod {ProtoDefinition} {{
+    include!("proto.rs");
+}}
+
+{ProtoGetters}
 
 {InternalStatesDefinition}
 
@@ -340,12 +354,21 @@ impl {TemplateNameCap}Engine {{
                 match msg {{
                     EngineTxMessage::RpcMessage(msg) => {{
                         let meta_ref = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }};
-                        // TODO! write to file
                         let mut input = Vec::new();
                         input.push(msg);
                         {OnTxRpc}
+                        
+                        
                         for msg in output {{
-                            self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
+                            match msg {{
+                                RpcMessageGeneral::TxMessage(msg) => {{
+                                    self.tx_outputs()[0].send(msg)?;
+                                }}
+                                RpcMessageGeneral::RxMessage(msg) => {{
+                                    self.rx_outputs()[0].send(msg)?;
+                                }}
+                                _ => {{}}
+                            }}
                         }}
                     }}
                     m => self.tx_outputs()[0].send(m)?,
@@ -362,7 +385,6 @@ impl {TemplateNameCap}Engine {{
             Ok(msg) => {{
                 match msg {{
                     EngineRxMessage::Ack(rpc_id, status) => {{                        
-                        // TODO! write to file
                         {OnRxRpc}
                         self.rx_outputs()[0].send(EngineRxMessage::Ack(rpc_id, status))?;
                     }}

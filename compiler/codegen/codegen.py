@@ -126,23 +126,32 @@ def handle_select_join_statement(node, ctx):
         from_vec_name = f"self.{from_vec_name}"
     if join_vec_name != "input" and join_vec_name != "output":
         join_vec_name = f"self.{join_vec_name}"
+    func = generate_join_filter_function(join_condition, where_condition, from_table_name, join_table_name, ctx["proto"])
     #gen_filter_function(from_table_name, join_table_name, join_condition)
-    return f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).filter(|&({from_table_name}, {join_table_name})| {join_condition} && {where_condition}).map(|(l, _)| l.clone()).collect()"
+    return f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).map({func}).collect()"
 
 def handle_binary_expression(node, ctx):
     #print(node)
     if node["type"] == "BinaryExpression":
-        left = node["left"]["table_name"] + "." + node["left"]["column_name"] if node["left"]["data_type"] == "Column" else node["left"]["value"]
-        right = node["right"]["table_name"] + "." + node["right"]["column_name"] if node["right"]["data_type"] == "Column" else node["right"]["value"]    
+        lt = node["left"]["table_name"] if node["left"]["data_type"] == "Column" else "Literal"
+        lc = node["left"]["column_name"] if node["left"]["data_type"] == "Column" else node["left"]["value"]
+        rt = node["right"]["table_name"] if node["right"]["data_type"] == "Column" else "Literal"
+        rc = node["right"]["column_name"] if node["right"]["data_type"] == "Column" else node["right"]["value"]
         op = node["operator"]
     elif node["type"] == "JoinOn":
         cond = node["condition"]
-        left = cond["left"]["table_name"] + "." + cond["left"]["column_name"]
-        right = cond["right"]["table_name"] + "." + cond["right"]["column_name"]
-        operator = cond["operator"]
-        if operator == '=':
+        lt = cond["left"]["table_name"]
+        lc = cond["left"]["column_name"]
+        rt = cond["right"]["table_name"]
+        rc = cond["right"]["column_name"]
+        op = cond["operator"]  
+        if op == '=':
             op = "=="
-    return f"{left} {op} {right}"
+    if rt == "Literal":
+        rc = rc.replace("'", "\"")
+    if lt == "Literal":
+        lc = lc.replace("'", "\"")
+    return {"lt": lt, "lc": lc, "rt": rt, "rc": rc, "op": op}
 
 def handle_set_statement(node, ctx):
     variable_name = node["variable"].replace('@', '')
@@ -206,12 +215,7 @@ def init_ctx():
             
         },
         "proto": {
-            "definition": r"""
-pub mod hello {
-    include!("rpc_hello.rs");
-}
-            """,
-            "declaration": r"",
+            "name": "hello",
             "req_type": "hello::HelloRequest",
             "resp_type": "hello::HelloResponse",
         }
