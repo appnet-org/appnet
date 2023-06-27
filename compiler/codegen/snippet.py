@@ -50,7 +50,7 @@ def generate_create_for_vec(ast, ctx, table_name):
     rust_vec += begin_sep("type") + f"{table['type']}<{struct_name}>" + end_sep("type")
     rust_vec += begin_sep("init") + f"{vec_name} = Vec::new()" + end_sep("init")
 
-    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_vec + "\n" + begin_sep("process")
+    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_vec + "\n" 
  
 def generate_create_for_file(ast, ctx, table_name):
     file_name = "table_" + table_name
@@ -93,7 +93,7 @@ def generate_create_for_file(ast, ctx, table_name):
     rust_file += begin_sep("init") + f"{file_field} = create_log_file()" + end_sep("init") 
 
 
-    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_file + "\n" + begin_sep("process")
+    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_file + "\n" 
 
 def generate_rpc_fields_getter():
     pass
@@ -110,6 +110,10 @@ def decorate_condition(cond, proto_ctx):
             raise NotImplementedError("Not implemented")
     elif cond["lt"] == "Literal":
         left = cond["lc"]
+    elif cond["lt"] == "Variable":
+        left = f"self.{cond['lc']}"
+    elif cond["lt"] == "Function":
+        left = cond["lc"]
     else:
         left = f"join.{cond['lc']}"
 
@@ -120,6 +124,10 @@ def decorate_condition(cond, proto_ctx):
         else:
             raise NotImplementedError("Not implemented")
     elif cond["rt"] == "Literal":
+        right = cond["rc"]
+    elif cond["rt"] == "Variable":
+        right = f"self.{cond['rc']}"
+    elif cond["rt"] == "Function":
         right = cond["rc"]
     else:
         right = f"join.{cond['rc']}"
@@ -161,5 +169,36 @@ def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
     }} else {{
         RpcMessageGeneral::Pass
     }}  
+}}
+"""
+
+def generate_where_filter_function(cond, proto_ctx):
+    cond = decorate_condition(cond, proto_ctx)
+    proto = proto_ctx["name"]
+    proto_req_type = proto_ctx["req_type"]
+    return f"""
+|msg| {{
+    let rpc_message = materialize_nocopy(&msg);
+    let conn_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.conn_id;
+    let call_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.call_id;
+    let rpc_id = RpcId::new(conn_id, call_id); 
+    if {cond} {{
+        let error = EngineRxMessage::Ack(
+            rpc_id,
+            TransportStatus::Error(unsafe {{
+                NonZeroU32::new_unchecked(403)
+            }}),
+        );
+        RpcMessageGeneral::RxMessage(error)
+    }} else {{
+        let raw_ptr: *const {proto_req_type} = rpc_message;
+        let new_msg = RpcMessageTx {{
+            meta_buf_ptr: msg.meta_buf_ptr.clone(),
+            addr_backend: raw_ptr.addr(),
+        }};
+        RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage(
+            new_msg,
+        ))
+    }}
 }}
 """

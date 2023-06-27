@@ -141,8 +141,12 @@ def generate(name):
         template_name_toml = "hello-acl"
         template_name_first_cap = "HelloAcl"
         template_name_all_cap = "HELLO_ACL"
-    else:
-        raise ValueError("Unknown template name")
+    elif name == "fault":
+        template_name = "fault"
+        template_name_toml = "fault"
+        template_name_first_cap = "Fault"
+        template_name_all_cap = "FAULT"
+        
     ctx = parse_intermediate_code(name)
     gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
     move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)

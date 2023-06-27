@@ -2,6 +2,8 @@
 include=r"""
 use chrono::prelude::*;
 use itertools::iproduct;
+use rand::Rng;
+
 """
 
 config_rs="""
@@ -450,6 +452,7 @@ phoenix-api.workspace = true
 
 serde.workspace = true
 itertools.workspace = true
+rand.workspace = true
 """
 
 policy_toml="""
@@ -479,6 +482,7 @@ toml = {{ workspace = true, features = ["preserve_order"] }}
 bincode.workspace = true
 chrono.workspace = true
 itertools.workspace = true
+rand.workspace = true
 """
  
  

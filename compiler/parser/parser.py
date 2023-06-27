@@ -12,6 +12,10 @@ class ADNParser:
         return self.parser.parse(sql)
 
 class ADNTransformer(Transformer):
+    
+    def __init__(self):
+        self.variables = {}
+
     def start(self, n):
         (n,) = n
         # print("start", n)
@@ -60,6 +64,7 @@ class ADNTransformer(Transformer):
             "value": n["value"],
             "data_type": n["data_type"]
         }
+        self.variables[n["variable"]] = n["value"]
         # print("set_statement", n)
         return res
     
@@ -117,6 +122,8 @@ class ADNTransformer(Transformer):
     def cname(self, c):
         (c,) = c
         res = {"name": c.value}
+        if c.value in self.variables:
+            res.update({"data_type": "Variable"})
         return res
     
     def column_definition(self, c):
@@ -171,7 +178,7 @@ class ADNTransformer(Transformer):
     
     def function(self, f):
         # print("function", f)
-        res = {'type': 'Function', 'name': f[0]}
+        res = {'data_type': 'Function', 'name': f[0]}
         return res
 
     def comparison_condition(self, c):
