@@ -2,15 +2,16 @@ from codegen.helper import *
 from codegen.snippet import *
 
 def compile_sql_to_rust(ast, ctx):
+    print(ast)
     if ast["type"] == "CreateTableAsStatement":
         return handle_create_table_as_statement(ast, ctx)
-    elif ast["type"] == "CreateTableAsSelect":
-        if ast["select"]["type"] == "SelectWhereStatement":
-            select_statement = handle_select_where_statement(ast["select"], ctx)
-            return f"let {ast['table']}: Vec<_> = {select_statement};"
-        elif ast["select"]["type"] == "SelectJoinStatement":
-            select_statement = handle_select_join_statement(ast["select"], ctx)
-            return f"let {ast['table']}: Vec<_> = {select_statement};"
+    if ast["type"] == "SelectStatement":
+        if ast.get("join") is not None:
+            return handle_select_join_statement(ast, ctx)
+        elif ast.get("where") is not None:        
+            return handle_select_where_statement(ast, ctx)
+        else:
+            return handle_select_simple_statement(ast, ctx)
     elif ast["type"] == "CreateTableStatement":
         return handle_create_table_statement(ast, ctx)
     elif ast["type"] == "InsertStatement":
@@ -42,7 +43,7 @@ def handle_insert_statement(node, ctx):
     if type(value) != list and value["type"] == "SelectStatement":
         select = value
         select["to"] = table_name
-        select_statement = handle_select_statement(select, ctx)
+        select_statement = handle_select_simple_statement(select, ctx)
         rust_code = f"for event in {select_statement} {{"
         if table_name.endswith("file"):
             file_name = table["file_field"]
@@ -50,7 +51,6 @@ def handle_insert_statement(node, ctx):
         else:
             rust_code += f"{vec_name}.push(event);"
         rust_code += f"}}"
-        return rust_code
     else:
         codes = ""
         struct_name = table["struct"]["name"]
@@ -59,12 +59,17 @@ def handle_insert_statement(node, ctx):
         for value in node["values"]:
             values = ""
             for k, v in zip(fields, value):
-                v = v.replace("'", "")
+                if v["data_type"] == "string":
+                    v = v["value"].replace("'", "")
                 values += f"{k}: \"{v}\".to_string(), "
-            codes += f"{vec_name}.push({struct_name} {{{values[:-2]}}});"
-        return codes
-
-def handle_select_statement(node, ctx):
+            codes += f"{vec_name}.push({struct_name} {{{values[:-2]}}})\n"
+        rust_code = codes
+    #comment following for logging
+    if table_name != "output":
+        rust_code = begin_sep("init") + rust_code + end_sep("init")
+    return rust_code
+        
+def handle_select_simple_statement(node, ctx):
     table_from = node["from"]
     if ctx["tables"].get(table_from) is None:
         raise ValueError("Table does not exist")
@@ -75,6 +80,7 @@ def handle_select_statement(node, ctx):
     else:
         columns = node["columns"]
     if table_from_name == "input":
+        # TODO test protobuf
         columns = [input_mapping(i) for i in columns]
         columns = ', '.join(columns)
     else:
@@ -88,36 +94,82 @@ def handle_select_statement(node, ctx):
         struct = table_to["struct"]["name"]
     else:
         struct = table_from["struct"]["name"]
-        
-    return f"{table_from_name}.iter().map(|req| {struct}::new({columns})).collect::<Vec<_>>()"
+    if ctx["tables"]["output"]["oncreate"] == True:
+        return f"{table_from_name}.iter().map(|req| RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({struct}::new({columns})))).collect::<Vec<_>>()" 
+    else:
+        return f"{table_from_name}.iter().map(|req| {struct}::new({columns})).collect::<Vec<_>>()"
 
 def handle_create_table_as_statement(node, ctx):
     new_table = node["table_name"]
     if new_table != "output":
         raise NotImplementedError("Currently only output table is supported")
-    select_statement = handle_select_statement(node["select"], ctx)
-    return f"let {new_table}: Vec<_> = {select_statement};"
+    select = node["select"]
+    if new_table == "output":
+        ctx["tables"]["output"]["oncreate"] = True
+    select_statement = compile_sql_to_rust(select, ctx)
+    if new_table == "output":
+        ctx["tables"]["output"]["oncreate"] = False
+    if select["type"] == "SelectJoinStatement":
+        return f"let {new_table}: Vec<_> = {select_statement};"
+    elif select["type"] == "SelectWhereStatement":
+        return f"let {new_table}: Vec<_> = {select_statement};"
+    elif select["type"] == "SelectStatement":
+        return f"let {new_table}: Vec<_> = {select_statement};"
+    else:
+        raise ValueError("Unsupported select statement type")
 
 def handle_select_join_statement(node, ctx):
-    join_condition = handle_binary_expression(node["join"]["condition"], ctx)
+    join_condition = handle_binary_expression(node["join"], ctx)
     where_condition = handle_binary_expression(node["where"], ctx)
-    join_table_name = node["join"]["table_name"] 
+    join_table_name = node["join"]["table"] 
     from_table_name = node["from"]
+    from_table_name = ctx["tables"][from_table_name]["name"]
     if ctx["tables"].get(join_table_name) is None:
         raise ValueError("Table does not exist")
     if ctx["tables"].get(from_table_name) is None:
         raise ValueError("Table does not exist")
     join_vec_name = ctx["tables"][join_table_name]["name"]
     from_vec_name = ctx["tables"][from_table_name]["name"]
-    return f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).filter(|&({from_table_name}, {join_table_name})| {join_condition} && {where_condition}).map(|(l, _)| l.clone()).collect()"
+    if from_vec_name != "input" and from_vec_name != "output":
+        from_vec_name = f"self.{from_vec_name}"
+    if join_vec_name != "input" and join_vec_name != "output":
+        join_vec_name = f"self.{join_vec_name}"
+    func = generate_join_filter_function(join_condition, where_condition, from_table_name, join_table_name, ctx["proto"])
+    #gen_filter_function(from_table_name, join_table_name, join_condition)
+    return f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).map({func}).collect()"
 
+def handle_expression(node, ctx):
+    if node["data_type"] == "Column":
+        return node["table_name"], node["column_name"]
+    elif node["data_type"] == "Literal":
+        return "Literal", node["value"]
+    elif node["data_type"] == "Function":
+        return "Function", handle_function(node, ctx)
+    elif node["data_type"] == "Variable":
+        name = node["name"]
+        if ctx["vars"].get(name) is None:
+            raise ValueError("Variable does not exist")
+        name = ctx["vars"][name]["name"]
+        return "Variable", name
+    
 def handle_binary_expression(node, ctx):
-    left = node["left"]["name"] if node["left"]["data_type"] == "Column" else node["left"]["value"]
-    right = node["right"]["name"] if node["right"]["data_type"] == "Column" else node["right"]["value"]
-    op = node["operator"]
-    if op == "=":
-        op = "=="
-    return f"{left} {op} {right}"
+    #print(node)
+    if node["type"] == "BinaryExpression":
+        lt, lc = handle_expression(node["left"], ctx)
+        rt, rc = handle_expression(node["right"], ctx)
+        op = node["operator"]
+    elif node["type"] == "JoinOn":
+        cond = node["condition"]
+        lt, lc = handle_expression(cond["left"], ctx)
+        rt, rc = handle_expression(cond["right"], ctx)
+        op = cond["operator"]  
+        if op == '=':
+            op = "=="
+    if rt == "Literal":
+        rc = rc.replace("'", "\"")
+    if lt == "Literal":
+        lc = lc.replace("'", "\"")
+    return {"lt": lt, "lc": lc, "rt": rt, "rc": rc, "op": op}
 
 def handle_set_statement(node, ctx):
     variable_name = node["variable"].replace('@', '')
@@ -125,24 +177,26 @@ def handle_set_statement(node, ctx):
         'name': "var_" + variable_name,
         'value': node["value"]
     }
+    val = node["value"]
+    var_type = "i32"
+    if "\'" in val:
+        var_type = "String"
+    elif "." in val:
+        var_type = "f32"
+    else:
+        var_type = "i32"
     variable_name = ctx["vars"][variable_name]["name"]
-    rust_code = f"let {variable_name} = {node['value']};"
+    rust_code = begin_sep("type") + var_type + end_sep("type")
+    rust_code += begin_sep("name") + variable_name + end_sep("name")
+    rust_code += begin_sep("init") + f"{variable_name} = {val}" + end_sep("init")
     return rust_code
 
 def handle_select_where_statement(node, ctx):
-    where_condition = handle_where_binary_expression(node["where"], ctx)
-    return f"{node['from']}.iter().filter(|&item| {where_condition}).cloned().collect()"
+    where_condition = handle_binary_expression(node["where"], ctx)
+    func = generate_where_filter_function(where_condition, ctx["proto"])
+    return f"{node['from']}.iter().map({func}).collect()"
 
-def handle_where_binary_expression(node, ctx):
-    left = handle_function(node["left"], ctx) if node["left"]["data_type"] == "Function" else node["left"]["name"]
-    right = node["right"]["name"].replace('@', '')
-    if ctx["vars"].get(right) is None:
-        raise ValueError("Variable does not exist")
-    right = ctx["vars"][right]["name"]
-    op = node["operator"]
-    if op == '=':
-        op = "=="
-    return f"{left} {op} {right}"
+
 
 def handle_function(node, ctx):
     if node["name"] == "random":
@@ -174,10 +228,16 @@ def init_ctx():
                         {"name": "meta_buf_ptr", "type": "MetaBufferPtr"},
                         {"name": "addr_backend", "type": "usize"},
                     ]
-                } 
+                },
+                "oncreate": False, 
             }
         },
         "vars": {
             
+        },
+        "proto": {
+            "name": "hello",
+            "req_type": "hello::HelloRequest",
+            "resp_type": "hello::HelloResponse",
         }
     }

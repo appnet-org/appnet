@@ -38,5 +38,4 @@ def input_mapping(fields):
     elif fields == "addr_backend":
         return "req.addr_backend.clone()"
     else:
-        print(fields)
-        raise ValueError("Unknown field")
+        return True

@@ -8,15 +8,28 @@ from string import Formatter
 # type: Vec<struct_rpc_events>
 # init: table_rpc_events = Vec::new()
 #
-def fill_internal_states(declaration, name, type, init, process):
+def fill_internal_states(definition, declaration, name, type, init, process, proto):
     assert(len(name) == len(type))
+    proto_fc = proto[0].upper() + proto[1:]
     return {
-        "InternalStatesDeclaration": "".join(declaration),
-        "InternalStatesOnBuild": "".join([f"let mut {i};\n" for i in init]),
-        "InternalStatesOnRestore": "".join([f"let mut {i};\n" for i in init]),
+        "ProtoDefinition": proto,
+        # todo! field name should be configurable
+        # todo! multiple type should be supported
+        "ProtoGetters": f"""
+fn {proto}_request_name_readonly(req: &{proto}::{proto_fc}Request) -> String {{
+    let buf = &req.name as &[u8];
+    String::from_utf8_lossy(buf).to_string().clone()
+}}
+        """,
+        "ProtoRpcRequestType": f"{proto}::{proto_fc}Request",
+        "ProtoRpcResponseType": f"{proto}::{proto_fc}Response",
+        "InternalStatesDefinition": "".join(definition),
+        "InternalStatesDeclaration": "".join([f"use crate::engine::{i};\n" for i in declaration]),
+        "InternalStatesOnBuild": "".join([f"let mut {i};\n" if '=' in i else f"{i};\n" for i in init]),
+        "InternalStatesOnRestore":"".join([f"let mut {i};\n" if '=' in i else f"{i};\n" for i in init]),
         "InternalStatesOnDecompose": "",
         "InternalStatesInConstructor": "".join([f"{i},\n" for i in name]),
-        "InternalStatesInStructDeclaration": "".join([f"pub(crate) {i[0]}:{i[1]},\n" for i in zip(name, type)]),
+        "InternalStatesInStructDefinition": "".join([f"pub(crate) {i[0]}:{i[1]},\n" for i in zip(name, type)]),
         "OnTxRpc": "".join(process),
         "OnRxRpc": r"""// todo """ 
     }
@@ -24,6 +37,7 @@ def fill_internal_states(declaration, name, type, init, process):
 
 def parse_intermediate_code(name):
     ctx = {
+        "definition": [],
         "declaration": [],
         "internal": [],
         "init": [],
@@ -51,12 +65,17 @@ def parse_intermediate_code(name):
                         current = "type"
                     elif j[2] == "name":
                         current = "name"
+                    elif j[2] == "definition":
+                        current = "definition"
+                elif j[1] == "END_OF":
+                    assert(j[2] == current)
+                    current = "process"
             else:
                 if current is not None:
                     if i.strip() != "":
-                        ctx[current].append(i)
-    
-    ctx = fill_internal_states(ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"])
+                        ctx[current].append(i.strip('\n'))
+
+    ctx = fill_internal_states(ctx["definition"], ctx["declaration"], ctx["name"], ctx["type"], ctx["init"], ctx["process"], "hello")
     
     return ctx
         
@@ -80,6 +99,8 @@ def gen_template(ctx, template_name, template_name_toml, template_name_first_cap
     with open("engine.rs", "w") as f:
         #print([i[1] for i in Formatter().parse(engine_rs)  if i[1] is not None])
         f.write(engine_rs.format(Include=include, **ctx))
+    with open("proto.rs", "w") as f:
+        f.write(proto_rs)
     with open("Cargo.toml.api", "w") as f:
         f.write(api_toml.format(TemplateName=template_name_toml))
     with open("Cargo.toml.policy", "w") as f:
@@ -101,10 +122,12 @@ def move_template(mrpc_root, template_name, template_name_toml, template_name_fi
     os.system(f"rustfmt --edition 2018  ./lib.rs")
     os.system(f"rustfmt --edition 2018  ./module.rs")
     os.system(f"rustfmt --edition 2018  ./engine.rs")
+    os.system(f"rustfmt --edition 2018  ./proto.rs")
     os.system(f"cp ./config.rs {mrpc_plugin}/{template_name_toml}/src/config.rs")
     os.system(f"cp ./lib.rs {mrpc_plugin}/{template_name_toml}/src/lib.rs")
     os.system(f"cp ./module.rs {mrpc_plugin}/{template_name_toml}/src/module.rs")
     os.system(f"cp ./engine.rs {mrpc_plugin}/{template_name_toml}/src/engine.rs") 
+    os.system(f"cp ./proto.rs {mrpc_plugin}/{template_name_toml}/src/proto.rs")
     print("Template {} moved to mrpc folder".format(template_name))
     
 def generate(name):
@@ -118,8 +141,12 @@ def generate(name):
         template_name_toml = "hello-acl"
         template_name_first_cap = "HelloAcl"
         template_name_all_cap = "HELLO_ACL"
-    else:
-        raise ValueError("Unknown template name")
+    elif name == "fault":
+        template_name = "fault"
+        template_name_toml = "fault"
+        template_name_first_cap = "Fault"
+        template_name_all_cap = "FAULT"
+        
     ctx = parse_intermediate_code(name)
     gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
     move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)

@@ -1,8 +1,9 @@
 
 include=r"""
-use phoenix_common::engine::datapath::RpcMessageTx;
 use chrono::prelude::*;
-///use itertools::iproduct;
+use itertools::iproduct;
+use rand::Rng;
+
 """
 
 config_rs="""
@@ -10,6 +11,8 @@ use chrono::{{Datelike, Timelike, Utc}};
 use phoenix_common::log;
 use serde::{{Deserialize, Serialize}};
 {Include}
+{InternalStatesDeclaration}
+
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -47,7 +50,11 @@ pub fn create_log_file() -> std::fs::File {{
 
 lib_rs="""
 #![feature(peer_credentials_unix_socket)]
+#![feature(ptr_internals)]
+#![feature(strict_provenance)]
 use thiserror::Error;
+
+{InternalStatesDeclaration}
 {Include}
 
 pub use phoenix_common::{{InitFnResult, PhoenixAddon}};
@@ -91,7 +98,7 @@ use phoenix_common::storage::ResourceCollection;
 
 use super::engine::{TemplateNameFirstCap}Engine;
 use crate::config::{{create_log_file, {TemplateNameFirstCap}Config}};
-
+{InternalStatesDeclaration}
 {Include}
 
 pub(crate) struct {TemplateNameFirstCap}EngineBuilder {{
@@ -189,35 +196,49 @@ impl PhoenixAddon for {TemplateNameFirstCap}Addon {{
 engine_rs="""
 use anyhow::{{anyhow, Result}};
 use futures::future::BoxFuture;
-use std::io::Write;
-use std::os::unix::ucred::UCred;
-use std::pin::Pin;
+use phoenix_api::rpc::{{RpcId, TransportStatus}};
 use std::fmt;
 use std::fs::File;
+use std::io::Write;
+use std::num::NonZeroU32;
+use std::os::unix::ucred::UCred;
+use std::pin::Pin;
 
 use phoenix_api_policy_{TemplateName}::control_plane;
 
-use phoenix_common::engine::datapath::message::{{EngineRxMessage, EngineTxMessage}};
+
+use phoenix_common::engine::datapath::message::{{
+    EngineRxMessage, EngineTxMessage, RpcMessageGeneral,
+}};
 
 use phoenix_common::engine::datapath::node::DataPathNode;
 use phoenix_common::engine::{{future, Decompose, Engine, EngineResult, Indicator, Vertex}};
 use phoenix_common::envelop::ResourceDowncast;
 use phoenix_common::impl_vertex_for_engine;
+use phoenix_common::log;
 use phoenix_common::module::Version;
+
 use phoenix_common::storage::{{ResourceCollection, SharedStorage}};
+use phoenix_common::engine::datapath::RpcMessageTx;
 
 use super::DatapathError;
 use crate::config::{{create_log_file, {TemplateNameCap}Config}};
 
 {Include}
 
-{InternalStatesDeclaration}
+pub mod {ProtoDefinition} {{
+    include!("proto.rs");
+}}
+
+{ProtoGetters}
+
+{InternalStatesDefinition}
 
 pub(crate) struct {TemplateNameCap}Engine {{
     pub(crate) node: DataPathNode,
     pub(crate) indicator: Indicator,
     pub(crate) config: {TemplateNameCap}Config,
-    {InternalStatesInStructDeclaration}
+    {InternalStatesInStructDefinition}
 }}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -319,21 +340,37 @@ impl {TemplateNameCap}Engine {{
     }}
 }}
 
+#[inline]
+fn materialize_nocopy(msg: &RpcMessageTx) -> &{ProtoRpcRequestType} {{
+    let req_ptr = msg.addr_backend as *mut {ProtoRpcRequestType};
+    let req = unsafe {{ req_ptr.as_ref().unwrap() }};
+    return req;
+}}
+
 impl {TemplateNameCap}Engine {{
     fn check_input_queue(&mut self) -> Result<Status, DatapathError> {{
         use phoenix_common::engine::datapath::TryRecvError;
 
-        match self.tx_inputs()[0].try_recv() {{
+        match self.tx_inputs()[0].try_recv() {{ 
             Ok(msg) => {{
                 match msg {{
                     EngineTxMessage::RpcMessage(msg) => {{
                         let meta_ref = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }};
-                        // TODO! write to file
                         let mut input = Vec::new();
                         input.push(msg);
                         {OnTxRpc}
+                        
+                        
                         for msg in output {{
-                            self.tx_outputs()[0].send(EngineTxMessage::RpcMessage(msg))?;
+                            match msg {{
+                                RpcMessageGeneral::TxMessage(msg) => {{
+                                    self.tx_outputs()[0].send(msg)?;
+                                }}
+                                RpcMessageGeneral::RxMessage(msg) => {{
+                                    self.rx_outputs()[0].send(msg)?;
+                                }}
+                                _ => {{}}
+                            }}
                         }}
                     }}
                     m => self.tx_outputs()[0].send(m)?,
@@ -350,7 +387,6 @@ impl {TemplateNameCap}Engine {{
             Ok(msg) => {{
                 match msg {{
                     EngineRxMessage::Ack(rpc_id, status) => {{                        
-                        // TODO! write to file
                         {OnRxRpc}
                         self.rx_outputs()[0].send(EngineRxMessage::Ack(rpc_id, status))?;
                     }}
@@ -371,6 +407,38 @@ impl {TemplateNameCap}Engine {{
 }}
 """
 
+proto_rs=r"""
+///  The request message containing the user's name.
+#[repr(C)]
+#[derive(Debug, Clone, ::mrpc_derive::Message)]
+pub struct HelloRequest {
+    #[prost(bytes = "vec", tag = "1")]
+    pub name: ::mrpc_marshal::shadow::Vec<u8>,
+}
+///  The response message containing the greetings
+#[repr(C)]
+#[derive(Debug, ::mrpc_derive::Message)]
+pub struct HelloReply {
+    #[prost(bytes = "vec", tag = "1")]
+    pub message: ::mrpc_marshal::shadow::Vec<u8>,
+}
+
+// ///  The request message containing the user's name.
+// #[repr(C)]
+// #[derive(Debug, Clone, ::mrpc_derive::Message)]
+// pub struct HelloRequest {
+//     #[prost(bytes = "vec", tag = "1")]
+//     pub name: ::mrpc::alloc::Vec<u8>,
+// }
+// ///  The response message containing the greetings
+// #[repr(C)]
+// #[derive(Debug, ::mrpc_derive::Message)]
+// pub struct HelloReply {
+//     #[prost(bytes = "vec", tag = "1")]
+//     pub message: ::mrpc::alloc::Vec<u8>,
+// }
+"""
+
 api_toml="""
 [package]
 name = "phoenix-api-policy-{TemplateName}"
@@ -383,6 +451,8 @@ edition = "2021"
 phoenix-api.workspace = true
 
 serde.workspace = true
+itertools.workspace = true
+rand.workspace = true
 """
 
 policy_toml="""
@@ -396,6 +466,10 @@ edition = "2021"
 [dependencies]
 phoenix_common.workspace = true
 phoenix-api-policy-{TemplateName}.workspace = true
+mrpc-marshal.workspace = true
+mrpc-derive.workspace = true
+shm.workspace = true
+phoenix-api = {{ workspace = true, features = ["mrpc"] }}
 
 futures.workspace = true
 minstant.workspace = true
@@ -407,5 +481,8 @@ nix.workspace = true
 toml = {{ workspace = true, features = ["preserve_order"] }}
 bincode.workspace = true
 chrono.workspace = true
+itertools.workspace = true
+rand.workspace = true
 """
+ 
  

@@ -13,7 +13,7 @@ CREATE TABLE acl (
 Initilization:
     Insert the access control rules into the acl table
 */
-INSERT INTO acl (permission, name) VALUES ('N', 'Apple') ('Y', 'Banana');
+INSERT INTO acl (name, permission) VALUES ('Apple', 'N') ('Banana', 'Y');
 
 /*
 Processing Logic: block users that do not have permission
