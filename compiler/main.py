@@ -25,10 +25,8 @@ if __name__ == "__main__":
     # Remove empty statements and leading/trailing whitespace
 
     compiler = ADNCompiler(verbose=False)
-    ast = compiler.parse(sql_statements)
     ast = compiler.transform(sql_statements)
     print("Transformed AST")
-    pprint(ast)
 
     print("Compiling...")
     ctx = init_ctx()

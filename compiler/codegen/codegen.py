@@ -5,7 +5,7 @@ def visit_root(ast, ctx):
     for i in ast:
         try :
             visit_single_statement(i, ctx)
-        except Exception as e:
+        except ValueError as e:
             print("Error in SQL statement: ", e)
             print(i)
             exit()
@@ -52,7 +52,9 @@ def handle_insert_statement(node, ctx):
     if type(value) != list and value["type"] == "SelectStatement":
         select = value
         select["to"] = table_name
-        select_statement = handle_select_simple_statement(select, ctx)
+        handle_select_simple_statement(select, ctx)
+        select_statement = ctx["code"][-1]
+        ctx["code"] = ctx["code"][:-1]
         rust_code = f"for event in {select_statement} {{"
         if table_name.endswith("file"):
             file_name = table["file_field"]
@@ -116,12 +118,11 @@ def handle_create_table_as_statement(node, ctx):
     select = node["select"]
     if new_table == "output":
         ctx["tables"]["output"]["oncreate"] = True
-        
+         
     visit_single_statement(select, ctx)
     select_statement = ctx["code"][-1]
     ctx["code"] = ctx["code"][:-1]
     
-    print("select", select)
     if new_table == "output":
         ctx["tables"]["output"]["oncreate"] = False
     if select["type"] == "SelectJoinStatement":
@@ -178,7 +179,7 @@ def handle_expression(node, ctx):
         return "Variable", name
     
 def handle_binary_expression(node, ctx):
-    #print(node)
+    print(node)
     if node["type"] == "BinaryExpression":
         lt, lc = handle_expression(node["left"], ctx)
         rt, rc = handle_expression(node["right"], ctx)
