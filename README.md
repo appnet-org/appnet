@@ -2,7 +2,7 @@
 
 # Overview
 
-Control plane for Application Defined Networks (ADN). 
+Control plane for Application Defined Networks (ADN).
 
 Details are avaliable in our whitepaper: [Application Defined Networks](https://xzhu27.me/papers/Application_Defined_Networks_UW_FOCI.pdf)
 
@@ -14,7 +14,7 @@ Details are avaliable in our whitepaper: [Application Defined Networks](https://
 
 ### Install the CLI
 
-`adnctl` is a command line program to manage ADN control plane. 
+`adnctl` is a command line program to manage ADN control plane.
 
 To install the CLI, run
 ```bash
@@ -88,6 +88,15 @@ make manifests
 ```
 
 **NOTE:** Run `make --help` for more information on all potential `make` targets
+
+# Development
+
+Before you start:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
 
 # Contact
 

@@ -1,5 +1,6 @@
 from lark import Lark
 
+
 class ADNParser:
     def __init__(self):
         with open("frontend/parser/sql.lark", "r") as file:
@@ -10,4 +11,3 @@ class ADNParser:
 
     def parse(self, sql):
         return self.parser.parse(sql)
-

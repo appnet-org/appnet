@@ -1,13 +1,17 @@
 from codegen.helper import *
 
+
 def generate_struct_declaration(struct_name, columns, table):
     rust_struct = f"pub struct {struct_name} {{\n"
     for column in columns:
         rust_type = type_mapping(column["data_type"])
-        table["struct"]["fields"].append({"name": column["column_name"], "type": rust_type})
+        table["struct"]["fields"].append(
+            {"name": column["column_name"], "type": rust_type}
+        )
         rust_struct += f"    pub {column['column_name']}: {rust_type},\n"
-    rust_struct += "}\n" 
+    rust_struct += "}\n"
     return rust_struct, struct_name
+
 
 def generate_new(struct_name, columns):
     rust_impl = f"impl {struct_name} {{\n"
@@ -17,7 +21,7 @@ def generate_new(struct_name, columns):
         if idx != len(columns) - 1:
             rust_impl += ", "
     rust_impl += f") -> {struct_name} {{\n"
-    
+
     rust_impl += f"         {struct_name} {{\n"
     for column in columns:
         rust_impl += f"             {column['column_name']}: {column['column_name']},\n"
@@ -26,42 +30,51 @@ def generate_new(struct_name, columns):
     rust_impl += f"}}\n"
     return rust_impl
 
+
 def generate_create_for_vec(ast, ctx, table_name):
     vec_name = "table_" + table_name
     struct_name = "struct_" + table_name
     table = {
         "name": vec_name,
         "type": "Vec",
-        "struct": {
-            "name": struct_name,
-            "fields": []
-        },
+        "struct": {"name": struct_name, "fields": []},
     }
     if ctx["tables"].get(table_name) is None:
         ctx["tables"][table_name] = table
     else:
         raise ValueError("Table already exists")
-    
-    rust_struct, rust_extern = generate_struct_declaration(struct_name, ast["columns"], table)
+
+    rust_struct, rust_extern = generate_struct_declaration(
+        struct_name, ast["columns"], table
+    )
     rust_extern = begin_sep("declaration") + rust_extern + end_sep("declaration")
     rust_impl = generate_new(struct_name, ast["columns"])
-    
-    rust_vec = begin_sep("name") + f"{vec_name}" + end_sep("name") 
+
+    rust_vec = begin_sep("name") + f"{vec_name}" + end_sep("name")
     rust_vec += begin_sep("type") + f"{table['type']}<{struct_name}>" + end_sep("type")
     rust_vec += begin_sep("init") + f"{vec_name} = Vec::new()" + end_sep("init")
 
-    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_vec + "\n" 
- 
+    return (
+        rust_extern
+        + begin_sep("definition")
+        + rust_struct
+        + "\n"
+        + rust_impl
+        + "\n"
+        + end_sep("definition")
+        + "\n"
+        + rust_vec
+        + "\n"
+    )
+
+
 def generate_create_for_file(ast, ctx, table_name):
     file_name = "table_" + table_name
     struct_name = "struct_" + table_name
     table = {
         "name": file_name,
         "type": "File",
-        "struct": {
-            "name": struct_name,
-            "fields": []
-        },
+        "struct": {"name": struct_name, "fields": []},
         "file_field": "log_file",
     }
     if ctx["tables"].get(table_name) is None:
@@ -71,35 +84,49 @@ def generate_create_for_file(ast, ctx, table_name):
 
     file_field = table["file_field"]
 
-    rust_struct, rust_extern = generate_struct_declaration(struct_name, ast["columns"], table)
+    rust_struct, rust_extern = generate_struct_declaration(
+        struct_name, ast["columns"], table
+    )
     rust_extern = begin_sep("declaration") + rust_extern + end_sep("declaration")
- 
-    rust_impl = generate_new(struct_name, ast["columns"]);
+
+    rust_impl = generate_new(struct_name, ast["columns"])
     rust_impl += "\n"
-    
+
     rust_impl += f"impl fmt::Display for {struct_name} {{\n"
     rust_impl += f"     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {{\n"
     fields = table["struct"]["fields"]
     for field in fields:
         name = field["name"]
         if name != file_field:
-            rust_impl += f"         write!(f, \"{{}},\", self.{name});\n"
-    rust_impl += f"         write!(f, \"\\n\")\n"
+            rust_impl += f'         write!(f, "{{}},", self.{name});\n'
+    rust_impl += f'         write!(f, "\\n")\n'
     rust_impl += f"     }}\n"
     rust_impl += f"}}\n"
-    
-    rust_file = begin_sep("type") + "File" + end_sep("type");
+
+    rust_file = begin_sep("type") + "File" + end_sep("type")
     rust_file += begin_sep("name") + f"{file_field}" + end_sep("name")
-    rust_file += begin_sep("init") + f"{file_field} = create_log_file()" + end_sep("init") 
+    rust_file += (
+        begin_sep("init") + f"{file_field} = create_log_file()" + end_sep("init")
+    )
 
+    return (
+        rust_extern
+        + begin_sep("definition")
+        + rust_struct
+        + "\n"
+        + rust_impl
+        + "\n"
+        + end_sep("definition")
+        + "\n"
+        + rust_file
+        + "\n"
+    )
 
-    return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_file + "\n" 
 
 def generate_rpc_fields_getter():
     pass
-  
-  
- 
+
+
 def decorate_condition(cond, proto_ctx):
     proto = proto_ctx["name"]
     if cond["lt"] == "input":
@@ -133,12 +160,13 @@ def decorate_condition(cond, proto_ctx):
         right = f"join.{cond['rc']}"
     return f"{left} {cond['op']} {right}"
 
+
 def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
     if lt != "input":
         raise ValueError("Only support when left table is input")
-    
+
     join_cond = decorate_condition(join_cond, proto_ctx)
-    filter_cond = decorate_condition(filter_cond, proto_ctx)    
+    filter_cond = decorate_condition(filter_cond, proto_ctx)
     proto = proto_ctx["name"]
     proto_req_type = proto_ctx["req_type"]
     return f"""
@@ -146,7 +174,7 @@ def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
     let rpc_message = materialize_nocopy(&msg);
     let conn_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.conn_id;
     let call_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.call_id;
-    let rpc_id = RpcId::new(conn_id, call_id); 
+    let rpc_id = RpcId::new(conn_id, call_id);
     if {join_cond} {{
         if {filter_cond} {{
             let error = EngineRxMessage::Ack(
@@ -168,9 +196,10 @@ def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
         }}
     }} else {{
         RpcMessageGeneral::Pass
-    }}  
+    }}
 }}
 """
+
 
 def generate_where_filter_function(cond, proto_ctx):
     cond = decorate_condition(cond, proto_ctx)
@@ -181,7 +210,7 @@ def generate_where_filter_function(cond, proto_ctx):
     let rpc_message = materialize_nocopy(&msg);
     let conn_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.conn_id;
     let call_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.call_id;
-    let rpc_id = RpcId::new(conn_id, call_id); 
+    let rpc_id = RpcId::new(conn_id, call_id);
     if {cond} {{
         let error = EngineRxMessage::Ack(
             rpc_id,

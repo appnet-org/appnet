@@ -4,14 +4,14 @@
 CREATE TABLE ab_testing_header (
   service_name VARCHAR(255)
   header_value VARCHAR(255)
-);  
+);
 
 /*
 Initilization:
     Insert the parameters
 */
-INSERT INTO ab_testing_header (service_name, header_value) 
-VALUES 
+INSERT INTO ab_testing_header (service_name, header_value)
+VALUES
 ("service_a", "Jason"),
 ("service_b", "Peter"),
 ("service_c", "Bob");

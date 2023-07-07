@@ -1,9 +1,9 @@
 start: (statement ";")*
 
-statement: select_statement 
-       | create_table_statement 
-       | set_statement 
-       | create_table_as_statement 
+statement: select_statement
+       | create_table_statement
+       | set_statement
+       | create_table_as_statement
        | insert_statement
        | update_statement
 
@@ -32,23 +32,23 @@ column_list: "(" column_name ("," column_name)* ")"
 
 column_definition: column_name data_type [length]
 
-value_list: "(" value ("," value)* ")" 
+value_list: "(" value ("," value)* ")"
 
 assignment: identifier "=" value
 
-data_type: CNAME 
+data_type: CNAME
 
-length: "(" NUMBER ")" 
+length: "(" NUMBER ")"
 
 value: function -> function
-     | column_name 
+     | column_name
      | table_name "." identifier -> column_field
-     | NUMBER -> number 
+     | NUMBER -> number
      | CNAME -> cname
      | quoted_string -> string
 
 
-column_name: "*" -> all | CNAME -> cname 
+column_name: "*" -> all | CNAME -> cname
 
 table_name: CNAME
 

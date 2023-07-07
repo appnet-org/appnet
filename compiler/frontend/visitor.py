@@ -16,14 +16,14 @@ def accept(visitor: Visitor, ctx) -> Callable:
     return lambda node: node.accept(visitor, ctx)
 
 
-class Visitor(): 
+class Visitor:
     def visitOther(self, node: Node, ctx) -> None:
         return None
 
     def visitStatement(self, node: Statement, ctx):
         return self.visitOther(node, ctx)
 
-   
+
 class Printer(Visitor):
     def visitStatement(self, node: Statement, ctx):
         print("Statement", node.name, node.type)

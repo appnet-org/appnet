@@ -1,12 +1,11 @@
-
-include=r"""
+include = r"""
 use chrono::prelude::*;
 use itertools::iproduct;
 use rand::Rng;
 
 """
 
-config_rs="""
+config_rs = """
 use chrono::{{Datelike, Timelike, Utc}};
 use phoenix_common::log;
 use serde::{{Deserialize, Serialize}};
@@ -48,7 +47,7 @@ pub fn create_log_file() -> std::fs::File {{
 
 """
 
-lib_rs="""
+lib_rs = """
 #![feature(peer_credentials_unix_socket)]
 #![feature(ptr_internals)]
 #![feature(strict_provenance)]
@@ -87,7 +86,7 @@ pub fn init_addon(config_string: Option<&str>) -> InitFnResult<Box<dyn PhoenixAd
 }}
 """
 
-module_rs="""
+module_rs = """
 use anyhow::{{bail, Result}};
 use nix::unistd::Pid;
 
@@ -116,7 +115,7 @@ impl {TemplateNameFirstCap}EngineBuilder {{
         Ok({TemplateNameFirstCap}Engine {{
             node: self.node,
             indicator: Default::default(),
-            config: self.config, 
+            config: self.config,
             {InternalStatesInConstructor}
         }})
     }}
@@ -193,7 +192,7 @@ impl PhoenixAddon for {TemplateNameFirstCap}Addon {{
 }}
 """
 
-engine_rs="""
+engine_rs = """
 use anyhow::{{anyhow, Result}};
 use futures::future::BoxFuture;
 use phoenix_api::rpc::{{RpcId, TransportStatus}};
@@ -351,7 +350,7 @@ impl {TemplateNameCap}Engine {{
     fn check_input_queue(&mut self) -> Result<Status, DatapathError> {{
         use phoenix_common::engine::datapath::TryRecvError;
 
-        match self.tx_inputs()[0].try_recv() {{ 
+        match self.tx_inputs()[0].try_recv() {{
             Ok(msg) => {{
                 match msg {{
                     EngineTxMessage::RpcMessage(msg) => {{
@@ -359,8 +358,8 @@ impl {TemplateNameCap}Engine {{
                         let mut input = Vec::new();
                         input.push(msg);
                         {OnTxRpc}
-                        
-                        
+
+
                         for msg in output {{
                             match msg {{
                                 RpcMessageGeneral::TxMessage(msg) => {{
@@ -386,7 +385,7 @@ impl {TemplateNameCap}Engine {{
         match self.rx_inputs()[0].try_recv() {{
             Ok(msg) => {{
                 match msg {{
-                    EngineRxMessage::Ack(rpc_id, status) => {{                        
+                    EngineRxMessage::Ack(rpc_id, status) => {{
                         {OnRxRpc}
                         self.rx_outputs()[0].send(EngineRxMessage::Ack(rpc_id, status))?;
                     }}
@@ -407,7 +406,7 @@ impl {TemplateNameCap}Engine {{
 }}
 """
 
-proto_rs=r"""
+proto_rs = r"""
 ///  The request message containing the user's name.
 #[repr(C)]
 #[derive(Debug, Clone, ::mrpc_derive::Message)]
@@ -439,7 +438,7 @@ pub struct HelloReply {
 // }
 """
 
-api_toml="""
+api_toml = """
 [package]
 name = "phoenix-api-policy-{TemplateName}"
 version = "0.1.0"
@@ -455,7 +454,7 @@ itertools.workspace = true
 rand.workspace = true
 """
 
-policy_toml="""
+policy_toml = """
 [package]
 name = "phoenix-{TemplateName}"
 version = "0.1.0"
@@ -484,5 +483,3 @@ chrono.workspace = true
 itertools.workspace = true
 rand.workspace = true
 """
- 
- 
