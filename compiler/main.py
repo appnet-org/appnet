@@ -1,7 +1,9 @@
 from compiler import *
 from example import logging_sqls, acl_sqls, fault_sqls
+from codegen.codegen import *
 import argparse
 import os, re
+from pprint import pprint
 
 if __name__ == "__main__":
     os.system("rm -rf ./generated")
@@ -18,23 +20,22 @@ if __name__ == "__main__":
 
     # Remove comments from the SQL file
     sql_file_content = re.sub(r'/\*.*?\*/', '', sql_file_content, flags=re.DOTALL)  # Remove /* ... */ comments
-    sql_statements = re.sub(r'--.*', '', sql_file_content).split(';')  # Remove -- comments and split statements
-
+    sql_statements = re.sub(r'--.*', '', sql_file_content) # Remove -- comments and split statements
+    print(sql_statements)
     # Remove empty statements and leading/trailing whitespace
-    sql_statements = [statement.strip().replace("\n", " ") for statement in sql_statements if statement.strip()]
 
     compiler = ADNCompiler(verbose=False)
+    ast = compiler.parse(sql_statements)
+    ast = compiler.transform(sql_statements)
+    print("Transformed AST")
+    pprint(ast)
 
-
-    print(f"Compiling {engine_name} statements...")
+    print("Compiling...")
     ctx = init_ctx()
-    for sql in sql_statements:
-        rust_code = compiler.compile(sql, ctx)
-        with open(f"./generated/{engine_name}.rs", "a") as f:
-            f.write(rust_code + '\n')
-        
-        
+    compiler.compile(ast, ctx)
+    with open(f"./generated/{engine_name}.rs", "w") as f:
+        f.write('\n'.join(ctx["code"]))
+
+    
     compiler.generate(engine_name)
-    #os.system(f"rustfmt ./generated/{engine_name}_engine.rs")
-    #os.system(f"cp ./generated/{engine_name}_engine.rs ./compiler_test/src/{engine_name}_engine.rs")
     

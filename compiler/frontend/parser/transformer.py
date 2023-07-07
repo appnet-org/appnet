@@ -1,15 +1,4 @@
-from lark import Lark, Transformer
-
-class ADNParser:
-    def __init__(self):
-        with open("parser/sql.lark", "r") as file:
-            # Perform operations on the opened file here
-            # For example, you can read its contents or process it line by line
-            file_contents = file.read()
-        self.parser = Lark(file_contents, start="start")
-
-    def parse(self, sql):
-        return self.parser.parse(sql)
+from lark import Transformer
 
 class ADNTransformer(Transformer):
     
@@ -17,9 +6,12 @@ class ADNTransformer(Transformer):
         self.variables = {}
 
     def start(self, n):
-        (n,) = n
         # print("start", n)
         return n
+
+    def statement(self, s):
+        s = s[0]
+        return s
 
     def create_table_as_statement(self, c):
         # print("create_table_as_statement", c)
@@ -241,3 +233,5 @@ class ADNTransformer(Transformer):
             "column_name": c[1]["variable"]
         }
         return res
+    
+    

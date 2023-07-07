@@ -1,6 +1,6 @@
 from lark import Lark
 import sys
-from parser.parser import *
+from frontend.parser import *
 from codegen.codegen import *
 from codegen.template import generate
 
@@ -13,7 +13,7 @@ class ADNCompiler:
 
     def parse(self, sql):
         return self.parser.parse(sql)
-        
+    
     def transform(self, sql):
         ast = self.parse(sql)
         if self.verbose:
@@ -21,10 +21,7 @@ class ADNCompiler:
         return self.Transformer.transform(ast)
 
     def compile(self, sql, ctx):
-        ast = self.transform(sql)
-        if self.verbose:
-            print(ast)
-        return compile_sql_to_rust(ast, ctx)
+        return visit_root(sql, ctx)
 
     def generate(self, e):
         return generate(e)

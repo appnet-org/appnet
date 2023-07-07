@@ -1,26 +1,35 @@
 from codegen.helper import *
 from codegen.snippet import *
 
-def compile_sql_to_rust(ast, ctx):
-    print(ast)
+def visit_root(ast, ctx):
+    for i in ast:
+        try :
+            visit_single_statement(i, ctx)
+        except Exception as e:
+            print("Error in SQL statement: ", e)
+            print(i)
+            exit()
+            
+def visit_single_statement(ast, ctx):
+    # print("visit_single_statement")
+    # print(ast)
     if ast["type"] == "CreateTableAsStatement":
-        return handle_create_table_as_statement(ast, ctx)
-    if ast["type"] == "SelectStatement":
+        handle_create_table_as_statement(ast, ctx)
+    elif ast["type"] == "SelectStatement":
         if ast.get("join") is not None:
-            return handle_select_join_statement(ast, ctx)
+            handle_select_join_statement(ast, ctx)
         elif ast.get("where") is not None:        
-            return handle_select_where_statement(ast, ctx)
+            handle_select_where_statement(ast, ctx)
         else:
-            return handle_select_simple_statement(ast, ctx)
+            handle_select_simple_statement(ast, ctx)
     elif ast["type"] == "CreateTableStatement":
-        return handle_create_table_statement(ast, ctx)
+        handle_create_table_statement(ast, ctx)
     elif ast["type"] == "InsertStatement":
-        return handle_insert_statement(ast, ctx)
+        handle_insert_statement(ast, ctx)
     elif ast["type"] == "SetStatement":
-        return handle_set_statement(ast, ctx)
+        handle_set_statement(ast, ctx)
     else:
-        print(ast)
-        raise ValueError("Unsupported SQL statement")
+        raise ValueError("Unsupported SQL statement", ast["type"])
 
 def handle_create_table_statement(ast, ctx):
     table_name = ast["table_name"]
@@ -30,7 +39,7 @@ def handle_create_table_statement(ast, ctx):
         ret = generate_create_for_file(ast, ctx, table_name)
     else:
         ret = generate_create_for_vec(ast, ctx, table_name)
-    return ret
+    ctx["code"].append(ret)
  
 def handle_insert_statement(node, ctx):
     table_name = node["table_name"]
@@ -67,7 +76,7 @@ def handle_insert_statement(node, ctx):
     #comment following for logging
     if table_name != "output":
         rust_code = begin_sep("init") + rust_code + end_sep("init")
-    return rust_code
+    ctx["code"].append(rust_code)
         
 def handle_select_simple_statement(node, ctx):
     table_from = node["from"]
@@ -95,9 +104,10 @@ def handle_select_simple_statement(node, ctx):
     else:
         struct = table_from["struct"]["name"]
     if ctx["tables"]["output"]["oncreate"] == True:
-        return f"{table_from_name}.iter().map(|req| RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({struct}::new({columns})))).collect::<Vec<_>>()" 
+        code = f"{table_from_name}.iter().map(|req| RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({struct}::new({columns})))).collect::<Vec<_>>()" 
     else:
-        return f"{table_from_name}.iter().map(|req| {struct}::new({columns})).collect::<Vec<_>>()"
+        code = f"{table_from_name}.iter().map(|req| {struct}::new({columns})).collect::<Vec<_>>()"
+    ctx["code"].append(code)
 
 def handle_create_table_as_statement(node, ctx):
     new_table = node["table_name"]
@@ -106,17 +116,23 @@ def handle_create_table_as_statement(node, ctx):
     select = node["select"]
     if new_table == "output":
         ctx["tables"]["output"]["oncreate"] = True
-    select_statement = compile_sql_to_rust(select, ctx)
+        
+    visit_single_statement(select, ctx)
+    select_statement = ctx["code"][-1]
+    ctx["code"] = ctx["code"][:-1]
+    
+    print("select", select)
     if new_table == "output":
         ctx["tables"]["output"]["oncreate"] = False
     if select["type"] == "SelectJoinStatement":
-        return f"let {new_table}: Vec<_> = {select_statement};"
+        code = f"let {new_table}: Vec<_> = {select_statement};"
     elif select["type"] == "SelectWhereStatement":
-        return f"let {new_table}: Vec<_> = {select_statement};"
+        code = f"let {new_table}: Vec<_> = {select_statement};"
     elif select["type"] == "SelectStatement":
-        return f"let {new_table}: Vec<_> = {select_statement};"
+        code = f"let {new_table}: Vec<_> = {select_statement};"
     else:
         raise ValueError("Unsupported select statement type")
+    ctx["code"].append(code)
 
 def handle_select_join_statement(node, ctx):
     join_condition = handle_binary_expression(node["join"], ctx)
@@ -136,8 +152,17 @@ def handle_select_join_statement(node, ctx):
         join_vec_name = f"self.{join_vec_name}"
     func = generate_join_filter_function(join_condition, where_condition, from_table_name, join_table_name, ctx["proto"])
     #gen_filter_function(from_table_name, join_table_name, join_condition)
-    return f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).map({func}).collect()"
+    code = f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).map({func}).collect()"
+    ctx["code"].append(code)
 
+
+
+def handle_select_where_statement(node, ctx):
+    where_condition = handle_binary_expression(node["where"], ctx)
+    func = generate_where_filter_function(where_condition, ctx["proto"])
+    code = f"{node['from']}.iter().map({func}).collect()"
+    ctx["code"].append(code)
+    
 def handle_expression(node, ctx):
     if node["data_type"] == "Column":
         return node["table_name"], node["column_name"]
@@ -189,13 +214,7 @@ def handle_set_statement(node, ctx):
     rust_code = begin_sep("type") + var_type + end_sep("type")
     rust_code += begin_sep("name") + variable_name + end_sep("name")
     rust_code += begin_sep("init") + f"{variable_name} = {val}" + end_sep("init")
-    return rust_code
-
-def handle_select_where_statement(node, ctx):
-    where_condition = handle_binary_expression(node["where"], ctx)
-    func = generate_where_filter_function(where_condition, ctx["proto"])
-    return f"{node['from']}.iter().map({func}).collect()"
-
+    ctx["code"].append(rust_code)
 
 
 def handle_function(node, ctx):
@@ -239,5 +258,6 @@ def init_ctx():
             "name": "hello",
             "req_type": "hello::HelloRequest",
             "resp_type": "hello::HelloResponse",
-        }
+        },
+        "code": []
     }

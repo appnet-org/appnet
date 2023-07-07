@@ -1,6 +1,6 @@
-start: statement [";"]
+start: (statement ";")*
 
-?statement: select_statement 
+statement: select_statement 
        | create_table_statement 
        | set_statement 
        | create_table_as_statement 
