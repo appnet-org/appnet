@@ -1,3 +1,5 @@
+from backend.rusttype import *
+
 
 def begin_sep(sec):
     return f"\n///@@ BEG_OF {sec} @@\n"
@@ -14,11 +16,12 @@ def to_str(x):
 
 def type_mapping(sql_type):
     if sql_type == "TIMESTAMP":
-        return "DateTime<Utc>"
+        return RustContainerType("DateTime", [RustBasicType("Utc")])
+        # return "DateTime<Utc>"
     elif sql_type == "VARCHAR":
-        return "String"
+        return RustBasicType("String")
     elif sql_type == "FILE":
-        return "File"
+        return RustBasicType("File")
     else:
         raise ValueError("Unknown type")
 

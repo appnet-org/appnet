@@ -37,12 +37,12 @@ def visit_single_statement(node, ctx: Context):
 def handle_create_table_statement(node, ctx):
     table_name = node["table_name"]
     if table_name == "output":
-        raise ValueError("Table name 'output' is reserved")
+        raise ValueError("Output table should be created by create table as statement")
     if table_name.endswith("_file"):
-        ret = generate_create_for_file(node, ctx, table_name)
+        generate_create_for_file(node, ctx, table_name)
     else:
-        ret = generate_create_for_vec(node, ctx, table_name)
-    ctx["code"].append(ret)
+        generate_create_for_vec(node, ctx, table_name)
+    
  
 def handle_insert_statement(node, ctx):
     table_name = node["table_name"]
