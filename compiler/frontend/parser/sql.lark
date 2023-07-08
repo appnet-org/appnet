@@ -4,7 +4,8 @@ statement: select_statement
        | create_table_statement
        | set_statement
        | create_table_as_statement
-       | insert_statement
+       | insert_value_statement
+       | insert_select_statement
        | update_statement
 
 select_statement: "SELECT" select_list "FROM" table_name join_clause* where_clause*
@@ -19,8 +20,9 @@ create_table_as_statement: "CREATE" "TABLE" table_name "AS" select_statement
 
 set_statement: "SET" assignment ("," assignment)*
 
-insert_statement: "INSERT INTO" table_name column_list? "VALUES" value_list*
-              | "INSERT INTO" table_name column_list? select_statement
+insert_value_statement: "INSERT INTO" table_name column_list? "VALUES" value_list*
+
+insert_select_statement: "INSERT INTO" table_name column_list? select_statement
 
 update_statement: "UPDATE" table_name "SET" update_list [where_clause]
 
@@ -55,8 +57,8 @@ table_name: CNAME
 identifier: CNAME
 
 search_condition: comparison_condition
-       | search_condition "AND" search_condition
-       | search_condition "OR" search_condition
+       | search_condition "AND" search_condition -> search_and_condition
+       | search_condition "OR" search_condition -> search_or_condition
        | "(" search_condition ")"
 
 comparison_condition: value comparison_operator value

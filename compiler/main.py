@@ -1,12 +1,13 @@
 import argparse
 import os
+import pathlib
 import re
 from pprint import pprint
 
-from codegen.codegen import *
-from example import acl_sqls, fault_sqls, logging_sqls
-
-from compiler import *
+from compiler.adn_compiler import ADNCompiler
+from compiler.codegen.codegen import *
+from compiler.config import ADN_ROOT
+from compiler.example import acl_sqls, fault_sqls, logging_sqls
 
 if __name__ == "__main__":
     os.system("rm -rf ./generated")
@@ -15,10 +16,11 @@ if __name__ == "__main__":
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--engine", type=str, help="Engine name", required=True)
+    parser.add_argument("--verbose", help="Print Lark info", action="store_true")
     args = parser.parse_args()
     engine_name = args.engine
 
-    with open(f"../elements/{engine_name}.sql", "r") as file:
+    with open(os.path.join(ADN_ROOT, f"elements/{engine_name}.sql"), "r") as file:
         sql_file_content = file.read()
 
     # Remove comments from the SQL file
@@ -31,7 +33,7 @@ if __name__ == "__main__":
     print(sql_statements)
     # Remove empty statements and leading/trailing whitespace
 
-    compiler = ADNCompiler(verbose=False)
+    compiler = ADNCompiler(verbose=args.verbose)
     ast = compiler.transform(sql_statements)
     print("Transformed AST")
 

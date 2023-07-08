@@ -1,15 +1,19 @@
 from codegen.helper import *
 from codegen.snippet import *
 
+from compiler.frontend.visitor import Printer
+
 
 def visit_root(ast, ctx):
     for i in ast:
-        try:
-            visit_single_statement(i, ctx)
-        except ValueError as e:
-            print("Error in SQL statement: ", e)
-            print(i)
-            exit()
+        # print(i)
+        print(i.accept(Printer, 0))
+        # try:
+        # visit_single_statement(i, ctx)
+        # except ValueError as e:
+        # print("Error in SQL statement: ", e)
+        # print(i)
+        # exit()
 
 
 def visit_single_statement(ast, ctx):
@@ -191,7 +195,6 @@ def handle_expression(node, ctx):
 
 
 def handle_binary_expression(node, ctx):
-    print(node)
     if node["type"] == "BinaryExpression":
         lt, lc = handle_expression(node["left"], ctx)
         rt, rc = handle_expression(node["right"], ctx)

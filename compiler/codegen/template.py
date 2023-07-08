@@ -182,9 +182,11 @@ def generate(name):
         template_name_first_cap,
         template_name_all_cap,
     )
+    """
     move_template(
         "/users/banruo/phoenix/experimental/mrpc",
         template_name,
         template_name_toml,
         template_name_first_cap,
     )
+    """
