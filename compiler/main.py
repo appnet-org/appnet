@@ -20,14 +20,15 @@ if __name__ == "__main__":
 
     # Remove comments from the SQL file
     sql_file_content = re.sub(r'/\*.*?\*/', '', sql_file_content, flags=re.DOTALL)  # Remove /* ... */ comments
-    sql_statements = re.sub(r'--.*', '', sql_file_content) # Remove -- comments and split statements
-    print(sql_statements)
+    sql_statements = sql_file_content.split('--processing--')
+    sql_statements = [re.sub(r'--.*', '', i) for i in sql_statements] # Remove -- comments and split statements
     # Remove empty statements and leading/trailing whitespace
-
     compiler = ADNCompiler(verbose=False)
-    ast = compiler.transform(sql_statements)
+    ast_init = compiler.transform(sql_statements[0])
+    ast_process = compiler.transform(sql_statements[1])
     print("Transformed AST")
-
+    print(ast_init)
+    print(ast_process)
     print("Compiling...")
     ctx = init_ctx()
     compiler.compile(ast, ctx)
@@ -35,5 +36,5 @@ if __name__ == "__main__":
         f.write('\n'.join(ctx["code"]))
 
     
-    compiler.generate(engine_name)
+    # compiler.generate(engine_name)
     
