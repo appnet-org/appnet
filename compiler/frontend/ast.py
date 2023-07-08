@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional, TypeVar, Union
 
-from compiler.frontend.visitor import Visitor
 from .visitor import Visitor, accept
 
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Optional
 from enum import Enum
 import copy
-from backend.rusttype import *
+from backend.abstract import *
 
 class SQLVariable():
     def __init__(self, name: str):
@@ -16,13 +16,14 @@ class Column(SQLVariable):
         self.dtype = dtype
 
 class Table(SQLVariable):
-    def __init__(self, name: str, columns: List[Column]):
+    def __init__(self, name: str, columns: List[Column], struct: BackendType):
         super().__init__(name)
         self.columns = columns
+        self.struct = struct
         
 
 class Context():
-    def __init__(self, tables: List[Table], rust_vars: List[RustVariable]):
+    def __init__(self, tables: List[Table], rust_vars: List[BackendVariable]):
         self.def_code = []
         self.init_code = []
         self.process_code = []
@@ -32,7 +33,3 @@ class Context():
         self.sql_vars = {}
         self.rust_vars = {}
         
-InputTable = Table("input", [Column("input", "type", "string"), Column("input", "src", "string"), Column("input", "dst", "string"), Column("input", "payload", "protobuf")])
-
-OutputTable = Table("output", [Column("output", "type", "string"), Column("output", "src", "string"), Column("output", "dst", "string"), Column("output", "payload", "protobuf")])
-

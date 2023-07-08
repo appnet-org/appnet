@@ -31,9 +31,10 @@ if __name__ == "__main__":
     print(ast_process)
     print("Compiling...")
     ctx = init_ctx()
-    compiler.compile(ast, ctx)
-    with open(f"./generated/{engine_name}.rs", "w") as f:
-        f.write('\n'.join(ctx["code"]))
+    print(ctx.tables["input"].struct.gen_copy_constructor())
+    # compiler.compile(ast, ctx)
+    # with open(f"./generated/{engine_name}.rs", "w") as f:
+    #     f.write('\n'.join(ctx["code"]))
 
     
     # compiler.generate(engine_name)

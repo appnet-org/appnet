@@ -1,8 +1,11 @@
 from codegen.helper import *
 from codegen.snippet import *
+from codegen.context import *
+from backend.rusttype import *
+from frontend.ast import Node
 
-def visit_root(ast, ctx):
-    for i in ast:
+def visit_root(node, ctx: Context):
+    for i in node:
         try :
             visit_single_statement(i, ctx)
         except ValueError as e:
@@ -10,35 +13,35 @@ def visit_root(ast, ctx):
             print(i)
             exit()
             
-def visit_single_statement(ast, ctx):
+def visit_single_statement(node, ctx: Context):
     # print("visit_single_statement")
     # print(ast)
-    if ast["type"] == "CreateTableAsStatement":
-        handle_create_table_as_statement(ast, ctx)
-    elif ast["type"] == "SelectStatement":
-        if ast.get("join") is not None:
-            handle_select_join_statement(ast, ctx)
-        elif ast.get("where") is not None:        
-            handle_select_where_statement(ast, ctx)
+    if node["type"] == "CreateTableAsStatement":
+        handle_create_table_as_statement(node, ctx)
+    elif node["type"] == "SelectStatement":
+        if node.get("join") is not None:
+            handle_select_join_statement(node, ctx)
+        elif node.get("where") is not None:        
+            handle_select_where_statement(node, ctx)
         else:
-            handle_select_simple_statement(ast, ctx)
-    elif ast["type"] == "CreateTableStatement":
-        handle_create_table_statement(ast, ctx)
-    elif ast["type"] == "InsertStatement":
-        handle_insert_statement(ast, ctx)
-    elif ast["type"] == "SetStatement":
-        handle_set_statement(ast, ctx)
+            handle_select_simple_statement(node, ctx)
+    elif node["type"] == "CreateTableStatement":
+        handle_create_table_statement(node, ctx)
+    elif node["type"] == "InsertStatement":
+        handle_insert_statement(node, ctx)
+    elif node["type"] == "SetStatement":
+        handle_set_statement(node, ctx)
     else:
-        raise ValueError("Unsupported SQL statement", ast["type"])
+        raise ValueError("Unsupported SQL statement", node["type"])
 
-def handle_create_table_statement(ast, ctx):
-    table_name = ast["table_name"]
+def handle_create_table_statement(node, ctx):
+    table_name = node["table_name"]
     if table_name == "output":
         raise ValueError("Table name 'output' is reserved")
     if table_name.endswith("_file"):
-        ret = generate_create_for_file(ast, ctx, table_name)
+        ret = generate_create_for_file(node, ctx, table_name)
     else:
-        ret = generate_create_for_vec(ast, ctx, table_name)
+        ret = generate_create_for_vec(node, ctx, table_name)
     ctx["code"].append(ret)
  
 def handle_insert_statement(node, ctx):
@@ -224,8 +227,19 @@ def handle_function(node, ctx):
     else:
         raise ValueError("Unsupported function")
     
-    
-def init_ctx():
+
+def init_ctx() -> Context:
+    InputTable = Table("input", [Column("input", "type", "string"), Column("input", "src", "string"), Column("input", "dst", "string"), Column("input", "payload", "protobuf")], tx_struct)
+    OutputTable = Table("output", [Column("output", "type", "string"), Column("output", "src", "string"), Column("output", "dst", "string"), Column("output", "payload", "protobuf")], tx_struct)
+    input_vec = RustVariable("input", 
+                             RustContainerType("Vec", tx_struct), 
+                             False, InputTable)
+    output_vec = RustVariable("output", 
+                              RustContainerType("Vec", tx_struct), 
+                              True, OutputTable)
+    return Context([InputTable, OutputTable], [input_vec, output_vec])
+ 
+# def init_ctx():
     return {
         "tables": {
             "input": {

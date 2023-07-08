@@ -7,8 +7,6 @@ from __future__ import annotations
 
 from typing import Callable, Protocol, Sequence, TypeVar
 
-from compiler.frontend.ast import Statement
-
 from .ast import *
 
 
