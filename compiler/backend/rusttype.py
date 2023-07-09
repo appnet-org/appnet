@@ -29,7 +29,7 @@ class RustBasicType(RustType):
     
     We use default init value, or use provided init value
     """
-    def __init__(self, name: str, init_val: Optional[str]):
+    def __init__(self, name: str, init_val: Optional[str] = None):
         super().__init__(name)
         self.init_val = init_val
          
@@ -82,7 +82,8 @@ class RustStructType(RustType):
             ret += f"        write!(f, \"{{}}\", self.{i});\n"
         ret += "    }\n"
         ret += "}\n"
-        
+        return ret 
+    
 class RustVariable(BackendVariable):
     def __init__(self, name: str, rust_type: RustType, mut: bool, parent: SQLVariable) -> None:
         self.name = name

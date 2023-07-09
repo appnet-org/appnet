@@ -31,11 +31,15 @@ if __name__ == "__main__":
     print(ast_process)
     print("Compiling...")
     ctx = init_ctx()
-    print(ctx.tables["input"].struct.gen_copy_constructor())
-    # compiler.compile(ast, ctx)
-    # with open(f"./generated/{engine_name}.rs", "w") as f:
-    #     f.write('\n'.join(ctx["code"]))
+    compiler.compile(ast_init, ctx)
+    compiler.compile(ast_process, ctx)
+
+    print("Generating intermidiate code...")
+    with open(f"./generated/{engine_name}.rs", "w") as f:
+        f.write('\n'.join(ctx.def_code))
+        f.write('\n'.join(ctx.init_code))
+        f.write('\n'.join(ctx.process_code))
 
     
-    # compiler.generate(engine_name)
+    #compiler.generate(engine_name)
     

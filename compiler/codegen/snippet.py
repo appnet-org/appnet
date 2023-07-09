@@ -86,10 +86,10 @@ def generate_create_for_file(ast, ctx: Context, table_name: str):
     # }
     
     rust_struct = RustStructType(struct_name, [trans_col_rust(i) for i in ast["columns"]])
-    table = Table(table_name, [trans_col(i) for i in ast["columns"]], rust_struct)
+    table = Table(table_name, [trans_col(table_name, i) for i in ast["columns"]], rust_struct)
     
-    if ctx["tables"].get(table_name) is None:
-        ctx["tables"][table_name] = table
+    if ctx.tables.get(table_name) is None:
+        ctx.tables[table_name] = table
     else:
         raise ValueError("Table already exists")
 
