@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 
 class Node(ABC):
@@ -16,9 +16,13 @@ class Node(ABC):
         return self.__class__.__name__
 
     def accept(self, visitor, ctx):
-        func_name = "visit" + self.name
-        visit_func = getattr(visitor, func_name)
-        return visit_func(visitor, self, ctx)
+        class_list = type(self).__mro__
+        for cls in class_list:
+            func_name = "visit" + cls.__name__
+            visit_func = getattr(visitor, func_name, None)
+            if visit_func is not None:
+                return visit_func(visitor, self, ctx)
+        raise Exception(f"visit function for {self.name} not implemented")
 
 
 class Value(Node):
@@ -40,17 +44,39 @@ class NumberValue(Value):
 
 class FunctionValue(Value):
     def __init__(self, func_name: str):
-        self.func_name = func_name
+        self.value = func_name
 
 
 class VariableValue(Value):
     def __init__(self, var_name: str):
-        self.var_name = var_name
+        self.value = var_name
 
 
 class StringValue(Value):
     def __init__(self, value: str):
         self.value = value
+
+
+class DataType(Node):
+    def __init__(self, length: int):
+        super().__init__()
+        self.length = length
+
+    @property
+    def type(self) -> str:
+        return "DataType"
+
+
+class VarCharType(DataType):
+    pass
+
+
+class FileType(DataType):
+    pass
+
+
+class TimeStampType(DataType):
+    pass
 
 
 class Statement(Node):
@@ -63,16 +89,12 @@ class Statement(Node):
 
 
 class CreateTableStatement(Statement):
-    def __init__(self, table_name: str, columns: List[Dict[str, str]]):
+    def __init__(
+        self, table_name: str, columns: List[Tuple[Union[ColumnValue, DataType]]]
+    ):
         super().__init__()
         self.table_name = table_name
-        self.columns = dict()
-        for column in columns:
-            data_length = int(column["length"]) if "length" in column else 0
-            self.columns[column["column_name"]] = {
-                "data_type": column["data_type"],
-                "data_length": data_length,
-            }
+        self.columns = columns
 
 
 class CreateTableAsStatement(Statement):

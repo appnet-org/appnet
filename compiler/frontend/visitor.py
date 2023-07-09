@@ -14,12 +14,15 @@ def accept(visitor: Visitor, ctx) -> Callable:
     return lambda node: node.accept(visitor, ctx)
 
 
-class Visitor:
-    def visitOther(self, node: Node, ctx) -> None:
-        return None
+class Visitor(ABC):
+    def visitNode(self, node: Node, ctx):
+        raise Exception(f"visit function for {node.name} not implemented")
 
-    def visitStatement(self, node, ctx):
-        return self.visitOther(node, ctx)
+
+class CodeGen(Visitor):
+    def visitCreateTableStatement(self, node: CreateTableStatement, ctx: dict) -> None:
+        if node.table_name == "output":
+            raise ValueError("Table name 'output' is reserved")
 
 
 def add_indent(slist: List[str], indent: int) -> str:
@@ -31,8 +34,8 @@ class Printer(Visitor):
     ctx: indent (width=4)
     """
 
-    def visitNumberValue(self, node: NumberValue, ctx: int) -> str:
-        return add_indent([f"NumberValue({str(node.value)})"], ctx)
+    def visitValue(self, node: Value, ctx: int) -> str:
+        return add_indent([f"{node.name}({str(node.value)})"], ctx)
 
     def visitColumnValue(self, node: ColumnValue, ctx: int) -> str:
         content = (
@@ -42,14 +45,8 @@ class Printer(Visitor):
         )
         return add_indent([f"ColumnValue({content})"], ctx)
 
-    def visitFunctionValue(self, node: FunctionValue, ctx: int) -> str:
-        return add_indent([f"FunctionValue({node.func_name})"], ctx)
-
-    def visitVariableValue(self, node: VariableValue, ctx: int) -> str:
-        return add_indent([f"VariableValue({node.var_name})"], ctx)
-
-    def visitStringValue(self, node: StringValue, ctx: int) -> str:
-        return add_indent([f"StringValue({node.value})"], ctx)
+    def visitDataType(self, node: DataType, ctx: int) -> str:
+        return add_indent([f"{node.name}({node.length})"], ctx)
 
     def visitCreateTableStatement(self, node: CreateTableStatement, ctx: int) -> str:
         res = [
@@ -57,8 +54,10 @@ class Printer(Visitor):
             f"    table_name: {node.table_name}",
             "    columns:",
         ]
-        for cname, cinfo in node.columns.items():
-            res.append(f'        {cname}: {cinfo["data_type"]}({cinfo["data_length"]})')
+        for column_value, data_type in node.columns:
+            res.append(
+                f"        {column_value.accept(self, 0)}: {data_type.accept(self, 0)})"
+            )
         return add_indent(res, ctx)
 
     def visitCreateTableAsStatement(

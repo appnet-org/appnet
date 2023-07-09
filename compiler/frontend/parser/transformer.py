@@ -35,7 +35,10 @@ class ADNTransformer(Transformer):
         return SetStatement(n["variable"], n["value"])
 
     def create_table_statement(self, c):
-        return CreateTableStatement(c[0]["table_name"], c[1:])
+        columns = []
+        for column_dict in c[1:]:
+            columns.append((column_dict["column"], column_dict["data_type"]))
+        return CreateTableStatement(c[0]["table_name"], columns)
 
     def insert_value_statement(self, i):
         return InsertValueStatement(i[0]["table_name"], i[1], i[2:])
@@ -86,10 +89,18 @@ class ADNTransformer(Transformer):
 
     def column_definition(self, c):
         # print("column_definition", c)
-        res = {"column_name": c[0].column_name, "data_type": c[1]["data_type"]}
-
-        if c[2] != None and "length" in c[2]:
-            res["length"] = c[2]["length"]
+        column = ColumnValue("", c[0].column_name)
+        length = c[2]["length"] if c[2] != None and "length" in c[2] else 0
+        type_name = c[1]["data_type"]
+        if type_name == "TIMESTAMP":
+            data_type = TimeStampType(length)
+        elif type_name == "VARCHAR":
+            data_type = VarCharType(length)
+        elif type_name == "FILE":
+            data_type = FileType(length)
+        else:
+            raise ValueError(f"Unsupported type '{type_name}'")
+        res = {"column": column, "data_type": data_type}
         return res
 
     def table_name(self, t):
