@@ -98,7 +98,7 @@ class InsertSelectStatement(Statement):
     ):
         super().__init__()
         self.table_name = table_name
-        self.columns = self.columns
+        self.columns = columns
         self.select_stmt = select_stmt
 
 
