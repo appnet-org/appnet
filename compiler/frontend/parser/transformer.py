@@ -27,7 +27,9 @@ class ADNTransformer(Transformer):
                 join_clauses.append(clause)
             else:
                 raise ValueError("Unrecognized clause")
-        return SelectStatement(s[0], s[1]["table_name"], join_clauses, where_clauses)
+        return SelectStatement(
+            s[0], s[1]["table_name"], "", join_clauses, where_clauses
+        )
 
     def set_statement(self, n):
         (n,) = n
@@ -44,6 +46,7 @@ class ADNTransformer(Transformer):
         return InsertValueStatement(i[0]["table_name"], i[1], i[2:])
 
     def insert_select_statement(self, i):
+        i[2].to_table = i[0]["table_name"]
         return InsertSelectStatement(i[0]["table_name"], i[1], i[2])
 
     def identifier(self, i):
@@ -93,7 +96,7 @@ class ADNTransformer(Transformer):
         length = c[2]["length"] if c[2] != None and "length" in c[2] else 0
         type_name = c[1]["data_type"]
         if type_name == "TIMESTAMP":
-            data_type = TimeStampType(length)
+            data_type = TimestampType(length)
         elif type_name == "VARCHAR":
             data_type = VarCharType(length)
         elif type_name == "FILE":

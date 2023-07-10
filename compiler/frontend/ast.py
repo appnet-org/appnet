@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+from abc import ABC
+from typing import List, Tuple, Union
 
 
 class Node(ABC):
@@ -26,6 +26,9 @@ class Node(ABC):
 
 
 class Value(Node):
+    def __init__(self):
+        self.data_type = None
+
     @property
     def type(self) -> str:
         return "Value"
@@ -33,28 +36,35 @@ class Value(Node):
 
 class ColumnValue(Value):
     def __init__(self, table_name: str, column_name: str):
+        super().__init__()
         self.table_name = table_name
         self.column_name = column_name
 
 
 class NumberValue(Value):
     def __init__(self, value: Union[str, int, float]):
+        super().__init__()
         self.value = float(value)
+        self.data_type = "float"
 
 
 class FunctionValue(Value):
     def __init__(self, func_name: str):
+        super().__init__()
         self.value = func_name
 
 
 class VariableValue(Value):
     def __init__(self, var_name: str):
+        super().__init__()
         self.value = var_name
 
 
 class StringValue(Value):
     def __init__(self, value: str):
+        super().__init__()
         self.value = value
+        self.data_type = "string"
 
 
 class DataType(Node):
@@ -75,7 +85,7 @@ class FileType(DataType):
     pass
 
 
-class TimeStampType(DataType):
+class TimestampType(DataType):
     pass
 
 
@@ -158,13 +168,15 @@ class SelectStatement(Statement):
     def __init__(
         self,
         columns: List[ColumnValue],
-        table_name: str,
+        from_table: str,
+        to_table: str,
         join_clauses: List[JoinClause],
         where_clauses: List[WhereClause],
     ):
         super().__init__()
         self.columns = columns
-        self.from_table = table_name
+        self.from_table = from_table
+        self.to_table = to_table
         self.join_clauses = join_clauses
         self.where_clauses = where_clauses
 
@@ -174,3 +186,4 @@ class SetStatement(Statement):
         super().__init__()
         self.variable = variable
         self.value = value
+        self.variable.data_type = self.value.data_type

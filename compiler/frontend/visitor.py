@@ -19,12 +19,6 @@ class Visitor(ABC):
         raise Exception(f"visit function for {node.name} not implemented")
 
 
-class CodeGen(Visitor):
-    def visitCreateTableStatement(self, node: CreateTableStatement, ctx: dict) -> None:
-        if node.table_name == "output":
-            raise ValueError("Table name 'output' is reserved")
-
-
 def add_indent(slist: List[str], indent: int) -> str:
     return "\n".join(map(lambda s: " " * 4 * indent + s, slist))
 
