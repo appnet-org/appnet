@@ -98,7 +98,7 @@ def handle_select_simple_statement(node, ctx: Context) -> None:
     elif table_from_name == "input":
         # TODO test protobuf
         columns = [input_mapping(i) for i in columns]
-        columns = ', '.join(columns)
+        columns = ", ".join(columns)
     else:
         columns = [f"req.{i.cname}.clone()" for i in columns]
         columns = ', '.join(columns).replace("req.CURRENT_TIMESTAMP.clone()", "Utc::now()")
@@ -146,7 +146,7 @@ def handle_create_table_as_statement(node, ctx: Context) -> None:
 def handle_select_join_statement(node, ctx):
     join_condition = handle_binary_expression(node["join"], ctx)
     where_condition = handle_binary_expression(node["where"], ctx)
-    join_table_name = node["join"]["table"] 
+    join_table_name = node["join"]["table"]
     from_table_name = node["from"]
     from_table_name = ctx["tables"][from_table_name]["name"]
     if ctx["tables"].get(join_table_name) is None:
@@ -159,11 +159,12 @@ def handle_select_join_statement(node, ctx):
         from_vec_name = f"self.{from_vec_name}"
     if join_vec_name != "input" and join_vec_name != "output":
         join_vec_name = f"self.{join_vec_name}"
-    func = generate_join_filter_function(join_condition, where_condition, from_table_name, join_table_name, ctx["proto"])
-    #gen_filter_function(from_table_name, join_table_name, join_condition)
+    func = generate_join_filter_function(
+        join_condition, where_condition, from_table_name, join_table_name, ctx["proto"]
+    )
+    # gen_filter_function(from_table_name, join_table_name, join_condition)
     code = f"iproduct!({from_vec_name}.iter(), {join_vec_name}.iter()).map({func}).collect()"
     ctx["code"].append(code)
-
 
 
 def handle_select_where_statement(node, ctx):
@@ -171,7 +172,8 @@ def handle_select_where_statement(node, ctx):
     func = generate_where_filter_function(where_condition, ctx["proto"])
     code = f"{node['from']}.iter().map({func}).collect()"
     ctx["code"].append(code)
-    
+
+
 def handle_expression(node, ctx):
     if node["data_type"] == "Column":
         return node["table_name"], node["column_name"]
@@ -185,9 +187,9 @@ def handle_expression(node, ctx):
             raise ValueError("Variable does not exist")
         name = ctx["vars"][name]["name"]
         return "Variable", name
-    
+
+
 def handle_binary_expression(node, ctx):
-    print(node)
     if node["type"] == "BinaryExpression":
         lt, lc = handle_expression(node["left"], ctx)
         rt, rc = handle_expression(node["right"], ctx)
@@ -196,24 +198,25 @@ def handle_binary_expression(node, ctx):
         cond = node["condition"]
         lt, lc = handle_expression(cond["left"], ctx)
         rt, rc = handle_expression(cond["right"], ctx)
-        op = cond["operator"]  
-        if op == '=':
+        op = cond["operator"]
+        if op == "=":
             op = "=="
     if rt == "Literal":
-        rc = rc.replace("'", "\"")
+        rc = rc.replace("'", '"')
     if lt == "Literal":
-        lc = lc.replace("'", "\"")
+        lc = lc.replace("'", '"')
     return {"lt": lt, "lc": lc, "rt": rt, "rc": rc, "op": op}
 
+
 def handle_set_statement(node, ctx):
-    variable_name = node["variable"].replace('@', '')
+    variable_name = node["variable"].replace("@", "")
     ctx["vars"][variable_name] = {
-        'name': "var_" + variable_name,
-        'value': node["value"]
+        "name": "var_" + variable_name,
+        "value": node["value"],
     }
     val = node["value"]
     var_type = "i32"
-    if "\'" in val:
+    if "'" in val:
         var_type = "String"
     elif "." in val:
         var_type = "f32"
@@ -255,29 +258,27 @@ def init_ctx() -> Context:
                     "fields": [
                         {"name": "meta_buf_ptr", "type": "MetaBufferPtr"},
                         {"name": "addr_backend", "type": "usize"},
-                    ]
-                }     
+                    ],
+                },
             },
             "output": {
                 "name": "output",
                 "type": "Vec",
-                 "struct": {
+                "struct": {
                     "name": "RpcMessageTx",
                     "fields": [
                         {"name": "meta_buf_ptr", "type": "MetaBufferPtr"},
                         {"name": "addr_backend", "type": "usize"},
-                    ]
+                    ],
                 },
-                "oncreate": False, 
-            }
+                "oncreate": False,
+            },
         },
-        "vars": {
-            
-        },
+        "vars": {},
         "proto": {
             "name": "hello",
             "req_type": "hello::HelloRequest",
             "resp_type": "hello::HelloResponse",
         },
-        "code": []
+        "code": [],
     }

@@ -4,11 +4,14 @@ from codegen.context import *
 def begin_sep(sec):
     return f"\n///@@ BEG_OF {sec} @@\n"
 
+
 def end_sep(sec):
     return f"\n///@@ END_OF {sec} @@\n"
 
+
 def to_str_debug(x):
     return f'format!("{{:?}}", {x})'
+
 
 def to_str(x):
     return f'format!("{{}}", {x})'

@@ -5,7 +5,7 @@
 */
 CREATE TABLE token_bucket (
  last_update TIMESTAMP
- tokens INTEGER 
+ tokens INTEGER
  token_per_fill INTEGER
 )
 

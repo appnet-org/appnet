@@ -38,5 +38,4 @@ We can generated Rust code that store each inbound RPC message into a vector(tab
 
 - We does not parse the rpc data, so currently only metadata is stored. Since RPC format depends on its protobuf config, and we have not yet import that config into our code.
 
-### SQL Code 
-
+### SQL Code

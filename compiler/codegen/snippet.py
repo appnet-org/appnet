@@ -11,14 +11,18 @@ def trans_col_rust(column) -> Tuple[str, RustType]:
 def trans_col(table: str, column) -> Column:
     return Column(table, column["column_name"], column["data_type"])
 
+
 def generate_struct_declaration(struct_name, columns, table):
     rust_struct = f"pub struct {struct_name} {{\n"
     for column in columns:
         rust_type = type_mapping(column["data_type"])
-        table["struct"]["fields"].append({"name": column["column_name"], "type": rust_type})
+        table["struct"]["fields"].append(
+            {"name": column["column_name"], "type": rust_type}
+        )
         rust_struct += f"    pub {column['column_name']}: {rust_type},\n"
-    rust_struct += "}\n" 
+    rust_struct += "}\n"
     return rust_struct, struct_name
+
 
 def generate_new(struct_name, columns):
     rust_impl = f"impl {struct_name} {{\n"
@@ -28,7 +32,7 @@ def generate_new(struct_name, columns):
         if idx != len(columns) - 1:
             rust_impl += ", "
     rust_impl += f") -> {struct_name} {{\n"
-    
+
     rust_impl += f"         {struct_name} {{\n"
     for column in columns:
         rust_impl += f"             {column['column_name']}: {column['column_name']},\n"
@@ -123,9 +127,8 @@ def generate_create_for_file(ast, ctx: Context, table_name: str):
 
 def generate_rpc_fields_getter():
     pass
-  
-  
- 
+
+
 def decorate_condition(cond, proto_ctx):
     proto = proto_ctx["name"]
     if cond["lt"] == "input":
@@ -159,12 +162,13 @@ def decorate_condition(cond, proto_ctx):
         right = f"join.{cond['rc']}"
     return f"{left} {cond['op']} {right}"
 
+
 def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
     if lt != "input":
         raise ValueError("Only support when left table is input")
-    
+
     join_cond = decorate_condition(join_cond, proto_ctx)
-    filter_cond = decorate_condition(filter_cond, proto_ctx)    
+    filter_cond = decorate_condition(filter_cond, proto_ctx)
     proto = proto_ctx["name"]
     proto_req_type = proto_ctx["req_type"]
     return f"""
@@ -172,7 +176,7 @@ def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
     let rpc_message = materialize_nocopy(&msg);
     let conn_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.conn_id;
     let call_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.call_id;
-    let rpc_id = RpcId::new(conn_id, call_id); 
+    let rpc_id = RpcId::new(conn_id, call_id);
     if {join_cond} {{
         if {filter_cond} {{
             let error = EngineRxMessage::Ack(
@@ -194,9 +198,10 @@ def generate_join_filter_function(join_cond, filter_cond, lt, rt, proto_ctx):
         }}
     }} else {{
         RpcMessageGeneral::Pass
-    }}  
+    }}
 }}
 """
+
 
 def generate_where_filter_function(cond, proto_ctx):
     cond = decorate_condition(cond, proto_ctx)
@@ -207,7 +212,7 @@ def generate_where_filter_function(cond, proto_ctx):
     let rpc_message = materialize_nocopy(&msg);
     let conn_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.conn_id;
     let call_id = unsafe {{ &*msg.meta_buf_ptr.as_meta_ptr() }}.call_id;
-    let rpc_id = RpcId::new(conn_id, call_id); 
+    let rpc_id = RpcId::new(conn_id, call_id);
     if {cond} {{
         let error = EngineRxMessage::Ack(
             rpc_id,

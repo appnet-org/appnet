@@ -4,13 +4,13 @@ ADN uses a SQL-like language to describe the network functions. Currently, we on
 
 # Core Concepts
 
-ADN NF uses several core concepts: `input`, `output`. Those concepts are assumed as prior knowledge and does not appear in the SQL code. 
+ADN NF uses several core concepts: `input`, `output`. Those concepts are assumed as prior knowledge and does not appear in the SQL code.
 
 ## `input` table
 
 This represent the inbound RPC messages, or ingress traffic. We assume that there is a single RPC message in the `input` table. During the execution of the NF, we can access the `input` table by `SELECT` statement many times.
 Althrough the backend may differ in the implementation, we assume an RPC is a struct that has metadata and data. Our compiler will do a mapping to map the abstract fields to lowlevel fields. Note that `rpc_meta` contains the information that is irrelevant to the protofile, such as `src` and `dst`, and `data` is an opaque fields that type is defined by protofile.
- 
+
 ```c
 struct rpc_meta {
     char *type,

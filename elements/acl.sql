@@ -1,7 +1,7 @@
 -- Access Control List
 
-/* 
-Internal state: 
+/*
+Internal state:
     acl: A table to store access control rules
 */
 CREATE TABLE acl (
