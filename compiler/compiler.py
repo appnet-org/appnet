@@ -20,8 +20,8 @@ class ADNCompiler:
             print(ast)
         return self.Transformer.transform(ast)
 
-    def compile(self, sql, ctx):
+    def compile(self, sql, ctx: Context):
         return visit_root(sql, ctx)
 
-    def generate(self, e):
-        return generate(e)
+    def generate(self, engine: str, ctx: Context):
+        return generate(engine, ctx)

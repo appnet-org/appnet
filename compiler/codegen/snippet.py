@@ -66,10 +66,9 @@ def generate_create_for_vec(ast, ctx: Context, table_name: str):
     # rust_vec += begin_sep("type") + f"{table['type']}<{struct_name}>" + end_sep("type")
     # rust_vec += begin_sep("init") + f"{vec_name} = Vec::new()" + end_sep("init")
 
-    ctx.def_code.append(rust_struct.gen_definition() + rust_struct.gen_copy_constructor())
+    ctx.def_code.append(rust_struct.gen_definition() + '\n' + rust_struct.gen_copy_constructor())
     
-    ctx.rust_vars.update({table_name: RustVariable(vec_name, RustContainerType("Vec", rust_struct), True, table)})
-    
+    ctx.rust_vars.update({table_name: RustVariable(vec_name, RustContainerType("Vec", rust_struct), True, None, table)})
     # return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_vec + "\n" 
  
 def generate_create_for_file(ast, ctx: Context, table_name: str):
@@ -116,9 +115,9 @@ def generate_create_for_file(ast, ctx: Context, table_name: str):
     # rust_file += begin_sep("name") + f"{file_field}" + end_sep("name")
     # rust_file += begin_sep("init") + f"{file_field} = create_log_file()" + end_sep("init") 
 
-    ctx.def_code.append(rust_struct.gen_definition() + rust_struct.gen_copy_constructor() + rust_struct.gen_trait_display())
+    ctx.def_code.append(rust_struct.gen_definition() + '\n' + rust_struct.gen_copy_constructor() + '\n' + rust_struct.gen_trait_display())
     
-    ctx.rust_vars.update({table_name: RustVariable(file_name, RustBasicType("File", "create_log_file()"), True, table)})
+    ctx.rust_vars.update({table_name: RustVariable(file_name, RustBasicType("File"), True, "create_log_file()", table)})
 
     # return rust_extern + begin_sep("definition") + rust_struct + "\n" + rust_impl + "\n" + end_sep("definition") + "\n" + rust_file + "\n" 
 

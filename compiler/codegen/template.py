@@ -3,7 +3,7 @@ import sys
 import os
 from codegen.boilerplate import *
 from string import Formatter
-
+from codegen.context import *
 # name: table_rpc_events
 # type: Vec<struct_rpc_events>
 # init: table_rpc_events = Vec::new()
@@ -34,6 +34,31 @@ fn {proto}_request_name_readonly(req: &{proto}::{proto_fc}Request) -> String {{
         "OnRxRpc": r"""// todo """ 
     }
 
+def retrieve_info(ctx: Context):
+    proto = "hello"
+    proto_fc = "Hello"
+    info = {
+        "ProtoDefinition": proto,
+        # todo! field name should be configurable
+        # todo! multiple type should be supported
+        "ProtoGetters": f"""
+        """,
+        "ProtoRpcRequestType": f"{proto}::{proto_fc}Request",
+        "ProtoRpcResponseType": f"{proto}::{proto_fc}Response",
+        "InternalStatesDefinition": "\n".join(ctx.def_code),
+        "InternalStatesDeclaration": "\n".join([f"use crate::engine::{i};" for i in ctx.gen_struct_names()]),
+        "InternalStatesOnBuild": "\n".join(ctx.gen_init_localvar()),
+        "InternalStatesOnRestore":"\n".join(ctx.gen_init_localvar()),
+        "InternalStatesOnDecompose": "",
+        "InternalStatesInConstructor": "\n".join([f"{i}," for i in ctx.gen_var_names()]),
+        "InternalStatesInStructDefinition": "\n".join([f"pub(crate) {i}" for i in ctx.gen_struct_declaration()]),
+        "OnTxRpc": "".join(ctx.process_code),
+        "OnRxRpc": r"""// todo """ 
+    }
+    # for k,v in info.items():
+    #     print(k)
+    #     print(v)
+    return info
 
 def parse_intermediate_code(name):
     ctx = {
@@ -130,7 +155,7 @@ def move_template(mrpc_root, template_name, template_name_toml, template_name_fi
     os.system(f"cp ./proto.rs {mrpc_plugin}/{template_name_toml}/src/proto.rs")
     print("Template {} moved to mrpc folder".format(template_name))
     
-def generate(name):
+def generate(name: str, ctx: Context):
     if name == "logging":
         template_name = "nofile_logging"
         template_name_toml = "nofile-logging"
@@ -147,8 +172,10 @@ def generate(name):
         template_name_first_cap = "Fault"
         template_name_all_cap = "FAULT"
         
-    ctx = parse_intermediate_code(name)
-    gen_template(ctx, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
+    #ctx = parse_intermediate_code(name)
+    ctx.explain()
+    info = retrieve_info(ctx)
+    gen_template(info, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
     move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
     
 

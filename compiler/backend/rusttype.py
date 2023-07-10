@@ -80,20 +80,33 @@ class RustStructType(RustType):
         ret =  f"impl fmt::Display for {self.name} {{\n" + f"    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {{\n"
         for i, j in self.fields:
             ret += f"        write!(f, \"{{}}\", self.{i});\n"
+        ret += "        write!(f, \"\\n\")\n"
         ret += "    }\n"
         ret += "}\n"
         return ret 
     
 class RustVariable(BackendVariable):
-    def __init__(self, name: str, rust_type: RustType, mut: bool, parent: SQLVariable) -> None:
+    def __init__(self, name: str, rust_type: RustType, mut: bool, init: Optional[str] = None, parent: Optional[SQLVariable] = None) -> None:
         self.name = name
         self.type = rust_type
         self.mut = mut
+        if init is None:
+            self.init = self.type.gen_init()
+        else:
+            self.init = init
         self.parent = parent
     
     def __str__(self) -> str:
         return f"{'mut ' if self.mut else ''}{self.name}: {self.type}"
+   
+    def gen_init_localvar(self) -> str:
+        return f"let mut {self.name} = {self.init};"
     
+    def gen_init_self(self) -> str:
+        return f"self.{self.name} = {self.init};"
+    
+    def gen_struct_declaration(self) -> str:
+        return f"{self.name}: {self.type.name}"
     
 tx_struct = RustStructType("RpcMessageTx", [("meta_buf_ptr", RustStructType("MetaBufferPtr", [])), ("addr_backend", RustBasicType("usize"))])
 

@@ -41,5 +41,5 @@ if __name__ == "__main__":
         f.write('\n'.join(ctx.process_code))
 
     
-    #compiler.generate(engine_name)
+    compiler.generate(engine_name, ctx)
     

@@ -238,10 +238,10 @@ def init_ctx() -> Context:
     OutputTable = Table("output", [Column("output", "type", "string"), Column("output", "src", "string"), Column("output", "dst", "string"), Column("output", "payload", "protobuf")], tx_struct)
     input_vec = RustVariable("input", 
                              RustContainerType("Vec", tx_struct), 
-                             False, InputTable)
+                             False, None, InputTable)
     output_vec = RustVariable("output", 
                               RustContainerType("Vec", tx_struct), 
-                              True, OutputTable)
+                              True, None, OutputTable)
     return Context([InputTable, OutputTable], [input_vec, output_vec])
  
 # def init_ctx():

@@ -34,6 +34,57 @@ class Context():
         self._rust_vars = {}
         self.is_forward = False
     
+    def explain(self):
+        print("Tables:")
+        for i in self.tables.values():
+            print("\t", i.name)
+            print("\t\t", i.struct.name)
+           # print(i.columns)
+        
+        print("SQL Vars:") 
+        for i in self.sql_vars.values():
+            print("\t", i.name)
+        
+        print("Rust Vars:")
+        for i in self.rust_vars.values():
+            print("\t", i.name)
+            print("\t\t", i.parent.name)
+            print("\t\t", i.type)
+            print("\t\t", i.init)
+        
+    
+    def gen_struct_names(self) -> List[str]:
+        ret = []
+        for i in self.tables.values():
+            if i.name == "input" or i.name == "output":
+                continue
+            ret.append(i.struct.name);
+        return ret
+    
+    def gen_var_names(self) -> List[str]:
+        ret = []
+        for i in self.rust_vars.values():
+            if i.parent is not None and (i.parent.name == "input" or i.parent.name == "output"):
+                continue
+            ret.append(i.name)
+        return ret
+    
+    def gen_init_localvar(self) -> List[str]:
+        ret = []
+        for i in self.rust_vars.values():
+            if i.parent is not None and (i.parent.name == "input" or i.parent.name == "output"):
+                continue
+            ret.append(i.gen_init_localvar())
+        return ret
+    
+    def gen_struct_declaration(self) -> List[str]:
+        ret = []
+        for i in self.rust_vars.values():  
+            if i.parent is not None and (i.parent.name == "input" or i.parent.name == "output"):
+                continue
+            ret.append(i.gen_struct_declaration())
+        return ret
+           
     def push_code(self, code: str):
         self.process_code.append(code)
     
