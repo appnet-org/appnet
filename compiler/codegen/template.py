@@ -2,6 +2,7 @@ import os
 import sys
 from string import Formatter
 from codegen.context import *
+from codegen.boilerplate import *
 # name: table_rpc_events
 # type: Vec<struct_rpc_events>
 # init: table_rpc_events = Vec::new()
@@ -202,19 +203,17 @@ def generate(name: str, ctx: Context):
     move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
     
 
-    ctx = parse_intermediate_code(name)
-    gen_template(
-        ctx,
-        template_name,
-        template_name_toml,
-        template_name_first_cap,
-        template_name_all_cap,
-    )
-    """
-    move_template(
-        "/users/banruo/phoenix/experimental/mrpc",
-        template_name,
-        template_name_toml,
-        template_name_first_cap,
-    )
-    """
+    # ctx = parse_intermediate_code(name)
+    # gen_template(
+    #     ctx,
+    #     template_name,
+    #     template_name_toml,
+    #     template_name_first_cap,
+    #     template_name_all_cap,
+    # )
+    # move_template(
+    #     "/users/banruo/phoenix/experimental/mrpc",
+    #     template_name,
+    #     template_name_toml,
+    #     template_name_first_cap,
+    # )

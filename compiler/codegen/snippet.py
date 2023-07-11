@@ -4,12 +4,14 @@ from backend.rusttype import *
 from typing import Tuple
 
 
+
 def trans_col_rust(column) -> Tuple[str, RustType]:
-    rust_type = type_mapping(column["data_type"])
-    return (column["column_name"], rust_type)
+    #print(column[1].sql_type())
+    rust_type = type_mapping(column[1].sql_type())
+    return (column[0].column_name, rust_type)
 
 def trans_col(table: str, column) -> Column:
-    return Column(table, column["column_name"], column["data_type"])
+    return Column(table, column[0].column_name, column[1].sql_type())
 
 
 def generate_struct_declaration(struct_name, columns, table):

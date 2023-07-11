@@ -78,15 +78,22 @@ class DataType(Node):
 
 
 class VarCharType(DataType):
-    pass
+    
+    def sql_type(self):
+        return "VARCHAR"
+    
 
 
 class FileType(DataType):
-    pass
+    
+    def sql_type(self):
+        return "FILE"
 
 
 class TimestampType(DataType):
-    pass
+    
+    def sql_type(self):
+        return "TIMESTAMP"
 
 
 class Statement(Node):
@@ -106,6 +113,8 @@ class CreateTableStatement(Statement):
         self.table_name = table_name
         self.columns = columns
 
+    def accept(self, visitor, ctx):
+        return visitor.visitCreateTableStatement(self, ctx)
 
 class CreateTableAsStatement(Statement):
     def __init__(self, table_name: str, select_stmt: SelectStatement) -> None:
@@ -113,6 +122,8 @@ class CreateTableAsStatement(Statement):
         self.table_name = table_name
         self.select_stmt = select_stmt
 
+    def accept(self, visitor, ctx):
+        return visitor.visitCreateTableAsStatement(self, ctx)
 
 class InsertValueStatement(Statement):
     def __init__(
@@ -132,6 +143,9 @@ class InsertSelectStatement(Statement):
         self.table_name = table_name
         self.columns = columns
         self.select_stmt = select_stmt
+        
+    def accept(self, visitor, ctx):
+        return visitor.visitInsertSelectStatement(self, ctx)
 
 
 class SearchCondition(Node):
@@ -180,6 +194,8 @@ class SelectStatement(Statement):
         self.join_clauses = join_clauses
         self.where_clauses = where_clauses
 
+    def accept(self, visitor, ctx):
+        return visitor.visitSelectStatement(self, ctx)
 
 class SetStatement(Statement):
     def __init__(self, variable: VariableValue, value: Value):

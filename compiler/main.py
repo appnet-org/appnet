@@ -2,13 +2,15 @@ import argparse
 import os
 import pathlib
 import re
+import sys
+
 from pprint import pprint
 
-from compiler.adn_compiler import ADNCompiler
-from compiler.codegen.codegen import *
-from compiler.config import ADN_ROOT
-from compiler.example import acl_sqls, fault_sqls, logging_sqls
-
+from adn_compiler import ADNCompiler
+from codegen.codegen import *
+from config import ADN_ROOT
+from example import acl_sqls, fault_sqls, logging_sqls
+from frontend.visitor import *
 if __name__ == "__main__":
     os.system("rm -rf ./generated")
     os.system("mkdir -p ./generated")
@@ -32,8 +34,9 @@ if __name__ == "__main__":
     ast_init = compiler.transform(sql_statements[0])
     ast_process = compiler.transform(sql_statements[1])
     print("Transformed AST")
-    print(ast_init)
-    print(ast_process)
+    #printer = Printer()
+    #printer.visitRoot(ast_init, 2)
+    #printer.visitRoot(ast_process, 2)
     print("Compiling...")
     ctx = init_ctx()
     compiler.compile(ast_init, ctx)
