@@ -107,7 +107,6 @@ class CodeGenerator(Visitor):
             columns = [i.cname for i in table_from.columns]
             
         if table_from_name == "input" and ctx.is_forward == True:
-            ctx.is_forward = False
             columns = [i for i, _ in table_from.struct.fields]
             columns = [f"req.{i}.clone()" for i in columns]
             columns = ', '.join(columns)
@@ -119,14 +118,14 @@ class CodeGenerator(Visitor):
             columns = [f"req.{i.cname}.clone()" for i in columns]
             columns = ', '.join(columns).replace("req.CURRENT_TIMESTAMP.clone()", "Utc::now()")
         
-        if node.to_table is None:
+        if node.to_table == "":
+            struct = table_from.struct
+        else:
             table_to_name = node.to_table
             if ctx.tables.get(table_to_name) is None:
                 raise ValueError("Table does not exist")
             table_to = ctx.tables[table_to_name]
             struct = table_to.struct
-        else:
-            struct = table_from.struct
         
         if ctx.is_forward == True:
             code = f"{table_from_name}.iter().map(|req| RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({struct.name}::new({columns})))).collect::<Vec<_>>()" 
