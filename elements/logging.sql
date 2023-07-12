@@ -12,6 +12,7 @@ CREATE TABLE rpc_events_file (
   rpc VARCHAR(50)
 );
 
+--processing--
 
 /*
   Processing Logic:

@@ -15,6 +15,8 @@ Initilization:
 */
 INSERT INTO acl (name, permission) VALUES ('Apple', 'N') ('Banana', 'Y');
 
+--processing--
+
 /*
 Processing Logic: block users that do not have permission
 */

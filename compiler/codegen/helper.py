@@ -1,3 +1,6 @@
+from backend.rusttype import *
+from codegen.context import *
+
 def begin_sep(sec):
     return f"\n///@@ BEG_OF {sec} @@\n"
 
@@ -16,29 +19,29 @@ def to_str(x):
 
 def type_mapping(sql_type):
     if sql_type == "TIMESTAMP":
-        return "DateTime<Utc>"
+        return RustContainerType("DateTime", RustBasicType("Utc"))
+        # return "DateTime<Utc>"
     elif sql_type == "VARCHAR":
-        return "String"
+        return RustBasicType("String")
     elif sql_type == "FILE":
-        return "File"
+        return RustBasicType("File")
     else:
         raise ValueError("Unknown type")
 
-
-def input_mapping(fields):
-    if fields == "CURRENT_TIMESTAMP":
+def input_mapping(field: Column) -> str:
+    if field == "CURRENT_TIMESTAMP":
         return "Utc::now()"
-    elif fields == "event_type":
+    elif field == "event_type":
         return to_str_debug("meta_ref.msg_type")
-    elif fields == "src":
+    elif field == "src":
         return to_str_debug("meta_ref.conn_id")
-    elif fields == "dst":
+    elif field == "dst":
         return to_str_debug("meta_ref.conn_id")
-    elif fields == "rpc":
+    elif field == "rpc":
         return to_str("req.addr_backend.clone()")
-    elif fields == "meta_buf_ptr":
+    elif field == "meta_buf_ptr":
         return "req.meta_buf_ptr.clone()"
-    elif fields == "addr_backend":
+    elif field == "addr_backend":
         return "req.addr_backend.clone()"
     else:
-        return True
+        return "NOT_IMPLEMENTED"

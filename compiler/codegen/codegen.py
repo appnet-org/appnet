@@ -1,74 +1,68 @@
 from codegen.helper import *
 from codegen.snippet import *
+from codegen.context import *
+from backend.rusttype import *
+from frontend.ast import Node
 
-from compiler.frontend.visitor import Printer
-
-
-def visit_root(ast, ctx):
-    for i in ast:
-        # print(i)
-        print(i.accept(Printer, 0))
-        # try:
-        # visit_single_statement(i, ctx)
-        # except ValueError as e:
-        # print("Error in SQL statement: ", e)
-        # print(i)
-        # exit()
-
-
-def visit_single_statement(ast, ctx):
+def visit_root(node, ctx: Context):
+    for i in node:
+        try :
+            visit_single_statement(i, ctx)
+        except ValueError as e:
+            print("Error in SQL statement: ", e)
+            print(i)
+            exit()
+            
+def visit_single_statement(node, ctx: Context):
     # print("visit_single_statement")
     # print(ast)
-    if ast["type"] == "CreateTableAsStatement":
-        handle_create_table_as_statement(ast, ctx)
-    elif ast["type"] == "SelectStatement":
-        if ast.get("join") is not None:
-            handle_select_join_statement(ast, ctx)
-        elif ast.get("where") is not None:
-            handle_select_where_statement(ast, ctx)
+    if node["type"] == "CreateTableAsStatement":
+        handle_create_table_as_statement(node, ctx)
+    elif node["type"] == "SelectStatement":
+        if node.get("join") is not None:
+            handle_select_join_statement(node, ctx)
+        elif node.get("where") is not None:        
+            handle_select_where_statement(node, ctx)
         else:
-            handle_select_simple_statement(ast, ctx)
-    elif ast["type"] == "CreateTableStatement":
-        handle_create_table_statement(ast, ctx)
-    elif ast["type"] == "InsertStatement":
-        handle_insert_statement(ast, ctx)
-    elif ast["type"] == "SetStatement":
-        handle_set_statement(ast, ctx)
+            handle_select_simple_statement(node, ctx)
+    elif node["type"] == "CreateTableStatement":
+        handle_create_table_statement(node, ctx)
+    elif node["type"] == "InsertStatement":
+        handle_insert_statement(node, ctx)
+    elif node["type"] == "SetStatement":
+        handle_set_statement(node, ctx)
     else:
-        raise ValueError("Unsupported SQL statement", ast["type"])
+        raise ValueError("Unsupported SQL statement", node["type"])
 
-
-def handle_create_table_statement(ast, ctx):
-    table_name = ast["table_name"]
-    if table_name == "output":
-        raise ValueError("Table name 'output' is reserved")
-    if table_name.endswith("_file"):
-        ret = generate_create_for_file(ast, ctx, table_name)
-    else:
-        ret = generate_create_for_vec(ast, ctx, table_name)
-    ctx["code"].append(ret)
-
-
-def handle_insert_statement(node, ctx):
+def handle_create_table_statement(node, ctx: Context) -> None:
     table_name = node["table_name"]
-    table = ctx["tables"].get(table_name)
+    if table_name == "output":
+        raise ValueError("Output table should be created by create table as statement")
+    if table_name.endswith("_file"):
+        generate_create_for_file(node, ctx, table_name)
+    else:
+        generate_create_for_vec(node, ctx, table_name)
+    
+ 
+def handle_insert_statement(node, ctx: Context) -> None:
+    table_name = node["table_name"]
+    table = ctx.tables.get(table_name)
     if table is None:
         raise ValueError("Table does not exist")
-    vec_name = table["name"]
-    columns = ", ".join(node["columns"])
+    var_name = ctx.rust_vars[table_name].name
+    columns = ', '.join(node["columns"])
     value = node["values"][0]
     if type(value) != list and value["type"] == "SelectStatement":
         select = value
         select["to"] = table_name
         handle_select_simple_statement(select, ctx)
-        select_statement = ctx["code"][-1]
-        ctx["code"] = ctx["code"][:-1]
+        select_statement = ctx.pop_code()
+
         rust_code = f"for event in {select_statement} {{"
         if table_name.endswith("file"):
-            file_name = table["file_field"]
-            rust_code += f'write!(self.{file_name}, "{{}}", event);'
+            rust_code += f"write!(self.{var_name}, \"{{}}\", event);"
         else:
-            rust_code += f"{vec_name}.push(event);"
+            rust_code += f"{var_name}.push(event);"
         rust_code += f"}}"
     else:
         codes = ""
@@ -80,63 +74,64 @@ def handle_insert_statement(node, ctx):
             for k, v in zip(fields, value):
                 if v["data_type"] == "string":
                     v = v["value"].replace("'", "")
-                values += f'{k}: "{v}".to_string(), '
-            codes += f"{vec_name}.push({struct_name} {{{values[:-2]}}})\n"
+                values += f"{k}: \"{v}\".to_string(), "
+            codes += f"{var_name}.push({struct_name} {{{values[:-2]}}})\n"
         rust_code = codes
-    # comment following for logging
-    if table_name != "output":
-        rust_code = begin_sep("init") + rust_code + end_sep("init")
-    ctx["code"].append(rust_code)
-
-
-def handle_select_simple_statement(node, ctx):
+    ctx.push_code(rust_code)
+        
+def handle_select_simple_statement(node, ctx: Context) -> None:
     table_from = node["from"]
-    if ctx["tables"].get(table_from) is None:
+    if ctx.tables.get(table_from) is None:
         raise ValueError("Table does not exist")
-    table_from = ctx["tables"][table_from]
-    table_from_name = table_from["name"]
+    table_from = ctx.tables[table_from]
+    table_from_name = table_from.name
+    
     if len(node["columns"]) == 1 and node["columns"][0] == "*":
-        columns = [i["name"] for i in table_from["struct"]["fields"]]
+        columns = [i.cname for i in table_from.columns]
     else:
         columns = node["columns"]
-    if table_from_name == "input":
+    
+    if table_from_name == "input" and ctx.is_forward:
+        columns = [i for i, _ in table_from.struct.fields]    
+        columns = [f"req.{i}.clone()" for i in columns]
+        columns = ', '.join(columns)
+    elif table_from_name == "input":
         # TODO test protobuf
         columns = [input_mapping(i) for i in columns]
         columns = ", ".join(columns)
     else:
-        columns = [f"req.{i}.clone()" for i in columns]
-        columns = ", ".join(columns).replace(
-            "req.CURRENT_TIMESTAMP.clone()", "Utc::now()"
-        )
+        columns = [f"req.{i.cname}.clone()" for i in columns]
+        columns = ', '.join(columns).replace("req.CURRENT_TIMESTAMP.clone()", "Utc::now()")
+        
     if node.get("to") is not None:
-        table_to = node["to"]
-        if ctx["tables"].get(table_to) is None:
+        table_to_name = node["to"]
+        if ctx.tables.get(table_to_name) is None:
             raise ValueError("Table does not exist")
-        table_to = ctx["tables"][table_to]
-        struct = table_to["struct"]["name"]
+        table_to = ctx.tables[table_to_name]
+        struct = table_to.struct
     else:
-        struct = table_from["struct"]["name"]
-    if ctx["tables"]["output"]["oncreate"] == True:
-        code = f"{table_from_name}.iter().map(|req| RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({struct}::new({columns})))).collect::<Vec<_>>()"
+        struct = table_from.struct
+        
+    if ctx.is_forward == True:
+        code = f"{table_from_name}.iter().map(|req| RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({struct.name}::new({columns})))).collect::<Vec<_>>()" 
     else:
-        code = f"{table_from_name}.iter().map(|req| {struct}::new({columns})).collect::<Vec<_>>()"
-    ctx["code"].append(code)
+        code = f"{table_from_name}.iter().map(|req| {struct.name}::new({columns})).collect::<Vec<_>>()"
+    ctx.push_code(code)
 
-
-def handle_create_table_as_statement(node, ctx):
+def handle_create_table_as_statement(node, ctx: Context) -> None:
     new_table = node["table_name"]
     if new_table != "output":
         raise NotImplementedError("Currently only output table is supported")
     select = node["select"]
     if new_table == "output":
-        ctx["tables"]["output"]["oncreate"] = True
-
+        ctx.is_forward = True
+         
     visit_single_statement(select, ctx)
-    select_statement = ctx["code"][-1]
-    ctx["code"] = ctx["code"][:-1]
-
-    if new_table == "output":
-        ctx["tables"]["output"]["oncreate"] = False
+    select_statement = ctx.pop_code()
+    
+    if new_table == "output" and ctx.is_forward == True:
+        ctx.is_forward = False
+    
     if select["type"] == "SelectJoinStatement":
         code = f"let {new_table}: Vec<_> = {select_statement};"
     elif select["type"] == "SelectWhereStatement":
@@ -145,9 +140,9 @@ def handle_create_table_as_statement(node, ctx):
         code = f"let {new_table}: Vec<_> = {select_statement};"
     else:
         raise ValueError("Unsupported select statement type")
-    ctx["code"].append(code)
-
-
+    
+    ctx.push_code(code)
+    
 def handle_select_join_statement(node, ctx):
     join_condition = handle_binary_expression(node["join"], ctx)
     where_condition = handle_binary_expression(node["where"], ctx)
@@ -239,9 +234,20 @@ def handle_function(node, ctx):
         return "rand::random::<f32>()"
     else:
         raise ValueError("Unsupported function")
+    
 
-
-def init_ctx():
+def init_ctx() -> Context:
+    InputTable = Table("input", [Column("input", "type", "string"), Column("input", "src", "string"), Column("input", "dst", "string"), Column("input", "payload", "protobuf")], tx_struct)
+    OutputTable = Table("output", [Column("output", "type", "string"), Column("output", "src", "string"), Column("output", "dst", "string"), Column("output", "payload", "protobuf")], tx_struct)
+    input_vec = RustVariable("input", 
+                             RustContainerType("Vec", tx_struct), 
+                             False, None, InputTable)
+    output_vec = RustVariable("output", 
+                              RustContainerType("Vec", tx_struct), 
+                              True, None, OutputTable)
+    return Context([InputTable, OutputTable], [input_vec, output_vec])
+ 
+# def init_ctx():
     return {
         "tables": {
             "input": {

@@ -3,6 +3,8 @@ import sys
 from codegen.codegen import *
 from codegen.template import generate
 from frontend.parser import *
+from codegen.context import *
+from codegen.gen import *
 from lark import Lark
 
 
@@ -11,6 +13,7 @@ class ADNCompiler:
         self.verbose = verbose
         self.parser = ADNParser()
         self.Transformer = ADNTransformer()
+        self.generator = CodeGenerator()
 
     def parse(self, sql):
         return self.parser.parse(sql)
@@ -21,8 +24,9 @@ class ADNCompiler:
             print(ast)
         return self.Transformer.transform(ast)
 
-    def compile(self, sql, ctx):
-        return visit_root(sql, ctx)
+    def compile(self, sql, ctx: Context):
+        return self.generator.visitRoot(sql, ctx)
+        #return visit_root(sql, ctx)
 
-    def generate(self, e):
-        return generate(e)
+    def generate(self, engine: str, ctx: Context):
+        return generate(engine, ctx)
