@@ -1,12 +1,14 @@
-
 def begin_sep(sec):
     return f"\n///@@ BEG_OF {sec} @@\n"
+
 
 def end_sep(sec):
     return f"\n///@@ END_OF {sec} @@\n"
 
+
 def to_str_debug(x):
     return f'format!("{{:?}}", {x})'
+
 
 def to_str(x):
     return f'format!("{{}}", {x})'
@@ -21,6 +23,7 @@ def type_mapping(sql_type):
         return "File"
     else:
         raise ValueError("Unknown type")
+
 
 def input_mapping(fields):
     if fields == "CURRENT_TIMESTAMP":

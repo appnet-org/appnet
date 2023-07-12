@@ -1,7 +1,13 @@
-from compiler import *
-from example import logging_sqls, acl_sqls, fault_sqls
 import argparse
-import os, re
+import os
+import pathlib
+import re
+from pprint import pprint
+
+from compiler.adn_compiler import ADNCompiler
+from compiler.codegen.codegen import *
+from compiler.config import ADN_ROOT
+from compiler.example import acl_sqls, fault_sqls, logging_sqls
 
 if __name__ == "__main__":
     os.system("rm -rf ./generated")
@@ -9,32 +15,32 @@ if __name__ == "__main__":
 
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--engine', type=str, help='Engine name', required=True)
+    parser.add_argument("-e", "--engine", type=str, help="Engine name", required=True)
+    parser.add_argument("--verbose", help="Print Lark info", action="store_true")
     args = parser.parse_args()
     engine_name = args.engine
 
-    with open(f'../elements/{engine_name}.sql', 'r') as file:
+    with open(os.path.join(ADN_ROOT, f"elements/{engine_name}.sql"), "r") as file:
         sql_file_content = file.read()
 
     # Remove comments from the SQL file
-    sql_file_content = re.sub(r'/\*.*?\*/', '', sql_file_content, flags=re.DOTALL)  # Remove /* ... */ comments
-    sql_statements = re.sub(r'--.*', '', sql_file_content).split(';')  # Remove -- comments and split statements
-
+    sql_file_content = re.sub(
+        r"/\*.*?\*/", "", sql_file_content, flags=re.DOTALL
+    )  # Remove /* ... */ comments
+    sql_statements = re.sub(
+        r"--.*", "", sql_file_content
+    )  # Remove -- comments and split statements
+    print(sql_statements)
     # Remove empty statements and leading/trailing whitespace
-    sql_statements = [statement.strip().replace("\n", " ") for statement in sql_statements if statement.strip()]
 
-    compiler = ADNCompiler(verbose=False)
+    compiler = ADNCompiler(verbose=args.verbose)
+    ast = compiler.transform(sql_statements)
+    print("Transformed AST")
 
-
-    print(f"Compiling {engine_name} statements...")
+    print("Compiling...")
     ctx = init_ctx()
-    for sql in sql_statements:
-        rust_code = compiler.compile(sql, ctx)
-        with open(f"./generated/{engine_name}.rs", "a") as f:
-            f.write(rust_code + '\n')
-        
-        
+    compiler.compile(ast, ctx)
+    with open(f"./generated/{engine_name}.rs", "w") as f:
+        f.write("\n".join(ctx["code"]))
+
     compiler.generate(engine_name)
-    #os.system(f"rustfmt ./generated/{engine_name}_engine.rs")
-    #os.system(f"cp ./generated/{engine_name}_engine.rs ./compiler_test/src/{engine_name}_engine.rs")
-    
