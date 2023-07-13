@@ -89,15 +89,6 @@ make manifests
 
 **NOTE:** Run `make --help` for more information on all potential `make` targets
 
-# Development
-
-Before you start:
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
 # Contact
 
 If you have any questions or comments, please get in touch with Xiangfeng Zhu (xfzhu@cs.washington.edu).

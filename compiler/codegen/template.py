@@ -1,8 +1,13 @@
 import os
 import sys
 from string import Formatter
-from codegen.context import *
+
 from codegen.boilerplate import *
+from codegen.context import *
+
+from compiler.config import COMPILER_ROOT
+
+
 # name: table_rpc_events
 # type: Vec<struct_rpc_events>
 # init: table_rpc_events = Vec::new()
@@ -41,6 +46,7 @@ fn {proto}_request_name_readonly(req: &{proto}::{proto_fc}Request) -> String {{
         "OnRxRpc": r"""// todo """,
     }
 
+
 def retrieve_info(ctx: Context):
     proto = "hello"
     proto_fc = "Hello"
@@ -53,19 +59,26 @@ def retrieve_info(ctx: Context):
         "ProtoRpcRequestType": f"{proto}::{proto_fc}Request",
         "ProtoRpcResponseType": f"{proto}::{proto_fc}Response",
         "InternalStatesDefinition": "\n".join(ctx.def_code),
-        "InternalStatesDeclaration": "\n".join([f"use crate::engine::{i};" for i in ctx.gen_struct_names()]),
+        "InternalStatesDeclaration": "\n".join(
+            [f"use crate::engine::{i};" for i in ctx.gen_struct_names()]
+        ),
         "InternalStatesOnBuild": "\n".join(ctx.gen_init_localvar()),
-        "InternalStatesOnRestore":"\n".join(ctx.gen_init_localvar()),
+        "InternalStatesOnRestore": "\n".join(ctx.gen_init_localvar()),
         "InternalStatesOnDecompose": "",
-        "InternalStatesInConstructor": "\n".join([f"{i}," for i in ctx.gen_var_names()]),
-        "InternalStatesInStructDefinition": "\n".join([f"pub(crate) {i}" for i in ctx.gen_struct_declaration()]),
+        "InternalStatesInConstructor": "\n".join(
+            [f"{i}," for i in ctx.gen_var_names()]
+        ),
+        "InternalStatesInStructDefinition": "\n".join(
+            [f"pub(crate) {i}" for i in ctx.gen_struct_declaration()]
+        ),
         "OnTxRpc": "".join(ctx.process_code),
-        "OnRxRpc": r"""// todo """ 
+        "OnRxRpc": r"""// todo """,
     }
     # for k,v in info.items():
     #     print(k)
     #     print(v)
     return info
+
 
 def parse_intermediate_code(name):
     ctx = {
@@ -78,7 +91,7 @@ def parse_intermediate_code(name):
         "process": [],
     }
     print("Generating code for " + name)
-    with open("./generated/" + name + ".rs") as f:
+    with open(os.path.join(COMPILER_ROOT, f"generated/{name}.rs")) as f:
         current = "process"
         for i in f.readlines():
             if i.startswith("///@@"):
@@ -127,7 +140,7 @@ def gen_template(
     template_name_first_cap,
     template_name_all_cap,
 ):
-    target_dir = "./generated/{}".format(template_name)
+    target_dir = os.path.join(COMPILER_ROOT, f"generated/{template_name}")
     os.system(f"rm -rf {target_dir}")
     os.system(f"mkdir -p {target_dir}")
     os.chdir(target_dir)
@@ -157,7 +170,7 @@ def gen_template(
 def move_template(
     mrpc_root, template_name, template_name_toml, template_name_first_cap
 ):
-    mrpc_api = mrpc_root + "/phoenix-api/policy/"
+    mrpc_api = mrpc_root + "/phoenix-api/policy"
     os.system(f"rm -rf {mrpc_api}/{template_name_toml}")
     os.system(f"cp -r {mrpc_api}/logging {mrpc_api}/{template_name_toml}")
     os.system(f"rm {mrpc_api}/{template_name_toml}/Cargo.toml")
@@ -178,8 +191,9 @@ def move_template(
     os.system(f"cp ./engine.rs {mrpc_plugin}/{template_name_toml}/src/engine.rs")
     os.system(f"cp ./proto.rs {mrpc_plugin}/{template_name_toml}/src/proto.rs")
     print("Template {} moved to mrpc folder".format(template_name))
-    
-def generate(name: str, ctx: Context):
+
+
+def generate(name: str, ctx: Context, output_dir: str):
     if name == "logging":
         template_name = "nofile_logging"
         template_name_toml = "nofile-logging"
@@ -195,13 +209,23 @@ def generate(name: str, ctx: Context):
         template_name_toml = "fault"
         template_name_first_cap = "Fault"
         template_name_all_cap = "FAULT"
-        
-    #ctx = parse_intermediate_code(name)
+
+    # ctx = parse_intermediate_code(name)
     ctx.explain()
     info = retrieve_info(ctx)
-    gen_template(info, template_name, template_name_toml, template_name_first_cap, template_name_all_cap)
-    move_template("/users/banruo/phoenix/experimental/mrpc", template_name, template_name_toml, template_name_first_cap)
-    
+    gen_template(
+        info,
+        template_name,
+        template_name_toml,
+        template_name_first_cap,
+        template_name_all_cap,
+    )
+    move_template(
+        output_dir,
+        template_name,
+        template_name_toml,
+        template_name_first_cap,
+    )
 
     # ctx = parse_intermediate_code(name)
     # gen_template(

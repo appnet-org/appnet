@@ -1,6 +1,7 @@
 from backend.rusttype import *
 from codegen.context import *
 
+
 def begin_sep(sec):
     return f"\n///@@ BEG_OF {sec} @@\n"
 
@@ -27,6 +28,7 @@ def type_mapping(sql_type):
         return RustBasicType("File")
     else:
         raise ValueError("Unknown type")
+
 
 def input_mapping(field: Column) -> str:
     if field == "CURRENT_TIMESTAMP":
