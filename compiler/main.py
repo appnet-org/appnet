@@ -20,6 +20,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--engine", type=str, help="Engine name", required=True)
     parser.add_argument("--verbose", help="Print Lark info", action="store_true")
+    parser.add_argument(
+        "--phoenix_dir",
+        type=str,
+        default=f"/user/{os.getlogin()}/phoenix/experimental/mrpc",
+    )
     args = parser.parse_args()
     engine_name = args.engine
 
@@ -47,10 +52,10 @@ if __name__ == "__main__":
     compiler.compile(ast_init, ctx)
     compiler.compile(ast_process, ctx)
 
-    print("Generating intermidiate code...")
+    print("Generating intermediate code...")
     with open(f"./generated/{engine_name}.rs", "w") as f:
         f.write("\n".join(ctx.def_code))
         f.write("\n".join(ctx.init_code))
         f.write("\n".join(ctx.process_code))
 
-    # compiler.generate(engine_name, ctx)
+    compiler.generate(engine_name, ctx, args.phoenix_dir)

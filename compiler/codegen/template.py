@@ -5,6 +5,8 @@ from string import Formatter
 from codegen.boilerplate import *
 from codegen.context import *
 
+from compiler.config import COMPILER_ROOT
+
 
 # name: table_rpc_events
 # type: Vec<struct_rpc_events>
@@ -89,7 +91,7 @@ def parse_intermediate_code(name):
         "process": [],
     }
     print("Generating code for " + name)
-    with open("./generated/" + name + ".rs") as f:
+    with open(os.path.join(COMPILER_ROOT, f"generated/{name}.rs")) as f:
         current = "process"
         for i in f.readlines():
             if i.startswith("///@@"):
@@ -138,7 +140,7 @@ def gen_template(
     template_name_first_cap,
     template_name_all_cap,
 ):
-    target_dir = "./generated/{}".format(template_name)
+    target_dir = os.path.join(COMPILER_ROOT, f"generated/{template_name}")
     os.system(f"rm -rf {target_dir}")
     os.system(f"mkdir -p {target_dir}")
     os.chdir(target_dir)
@@ -168,7 +170,7 @@ def gen_template(
 def move_template(
     mrpc_root, template_name, template_name_toml, template_name_first_cap
 ):
-    mrpc_api = mrpc_root + "/phoenix-api/policy/"
+    mrpc_api = mrpc_root + "/phoenix-api/policy"
     os.system(f"rm -rf {mrpc_api}/{template_name_toml}")
     os.system(f"cp -r {mrpc_api}/logging {mrpc_api}/{template_name_toml}")
     os.system(f"rm {mrpc_api}/{template_name_toml}/Cargo.toml")
@@ -191,7 +193,7 @@ def move_template(
     print("Template {} moved to mrpc folder".format(template_name))
 
 
-def generate(name: str, ctx: Context):
+def generate(name: str, ctx: Context, output_dir: str):
     if name == "logging":
         template_name = "nofile_logging"
         template_name_toml = "nofile-logging"
@@ -219,7 +221,7 @@ def generate(name: str, ctx: Context):
         template_name_all_cap,
     )
     move_template(
-        "/users/banruo/phoenix/experimental/mrpc",
+        output_dir,
         template_name,
         template_name_toml,
         template_name_first_cap,

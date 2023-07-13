@@ -28,5 +28,5 @@ class ADNCompiler:
         return self.generator.visitRoot(sql, ctx)
         # return visit_root(sql, ctx)
 
-    def generate(self, engine: str, ctx: Context):
-        return generate(engine, ctx)
+    def generate(self, engine: str, ctx: Context, output_dir: str):
+        return generate(engine, ctx, output_dir)
