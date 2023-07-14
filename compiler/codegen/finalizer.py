@@ -193,12 +193,16 @@ def move_template(
     print("Template {} moved to mrpc folder".format(template_name))
 
 
-def generate(name: str, ctx: Context, output_dir: str):
+def finalize(name: str, ctx: Context, output_dir: str):
     if name == "logging":
-        template_name = "nofile_logging"
-        template_name_toml = "nofile-logging"
-        template_name_first_cap = "NofileLogging"
-        template_name_all_cap = "NOFILE_LOGGING"
+        # template_name = "nofile_logging"
+        # template_name_toml = "nofile-logging"
+        # template_name_first_cap = "NofileLogging"
+        # template_name_all_cap = "NOFILE_LOGGING"
+        template_name = "file_logging"
+        template_name_toml = "file-logging"
+        template_name_first_cap = "FileLogging"
+        template_name_all_cap = "FILE_LOGGING"
     elif name == "acl":
         template_name = "hello_acl"
         template_name_toml = "hello-acl"

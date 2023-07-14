@@ -10,9 +10,9 @@ from typing import Callable, List, Protocol, Sequence, TypeVar
 from codegen.codegen import init_ctx
 from codegen.context import *
 from codegen.snippet import *
-from frontend.ast import *
-from frontend.ast import InsertSelectStatement, SelectStatement
-from frontend.visitor import Visitor
+from tree.node import *
+from tree.node import InsertSelectStatement, SelectStatement
+from tree.visitor import Visitor
 
 
 class CodeGenerator(Visitor):

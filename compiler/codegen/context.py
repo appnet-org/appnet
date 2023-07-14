@@ -5,7 +5,8 @@ from enum import Enum
 from typing import Dict, List, Optional
 
 from backend.abstract import *
-from proto import Proto
+
+from compiler.protobuf.protobuf import Proto
 
 
 class SQLVariable:
@@ -44,6 +45,7 @@ class Context:
         self.proto = proto
 
     def explain(self):
+        print("Context.Explain:")
         print("Tables:")
         for i in self.tables.values():
             print("\t", i.name)

@@ -1,9 +1,9 @@
 from backend.rusttype import *
 from codegen.context import *
 from codegen.helper import *
-from codegen.proto import HelloProto
 from codegen.snippet import *
-from frontend.ast import Node
+from protobuf.protobuf import HelloProto
+from tree.node import Node
 
 
 def visit_root(node, ctx: Context):
