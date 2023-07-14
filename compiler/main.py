@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--phoenix_dir",
         type=str,
-        default=f"/user/{os.getlogin()}/phoenix/experimental/mrpc",
+        default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
     )
     args = parser.parse_args()
     engine_name = args.engine

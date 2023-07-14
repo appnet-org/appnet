@@ -43,7 +43,7 @@ class CodeGenerator(Visitor):
             ctx.tables[table_name] = table
         else:
             raise ValueError("Table already exists")
-
+        # TODO bubble to ast
         if table_name.endswith("_file"):
             file_name = "file_" + table_name
             ctx.def_code.append(

@@ -14,6 +14,7 @@ def accept(visitor: Visitor, ctx) -> Callable:
     return lambda node: node.accept(visitor, ctx)
 
 
+# collection chainmap
 class Visitor(ABC):
     def visitNode(self, node: Node, ctx):
         raise Exception(f"visit function for {node.name} not implemented")
