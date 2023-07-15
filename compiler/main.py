@@ -6,9 +6,9 @@ import sys
 
 from compiler.adn_compiler import ADNCompiler
 from compiler.codegen.codegen import *
+from compiler.config import ADN_ROOT, COMPILER_ROOT
 from compiler.frontend.printer import Printer
 from compiler.tree.visitor import *
-from config import ADN_ROOT
 
 if __name__ == "__main__":
     os.system("rm -rf ./generated")
@@ -43,15 +43,15 @@ if __name__ == "__main__":
     ast_process = compiler.transform(sql_statements[1])
     print("Transformed AST")
     printer = Printer()
-    printer.visitRoot(ast_init, 0)
-    printer.visitRoot(ast_process, 0)
+    printer.visitRoot(ast_init)
+    printer.visitRoot(ast_process)
     print("Compiling...")
     ctx = init_ctx()
     compiler.compile(ast_init, ctx)
     compiler.compile(ast_process, ctx)
 
     print("Generating intermediate code...")
-    with open(f"./generated/{engine_name}.rs", "w") as f:
+    with open(os.path.join(COMPILER_ROOT, f"generated/{engine_name}.rs"), "w") as f:
         f.write("\n".join(ctx.def_code))
         f.write("\n".join(ctx.init_code))
         f.write("\n".join(ctx.process_code))

@@ -6,7 +6,7 @@ class Printer(Visitor):
     ctx: indent (width=4)
     """
 
-    def visitRoot(self, node: List[Statement], ctx: int) -> None:
+    def visitRoot(self, node: List[Statement], ctx: int = 0) -> None:
         for statement in node:
             print(statement.accept(self, ctx))
 
