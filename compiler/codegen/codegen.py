@@ -2,7 +2,8 @@ from backend.rusttype import *
 from codegen.context import *
 from codegen.helper import *
 from codegen.snippet import *
-from frontend.ast import Node
+from protobuf.protobuf import HelloProto
+from tree.node import Node
 
 
 def visit_root(node, ctx: Context):
@@ -271,7 +272,7 @@ def init_ctx() -> Context:
     output_vec = RustVariable(
         "output", RustContainerType("Vec", tx_struct), True, None, OutputTable
     )
-    return Context([InputTable, OutputTable], [input_vec, output_vec])
+    return Context([InputTable, OutputTable], [input_vec, output_vec], HelloProto)
 
     # def init_ctx():
     return {

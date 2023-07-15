@@ -3,13 +3,11 @@ import os
 import pathlib
 import re
 import sys
-from pprint import pprint
 
-from adn_compiler import ADNCompiler
-from codegen.codegen import *
-from example import acl_sqls, fault_sqls, logging_sqls
-from frontend.visitor import *
-
+from compiler.adn_compiler import ADNCompiler
+from compiler.codegen.codegen import *
+from compiler.frontend.printer import Printer
+from compiler.tree.visitor import *
 from config import ADN_ROOT
 
 if __name__ == "__main__":
@@ -23,7 +21,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--phoenix_dir",
         type=str,
-        default=f"/user/{os.getlogin()}/phoenix/experimental/mrpc",
+        default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
     )
     args = parser.parse_args()
     engine_name = args.engine

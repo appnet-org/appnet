@@ -1,11 +1,11 @@
 import sys
 
-from codegen.codegen import *
-from codegen.context import *
-from codegen.gen import *
-from codegen.template import generate
-from frontend.parser import *
 from lark import Lark
+
+from compiler.codegen.context import Context
+from compiler.codegen.finalizer import finalize
+from compiler.codegen.generator import CodeGenerator
+from compiler.frontend.parser import ADNParser, ADNTransformer
 
 
 class ADNCompiler:
@@ -29,4 +29,4 @@ class ADNCompiler:
         # return visit_root(sql, ctx)
 
     def generate(self, engine: str, ctx: Context, output_dir: str):
-        return generate(engine, ctx, output_dir)
+        return finalize(engine, ctx, output_dir)

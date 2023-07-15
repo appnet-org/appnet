@@ -6,6 +6,8 @@ from typing import Dict, List, Optional
 
 from backend.abstract import *
 
+from compiler.protobuf.protobuf import Proto
+
 
 class SQLVariable:
     def __init__(self, name: str):
@@ -28,7 +30,9 @@ class Table(SQLVariable):
 
 
 class Context:
-    def __init__(self, tables: List[Table], rust_vars: List[BackendVariable]):
+    def __init__(
+        self, tables: List[Table], rust_vars: List[BackendVariable], proto: Proto
+    ):
         self._def_code = []
         self._init_code = []
         self._process_code = []
@@ -38,8 +42,10 @@ class Context:
         self._sql_vars = {}
         self._rust_vars = {}
         self.is_forward = False
+        self.proto = proto
 
     def explain(self):
+        print("Context.Explain:")
         print("Tables:")
         for i in self.tables.values():
             print("\t", i.name)

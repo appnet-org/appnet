@@ -1,5 +1,6 @@
-from frontend.ast import *
 from lark import Transformer
+
+from compiler.tree.node import *
 
 
 class ADNTransformer(Transformer):
