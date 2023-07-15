@@ -32,7 +32,7 @@ compiler
 |---- frontend      # frontend code (SQL)
   |---- parser      # parse lark-generated AST to our AST
 |---- protobuf      # protobuf related code
-|---- tree          # AST definition, visitor. Unfortunatly "ast" is used in Python, so we use "tree"å instead.
+|---- tree          # AST definition, visitor. Unfortunatly "ast" is used in Python, so we use "tree" instead.
 install.sh          # you should run this script before running main.py
 main.py             # main entry
 ```
