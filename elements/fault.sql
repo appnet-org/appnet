@@ -1,5 +1,5 @@
 /*
-Initilization:
+Initialization:
 */
 SET probability = 0.2;
 

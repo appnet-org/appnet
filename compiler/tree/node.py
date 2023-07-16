@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC
+from enum import Enum
 from typing import List, Tuple, Union
 
 
-class Node(ABC):
+class Node:
     def __init__(self):
         pass
 
@@ -140,8 +141,38 @@ class InsertSelectStatement(Statement):
         self.select_stmt = select_stmt
 
 
+class Operator(Enum):
+    def __eq__(self, other: Operator):
+        return self.value == other.value
+
+    def accept(self, visitor, ctx):
+        class_list = type(self).__mro__
+        for cls in class_list:
+            func_name = "visit" + cls.__name__
+            visit_func = getattr(visitor, func_name, None)
+            if visit_func is not None:
+                return visit_func(self, ctx)
+        raise Exception(f"visit function for {self.name} not implemented")
+
+
+class CompareOp(Operator):
+    EQ = 1
+    GT = 2
+    LT = 3
+    GE = 4
+    LE = 5
+    NEQ = 6
+
+
+class LogicalOp(Operator):
+    AND = 1
+    OR = 2
+
+
 class SearchCondition(Node):
-    def __init__(self, lvalue: SearchCondition, rvalue: SearchCondition, operator: str):
+    def __init__(
+        self, lvalue: SearchCondition, rvalue: SearchCondition, operator: Operator
+    ):
         self.lvalue = lvalue
         self.rvalue = rvalue
         self.operator = operator

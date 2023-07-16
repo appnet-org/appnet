@@ -14,7 +14,7 @@ git switch adn
 
 ```bash
 # in compiler
-bash ./install.sh
+. ./install.sh
 python3 main.py -p [ENGINE_NAME]
 #! Currently, ENGINE_NAME must be `logging`
 # Change working directory to `phoenix`, you will found generated `nofile-logging` engine.

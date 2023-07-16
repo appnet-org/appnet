@@ -10,9 +10,9 @@ from graph.element import Element
 from compiler.adn_compiler import ADNCompiler
 from compiler.codegen.codegen import *
 from compiler.codegen.finalizer import finalize_graph
+from compiler.config import ADN_ROOT, COMPILER_ROOT
 from compiler.frontend.printer import Printer
 from compiler.tree.visitor import *
-from config import ADN_ROOT
 
 
 def preprocess(sql_file: str) -> Tuple[str, str]:
@@ -45,21 +45,22 @@ def compile_single(engine: str, compiler: ADNCompiler, mrpc_dir: str, verbose: b
     init, process = compiler.transform(init), compiler.transform(process)
 
     printer = Printer()
-
-    printer.visitRoot(init, 0)
-    printer.visitRoot(process, 0)
-
+    printer.visitRoot(ast_init)
+    printer.visitRoot(ast_process)
+    print("Compiling...")
     ctx = init_ctx()
 
     init = compiler.gen(init, ctx)
     process = compiler.gen(process, ctx)
 
-    if verbose:
-        print("Generating intermediate code...")
-        with open(f"./generated/{engine_name}.rs", "w") as f:
-            f.write("\n".join(ctx.def_code))
-            f.write("\n".join(ctx.init_code))
-            f.write("\n".join(ctx.process_code))
+    print("Generating intermediate code...")
+    with open(os.path.join(COMPILER_ROOT, f"generated/{engine_name}.rs"), "w") as f:
+        f.write("// def code\n")
+        f.write("\n".join(ctx.def_code))
+        f.write("// init code\n")
+        f.write("\n".join(ctx.init_code))
+        f.write("// process code\n")
+        f.write("\n".join(ctx.process_code))
 
     compiler.finalize(engine, ctx, mrpc_dir)
 

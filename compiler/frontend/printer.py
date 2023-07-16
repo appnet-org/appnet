@@ -6,7 +6,7 @@ class Printer(Visitor):
     ctx: indent (width=4)
     """
 
-    def visitRoot(self, node: List[Statement], ctx: int) -> None:
+    def visitRoot(self, node: List[Statement], ctx: int = 0) -> None:
         for statement in node:
             print(statement.accept(self, ctx))
 
@@ -93,13 +93,39 @@ class Printer(Visitor):
         ]
         return add_indent(res, ctx)
 
+    def visitCompareOp(self, node: CompareOp, ctx: int) -> str:
+        if node == CompareOp.EQ:
+            res = "=="
+        elif node == CompareOp.NEQ:
+            res = "!="
+        elif node == CompareOp.GT:
+            res = ">"
+        elif node == CompareOp.LT:
+            res = "<"
+        elif node == CompareOp.GE:
+            res = ">="
+        elif node == CompareOp.LE:
+            res = "<="
+        else:
+            raise ValueError("Unrecognized operator")
+        return add_indent([res], ctx)
+
+    def visitLogicalOp(self, node: LogicalOp, ctx: int) -> str:
+        if node == LogicalOp.AND:
+            res = "AND"
+        elif node == LogicalOp.OR:
+            res = "OR"
+        else:
+            raise ValueError("Unrecognized operator")
+        return add_indent([res], ctx)
+
     def visitSearchCondition(self, node: SearchCondition, ctx: int) -> str:
         lvalue_str = node.lvalue.accept(self, 0)
         rvalue_str = node.rvalue.accept(self, 0)
-        if node.operator.isupper():
+        if isinstance(node.operator, LogicalOp):
             lvalue_str = "(" + lvalue_str + ")"
             rvalue_str = "(" + rvalue_str + ")"
-        res = [f"{lvalue_str} {node.operator} {rvalue_str}"]
+        res = [f"{lvalue_str} {node.operator.accept(self, 0)} {rvalue_str}"]
         return add_indent(res, ctx)
 
     def visitWhereClause(self, node: WhereClause, ctx: int) -> str:
