@@ -213,6 +213,13 @@ def finalize(name: str, ctx: Context, output_dir: str):
         template_name_toml = "fault"
         template_name_first_cap = "Fault"
         template_name_all_cap = "FAULT"
+    else:
+        name = name.split("_")
+        template_name = "_".join(name)
+        template_name_toml = "-".join(name)
+        cap = [i[0].upper() + i[1:] for i in name]
+        template_name_first_cap = "".join(cap)
+        template_name_all_cap = "_".join(name).upper()
 
     # ctx = parse_intermediate_code(name)
     ctx.explain()

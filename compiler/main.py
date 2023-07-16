@@ -77,15 +77,23 @@ if __name__ == "__main__":
         default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
     )
     args = parser.parse_args()
-    engine_name = args.engine.split(",")
-
+    engine_name = [i.strip() for i in args.engine.split("->")]
+    print("Engines: ", engine_name)
     compiler = ADNCompiler(args.verbose)
 
     elems: List[Element] = []
+    elem_name: List[str] = []
     for engine in engine_name:
-        elem = Element(engine, preprocess(f"{engine}.sql"), HelloProto)
+        name = f"{engine}_{len(elem_name)}"
+        elem_name.append(name)
+        elem = Element(name, preprocess(f"{engine}.sql"), HelloProto)
         elems.append(elem)
 
     edges: List[Tuple[str, str]] = []
+    for i in range(len(elem_name) - 1):
+        edges.append((elem_name[i], elem_name[(i + 1) % len(elem_name)]))
 
-    graph = Graph(elems, [])
+    graph = Graph(elems, edges)
+
+    for elem in graph:
+        compiler.compile(elem, args.phoenix_dir)
