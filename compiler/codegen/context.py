@@ -59,7 +59,8 @@ class Context:
         print("Rust Vars:")
         for i in self.rust_vars.values():
             print("\t", i.name)
-            print("\t\t", i.parent.name)
+            if i.parent is not None:
+                print("\t\t", i.parent.name)
             print("\t\t", i.type)
             print("\t\t", i.init)
 
