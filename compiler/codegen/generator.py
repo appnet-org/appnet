@@ -15,9 +15,15 @@ from tree.node import InsertSelectStatement, SelectStatement
 from tree.visitor import Visitor
 
 
+class RustTypeGenerator(Visitor):
+    def visitNumberValue(self, node: NumberValue, ctx=None) -> RustType:
+        return RustBasicType("f32", node.value)
+
+
 class CodeGenerator(Visitor):
     def __init__(self):
         super().__init__()
+        self.type_generator = RustTypeGenerator()
 
     def visitRoot(self, node: List[Statement], ctx: Context) -> None:
         for statement in node:
@@ -103,7 +109,7 @@ class CodeGenerator(Visitor):
 
         ctx.push_code(code)
 
-    def visitInsertSelectStatement(self, node: InsertSelectStatement, ctx):
+    def visitInsertSelectStatement(self, node: InsertSelectStatement, ctx: Context):
         table_name = node.table_name
 
         table = ctx.tables.get(table_name)
@@ -130,7 +136,6 @@ class CodeGenerator(Visitor):
 
     def visitSelectStatement(self, node: SelectStatement, ctx: Context):
         assert len(node.join_clauses) == 0
-        assert len(node.where_clauses) == 0
 
         table_from = node.from_table
         # print(table_from)
@@ -166,9 +171,81 @@ class CodeGenerator(Visitor):
             table_to = ctx.tables[table_to_name]
             struct = table_to.struct
 
-        if ctx.is_forward == True:
-            code = f"{table_from_name}.iter().map(|req| RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({struct.name}::new({columns})))).collect::<Vec<_>>()"
+        original_rpc = f"{struct.name}::new({columns})"
+        if ctx.is_forward:
+            send_logic = f"RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({original_rpc}))"
         else:
-            code = f"{table_from_name}.iter().map(|req| {struct.name}::new({columns})).collect::<Vec<_>>()"
+            send_logic = original_rpc
+
+        rpc_id = "RpcId::new(unsafe {&*req.meta_buf_ptr.as_meta_ptr()}.conn_id, unsafe {&*req.meta_buf_ptr.as_meta_ptr()}.call_id)"
+        error_rpc = f"let error = EngineRxMessage::Ack({rpc_id}, TransportStatus::Error(unsafe {{NonZeroU32::new_unchecked(403)}}),); RpcMessageGeneral::RxMessage(error)"
+
+        for where_clause in node.where_clauses:
+            where_clause.search_condition.accept(self, ctx)
+            cond_str = ctx.pop_code()
+            send_logic = f"if !({cond_str}) {{ {error_rpc} }} else {{ {send_logic} }}"
+
+        code = f"{table_from_name}.iter().map(|req| {send_logic}).collect::<Vec<_>>()"
 
         ctx.push_code(code)
+
+    def visitSetStatement(self, node: SetStatement, ctx: Context):
+        var_name = node.variable.value
+        ctx.rust_vars.update(
+            {
+                var_name: RustVariable(
+                    var_name, node.value.accept(self.type_generator, None), False
+                )
+            }
+        )
+
+    def visitFunctionValue(self, node: FunctionValue, ctx: Context):
+        if node.value == "random":
+            func_str = "rand::random::<f32>()"
+        else:
+            raise NotImplementedError
+
+        ctx.push_code(func_str)
+
+    def visitVariableValue(self, node: VariableValue, ctx: Context):
+        if ctx.rust_vars.get(node.value) is None:
+            raise Exception(f"Variable {node.value} does not exist")
+
+        var_str = f"self.{node.value}"
+        ctx.push_code(var_str)
+
+    def visitLogicalOp(self, node: LogicalOp, ctx: Context):
+        if node == LogicalOp.AND:
+            op_str = "&&"
+        elif node == LogicalOp.OR:
+            op_str = "||"
+
+        ctx.push_code(op_str)
+
+    def visitCompareOp(self, node: CompareOp, ctx: Context):
+        if node == CompareOp.LT:
+            op_str = "<"
+        else:
+            print("node", node)
+            print(node.value, CompareOp.LT.value)
+            print(node.value == CompareOp.LT.value)
+            print(node == CompareOp.LT)
+            raise NotImplementedError
+
+        ctx.push_code(op_str)
+
+    def visitSearchCondition(self, node: SearchCondition, ctx: Context):
+        node.lvalue.accept(self, ctx)
+        lvalue_str = ctx.pop_code()
+        print(lvalue_str)
+        node.rvalue.accept(self, ctx)
+        rvalue_str = ctx.pop_code()
+        node.operator.accept(self, ctx)
+        op_str = ctx.pop_code()
+
+        if isinstance(node.operator, LogicalOp):
+            lvalue_str = "(" + lvalue_str + ")"
+            rvalue_str = "(" + rvalue_str + ")"
+
+        cond_str = f"{lvalue_str} {op_str} {rvalue_str}"
+        ctx.push_code(cond_str)

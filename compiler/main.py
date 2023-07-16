@@ -52,8 +52,11 @@ if __name__ == "__main__":
 
     print("Generating intermediate code...")
     with open(os.path.join(COMPILER_ROOT, f"generated/{engine_name}.rs"), "w") as f:
+        f.write("// def code\n")
         f.write("\n".join(ctx.def_code))
+        f.write("// init code\n")
         f.write("\n".join(ctx.init_code))
+        f.write("// process code\n")
         f.write("\n".join(ctx.process_code))
 
     compiler.generate(engine_name, ctx, args.phoenix_dir)
