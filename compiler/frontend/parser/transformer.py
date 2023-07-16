@@ -33,7 +33,7 @@ class ADNTransformer(Transformer):
 
     def set_statement(self, n):
         (n,) = n
-        self.variables[n["variable"]] = n["value"]
+        self.variables[n["variable"].value] = n["value"]
         return SetStatement(n["variable"], n["value"])
 
     def create_table_statement(self, c):
@@ -51,7 +51,7 @@ class ADNTransformer(Transformer):
 
     def identifier(self, i):
         (i,) = i
-        res = {"variable": i.value}
+        res = {"variable": VariableValue(i.value)}
         return res
 
     def number(self, n):
@@ -148,28 +148,28 @@ class ADNTransformer(Transformer):
         return SearchCondition(c[0], c[2], c[1])
 
     def eq(self, c):
-        return "=="
+        return CompareOp.EQ
 
     def neq(self, c):
-        return "!="
+        return CompareOp.NEQ
 
     def g(self, c):
-        return ">"
+        return CompareOp.GT
 
     def l(self, c):
-        return "<"
+        return CompareOp.LT
 
     def ge(self, c):
-        return ">="
+        return CompareOp.GE
 
     def le(self, c):
-        return "<="
+        return CompareOp.LE
 
     def search_and_condition(self, c):
-        return SearchCondition(c[0], c[1], "AND")
+        return SearchCondition(c[0], c[1], LogicalOp.AND)
 
     def search_or_condition(self, c):
-        return SearchCondition(c[0], c[1], "OR")
+        return SearchCondition(c[0], c[1], LogicalOp.OR)
 
     def search_condition(self, s):
         (s,) = s
