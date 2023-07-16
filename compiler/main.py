@@ -79,6 +79,8 @@ if __name__ == "__main__":
         default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
     )
     args = parser.parse_args()
+    mrpc_dir = os.abspath(args.mrpc_dir)
+
     engine_name = [i.strip() for i in args.engine.split("->")]
     print("Engines: ", engine_name)
     compiler = ADNCompiler(args.verbose)
@@ -98,9 +100,9 @@ if __name__ == "__main__":
     graph = Graph(elems, edges)
 
     for elem in graph:
-        compiler.compile(elem, args.mrpc_dir)
+        compiler.compile(elem, mrpc_dir)
 
     ctx = graph.gen_toml()
-    finalize_graph(ctx, args.mrpc_dir)
+    finalize_graph(ctx, mrpc_dir)
 
     print("All Done!")
