@@ -9,6 +9,7 @@ from graph.element import Element
 
 from compiler.adn_compiler import ADNCompiler
 from compiler.codegen.codegen import *
+from compiler.codegen.finalizer import finalize_graph
 from compiler.frontend.printer import Printer
 from compiler.tree.visitor import *
 from config import ADN_ROOT
@@ -35,7 +36,7 @@ def preprocess(sql_file: str) -> Tuple[str, str]:
     return sql_statements[0], sql_statements[1]
 
 
-def compile_single(engine: str, compiler: ADNCompiler, phoenix_dir: str, verbose: bool):
+def compile_single(engine: str, compiler: ADNCompiler, mrpc_dir: str, verbose: bool):
     os.system("rm -rf ./generated/")
     os.system("mkdir -p ./generated")
 
@@ -60,7 +61,7 @@ def compile_single(engine: str, compiler: ADNCompiler, phoenix_dir: str, verbose
             f.write("\n".join(ctx.init_code))
             f.write("\n".join(ctx.process_code))
 
-    compiler.finalize(engine, ctx, phoenix_dir)
+    compiler.finalize(engine, ctx, mrpc_dir)
 
 
 if __name__ == "__main__":
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--verbose", help="Print Debug info", action="store_true")
     parser.add_argument(
-        "--phoenix_dir",
+        "--mrpc_dir",
         type=str,
         default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
     )
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     elems: List[Element] = []
     elem_name: List[str] = []
     for engine in engine_name:
-        name = f"{engine}_{len(elem_name)}"
+        name = f"gen_{engine}_{len(elem_name)}"
         elem_name.append(name)
         elem = Element(name, preprocess(f"{engine}.sql"), HelloProto)
         elems.append(elem)
@@ -96,4 +97,9 @@ if __name__ == "__main__":
     graph = Graph(elems, edges)
 
     for elem in graph:
-        compiler.compile(elem, args.phoenix_dir)
+        compiler.compile(elem, args.mrpc_dir)
+
+    ctx = graph.gen_toml()
+    finalize_graph(ctx, args.mrpc_dir)
+
+    print("All Done!")
