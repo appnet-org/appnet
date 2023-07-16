@@ -226,10 +226,6 @@ class CodeGenerator(Visitor):
         if node == CompareOp.LT:
             op_str = "<"
         else:
-            print("node", node)
-            print(node.value, CompareOp.LT.value)
-            print(node.value == CompareOp.LT.value)
-            print(node == CompareOp.LT)
             raise NotImplementedError
 
         ctx.push_code(op_str)
@@ -237,7 +233,6 @@ class CodeGenerator(Visitor):
     def visitSearchCondition(self, node: SearchCondition, ctx: Context):
         node.lvalue.accept(self, ctx)
         lvalue_str = ctx.pop_code()
-        print(lvalue_str)
         node.rvalue.accept(self, ctx)
         rvalue_str = ctx.pop_code()
         node.operator.accept(self, ctx)
