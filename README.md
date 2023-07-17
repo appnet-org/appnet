@@ -4,7 +4,7 @@
 
 Control plane for Application Defined Networks (ADN).
 
-Details are avaliable in our whitepaper: [Application Defined Networks](https://xzhu27.me/papers/Application_Defined_Networks_UW_FOCI.pdf)
+Details are available in our [whitepaper](https://xzhu27.me/papers/Application_Defined_Networks_UW_FOCI.pdf) and [talk](https://www.youtube.com/watch?v=cXYoP628xcY&list=PLFfbSBwYMpIq7bYLnmnE_WVUJx_AvZlXb&index=8)
 
 ## Requirements
 - Kubernetes and Docker
@@ -14,14 +14,14 @@ Details are avaliable in our whitepaper: [Application Defined Networks](https://
 
 ### Install the CLI
 
-`adnctl` is a command line program to manage ADN control plane.
+`adnctl` is a command line program to manage the ADN control plane.
 
 To install the CLI, run
 ```bash
 . ./install.sh
 ```
 
-Once installed, verity the CLI is running correctly with:
+Once installed, verify the CLI is running correctly with:
 ```bash
 adnctl version
 ```
@@ -63,7 +63,7 @@ make undeploy
 This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
 
 It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/),
-which provide a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster.
+which provides a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster.
 
 ### Test It Out
 1. Install the CRDs into the cluster:
