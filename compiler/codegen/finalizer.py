@@ -148,7 +148,7 @@ def gen_template(
     ctx["TemplateNameFirstCap"] = template_name_first_cap
     ctx["TemplateNameAllCap"] = template_name_all_cap
     ctx["TemplateNameCap"] = template_name_first_cap
-    print("Current dir: {}".format(os.getcwd()))
+    # print("Current dir: {}".format(os.getcwd()))
     with open("config.rs", "w") as f:
         f.write(config_rs.format(Include=include, **ctx))
     with open("lib.rs", "w") as f:
@@ -170,12 +170,19 @@ def gen_template(
 def move_template(
     mrpc_root, template_name, template_name_toml, template_name_first_cap
 ):
-    mrpc_api = mrpc_root + "/phoenix-api/policy"
+    mrpc_api = mrpc_root + "/generated/api"
+    original_api = mrpc_root + "/phoenix-api/policy"
+
+    os.system("mkdir -p {}".format(mrpc_api))
+
     os.system(f"rm -rf {mrpc_api}/{template_name_toml}")
-    os.system(f"cp -r {mrpc_api}/logging {mrpc_api}/{template_name_toml}")
+    os.system(f"cp -r {original_api}/logging {mrpc_api}/{template_name_toml}")
     os.system(f"rm {mrpc_api}/{template_name_toml}/Cargo.toml")
     os.system(f"cp ./Cargo.toml.api {mrpc_api}/{template_name_toml}/Cargo.toml")
-    mrpc_plugin = mrpc_root + "/plugin/policy"
+
+    mrpc_plugin = mrpc_root + "/generated/plugin"
+    os.system("mkdir -p {}".format(mrpc_plugin))
+
     os.system(f"rm -rf {mrpc_plugin}/{template_name_toml}")
     os.system(f"mkdir -p {mrpc_plugin}/{template_name_toml}/src")
     os.system(f"cp ./Cargo.toml.policy {mrpc_plugin}/{template_name_toml}/Cargo.toml")
@@ -191,6 +198,14 @@ def move_template(
     os.system(f"cp ./engine.rs {mrpc_plugin}/{template_name_toml}/src/engine.rs")
     os.system(f"cp ./proto.rs {mrpc_plugin}/{template_name_toml}/src/proto.rs")
     print("Template {} moved to mrpc folder".format(template_name))
+
+
+def gen_attach_detach(name: str, ctx):
+    with open(f"{name}_attach.toml", "w") as f:
+        f.write(attach_toml.format(**ctx))
+
+    with open(f"{name}_detach.toml", "w") as f:
+        f.write(detach_toml.format(**ctx))
 
 
 def finalize(name: str, ctx: Context, output_dir: str):
@@ -213,9 +228,15 @@ def finalize(name: str, ctx: Context, output_dir: str):
         template_name_toml = "fault"
         template_name_first_cap = "Fault"
         template_name_all_cap = "FAULT"
+    else:
+        name = name.split("_")
+        template_name = "_".join(name)
+        template_name_toml = "-".join(name)
+        cap = [i[0].upper() + i[1:] for i in name]
+        template_name_first_cap = "".join(cap)
+        template_name_all_cap = "_".join(name).upper()
 
-    # ctx = parse_intermediate_code(name)
-    ctx.explain()
+    # ctx.explain()
     info = retrieve_info(ctx)
     gen_template(
         info,
@@ -231,17 +252,19 @@ def finalize(name: str, ctx: Context, output_dir: str):
         template_name_first_cap,
     )
 
-    # ctx = parse_intermediate_code(name)
-    # gen_template(
-    #     ctx,
-    #     template_name,
-    #     template_name_toml,
-    #     template_name_first_cap,
-    #     template_name_all_cap,
-    # )
-    # move_template(
-    #     "/users/banruo/phoenix/experimental/mrpc",
-    #     template_name,
-    #     template_name_toml,
-    #     template_name_first_cap,
-    # )
+
+def finalize_graph(ctx: Dict[str, object], mrpc_dir: str):
+    output_dir = f"{mrpc_dir}/generated"
+    os.chdir(COMPILER_ROOT)
+
+    os.system("rm -rf ./generated/addonctl")
+    os.system("mkdir ./generated/addonctl")
+    os.chdir("./generated/addonctl")
+    for k, v in ctx.items():
+        gen_attach_detach(k, v)
+        print(f"Generated {k} attach/detach toml")
+    os.chdir(COMPILER_ROOT)
+
+    os.system(f"rm -rf {output_dir}/addonctl")
+    os.system(f"mkdir -p {output_dir}/addonctl")
+    os.system(f"cp -r ./generated/addonctl {output_dir}/")

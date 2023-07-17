@@ -2,10 +2,12 @@ import sys
 
 from lark import Lark
 
+from compiler.codegen.codegen import init_ctx
 from compiler.codegen.context import Context
 from compiler.codegen.finalizer import finalize
 from compiler.codegen.generator import CodeGenerator
 from compiler.frontend.parser import ADNParser, ADNTransformer
+from compiler.graph.element import Element
 
 
 class ADNCompiler:
@@ -24,9 +26,19 @@ class ADNCompiler:
             print(ast)
         return self.Transformer.transform(ast)
 
-    def compile(self, sql, ctx: Context):
+    def gen(self, sql, ctx: Context):
         return self.generator.visitRoot(sql, ctx)
         # return visit_root(sql, ctx)
 
-    def generate(self, engine: str, ctx: Context, output_dir: str):
+    def finalize(self, engine: str, ctx: Context, output_dir: str):
         return finalize(engine, ctx, output_dir)
+
+    def compile(self, elem: Element, output_dir: str):
+        init, process = elem.sql
+        ctx: Context = init_ctx()
+
+        init, process = self.transform(init), self.transform(process)
+        # todo verbose
+        init, process = self.gen(init, ctx), self.gen(process, ctx)
+
+        return finalize(elem.name, ctx, output_dir)

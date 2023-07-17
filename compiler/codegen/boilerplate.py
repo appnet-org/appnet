@@ -483,3 +483,47 @@ chrono.workspace = true
 itertools.workspace = true
 rand.workspace = true
 """
+
+
+# prev = MrpcEngine, next = TcpRpcAdapterEngine
+attach_toml = """
+addon_engine = "{Me}Engine"
+tx_channels_replacements = [
+    [
+        "{Prev}Engine",
+        "{Me}Engine",
+        0,
+        0,
+    ],
+    [
+        "{Me}Engine",
+        "{Next}Engine",
+        0,
+        0,
+    ],
+]
+rx_channels_replacements = [
+    [
+        "{Next}Engine",
+        "{Me}Engine",
+        0,
+        0,
+    ],
+    [
+        "{Me}Engine",
+        "{Prev}Engine",
+        0,
+        0,
+    ],
+]
+group = {Group}
+op = "attach"
+"""
+
+detach_toml = """
+addon_engine = "{Me}Engine"
+tx_channels_replacements = [["{Prev}Engine", "{Next}Engine", 0, 0]]
+rx_channels_replacements = [["{Next}Engine", "{Prev}Engine", 0, 0]]
+op = "detach"
+
+"""
