@@ -79,7 +79,7 @@ if __name__ == "__main__":
         default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
     )
     args = parser.parse_args()
-    mrpc_dir = os.abspath(args.mrpc_dir)
+    mrpc_dir = os.path.abspath(args.mrpc_dir)
 
     engine_name = [i.strip() for i in args.engine.split("->")]
     print("Engines: ", engine_name)

@@ -46,7 +46,7 @@ class Graph:
                 "Me": name,
                 "Prev": prev,
                 "Next": next,
-                "Group": str(current_group),
+                "Group": str([f"{i}Engine" for i in current_group]),
             }
             prev = name
             current_group = current_group[:-1] + [prev] + current_group[-1:]
