@@ -18,7 +18,8 @@ from compiler.tree.visitor import *
 def preprocess(sql_file: str) -> Tuple[str, str]:
     with open(os.path.join(ADN_ROOT, f"elements/{sql_file}"), "r") as file:
         sql_file_content = file.read()
-
+    print(sql_file, ":")
+    print(sql_file_content)
     # Remove comments from the SQL file
     sql_file_content = re.sub(
         r"/\*.*?\*/", "", sql_file_content, flags=re.DOTALL
@@ -105,4 +106,4 @@ if __name__ == "__main__":
     ctx = graph.gen_toml()
     finalize_graph(ctx, mrpc_dir)
 
-    print("All Done!")
+    print("Done!")
