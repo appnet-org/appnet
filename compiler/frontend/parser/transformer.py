@@ -181,9 +181,10 @@ class ADNTransformer(Transformer):
         return WhereClause(w)
 
     def join_clause(self, j):
-        return JoinClause(j[0]["table_name"], j[1], j[2])
+        return JoinClause(j[0]["table_name"], SearchCondition(j[1], j[2], CompareOp.EQ))
         # ColumnValue(j[1]["table_name"], j[1]["column_name"]),
         # ColumnValue(j[2]["table_name"], j[2]["column_name"]),
 
     def column_field(self, c):
-        return ColumnValue(c[0]["table_name"], c[1]["variable"])
+        return ColumnValue(c[0]["table_name"], c[1])
+    

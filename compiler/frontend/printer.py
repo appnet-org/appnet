@@ -13,7 +13,11 @@ class Printer(Visitor):
     def visitValue(self, node: Value, ctx: int) -> str:
         return add_indent([f"{node.name}({str(node.value)})"], ctx)
 
+    def visitVariableValue(self, node: VariableValue, ctx: int) -> str:
+        return add_indent([f"VariableValue({node.value})"], ctx)
+
     def visitColumnValue(self, node: ColumnValue, ctx: int) -> str:
+        #print("visitColumnValue", node.table_name, node.column_name)
         content = (
             node.column_name
             if node.table_name == ""
@@ -89,7 +93,7 @@ class Printer(Visitor):
 
     def visitJoinClause(self, node: JoinClause, ctx: int) -> str:
         res = [
-            f"JoinClause {node.table_name} ON {node.lvalue.accept(self, 0)} = {node.rvalue.accept(self, 0)}"
+            f"JoinClause table: {node.table_name}\n{node.condition.accept(self, ctx + 3)}"
         ]
         return add_indent(res, ctx)
 
@@ -122,6 +126,7 @@ class Printer(Visitor):
     def visitSearchCondition(self, node: SearchCondition, ctx: int) -> str:
         lvalue_str = node.lvalue.accept(self, 0)
         rvalue_str = node.rvalue.accept(self, 0)
+        #print("lvalue_str", lvalue_str, "rvalue_str", rvalue_str)
         if isinstance(node.operator, LogicalOp):
             lvalue_str = "(" + lvalue_str + ")"
             rvalue_str = "(" + rvalue_str + ")"

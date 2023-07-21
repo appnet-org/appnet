@@ -44,7 +44,7 @@ length: "(" NUMBER ")"
 
 value: function -> function
      | column_name
-     | table_name "." identifier -> column_field
+     | table_name "." CNAME -> column_field
      | NUMBER -> number
      | CNAME -> cname
      | quoted_string -> string

@@ -79,11 +79,15 @@ if __name__ == "__main__":
         type=str,
         default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
     )
+    parser.add_argument(
+        "-o", "--output", type=str, help="Output type: ast, ir, mrpc", default="mrpc"
+    )
     args = parser.parse_args()
     mrpc_dir = os.path.abspath(args.mrpc_dir)
 
     engine_name = [i.strip() for i in args.engine.split("->")]
-    print("Engines: ", engine_name)
+    print("Engines:", engine_name)
+    print("Output:", args.output)
     compiler = ADNCompiler(args.verbose)
 
     elems: List[Element] = []
@@ -100,10 +104,35 @@ if __name__ == "__main__":
 
     graph = Graph(elems, edges)
 
-    for elem in graph:
-        compiler.compile(elem, mrpc_dir)
+    printer = Printer()
 
-    ctx = graph.gen_toml()
-    finalize_graph(ctx, mrpc_dir)
+    for elem in graph:
+        if args.output == "ast":
+            print(elem.name, ":")
+            init, process = elem.sql
+            init, process = compiler.transform(init), compiler.transform(process)
+            printer.visitRoot(init)
+            printer.visitRoot(process)
+        elif args.output == "ir":
+            print(elem.name, ":")
+            init, process = elem.sql
+            init, process = compiler.transform(init), compiler.transform(process)
+            ctx = init_ctx()
+            init, process = compiler.gen(init, ctx), compiler.gen(process, ctx)
+            os.system("mkdir -p ./generated/ir")
+            with open(os.path.join(COMPILER_ROOT, f"generated/ir/{engine_name}.rs"), "w") as f:
+                f.write("// def code\n")
+                f.write("\n".join(ctx.def_code))
+                f.write("// init code\n")
+                f.write("\n".join(ctx.init_code))
+                f.write("// process code\n")
+                f.write("\n".join(ctx.process_code))
+        else:         
+            print(elem.name, ":")
+            compiler.compile(elem, mrpc_dir)
+
+    if args.output == "mrpc":
+        ctx = graph.gen_toml()
+        finalize_graph(ctx, mrpc_dir)
 
     print("Done!")

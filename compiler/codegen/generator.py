@@ -135,8 +135,8 @@ class CodeGenerator(Visitor):
         ctx.push_code(code)
 
     def visitSelectStatement(self, node: SelectStatement, ctx: Context):
-        assert len(node.join_clauses) == 0
-
+        assert (len(node.join_clauses) <= 1)
+        assert (len(node.where_clauses) <= 1)
         table_from = node.from_table
         # print(table_from)
         if ctx.tables.get(table_from) is None:

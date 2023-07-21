@@ -171,7 +171,7 @@ class LogicalOp(Operator):
 
 class SearchCondition(Node):
     def __init__(
-        self, lvalue: SearchCondition, rvalue: SearchCondition, operator: Operator
+        self, lvalue: SearchCondition or Value, rvalue: SearchCondition or Value, operator: Operator
     ):
         self.lvalue = lvalue
         self.rvalue = rvalue
@@ -194,11 +194,10 @@ class WhereClause(Clause):
 
 
 class JoinClause(Clause):
-    def __init__(self, table_name: str, lvalue: Value, rvalue: Value):
+    def __init__(self, table_name: str, condition: SearchCondition):
         super().__init__()
         self.table_name = table_name
-        self.lvalue = lvalue
-        self.rvalue = rvalue
+        self.condition = condition
 
 
 class SelectStatement(Statement):
