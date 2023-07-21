@@ -5,20 +5,23 @@ Module that defines the base type of visitor.
 
 from __future__ import annotations
 
-from typing import Callable, List, Protocol, Sequence, TypeVar
+from typing import Callable, List, Protocol, Sequence, TypeVar, Optional
 
 from codegen.codegen import init_ctx
 from codegen.context import *
 from codegen.snippet import *
 from tree.node import *
-from tree.node import InsertSelectStatement, SelectStatement
+from tree.node import ColumnValue, InsertSelectStatement, InsertValueStatement, SelectStatement
 from tree.visitor import Visitor
 
 
 class RustTypeGenerator(Visitor):
     def visitNumberValue(self, node: NumberValue, ctx=None) -> RustType:
         return RustBasicType("f32", node.value)
-
+    
+    def visitStringValue(self, node: StringValue, ctx=None) -> RustType:
+        val = node.value.replace("\'", "")
+        return RustBasicType("String", f"String::from(\"{val}\")")
 
 class CodeGenerator(Visitor):
     def __init__(self):
@@ -27,7 +30,11 @@ class CodeGenerator(Visitor):
 
     def visitRoot(self, node: List[Statement], ctx: Context) -> None:
         for statement in node:
-            statement.accept(self, ctx)
+            try:
+                statement.accept(self, ctx)
+            except Exception as e:
+                print(statement)
+                raise e
 
     def visitCreateTableStatement(
         self, node: CreateTableStatement, ctx: Context
@@ -189,6 +196,32 @@ class CodeGenerator(Visitor):
 
         ctx.push_code(code)
 
+    def visitInsertValueStatement(self, node: InsertValueStatement, ctx: Context):
+        table_name = node.table_name
+
+        table = ctx.tables.get(table_name)
+        if table is None:
+            raise ValueError("Table does not exist")
+
+        var_name = ctx.rust_vars[table_name].name
+        struct = table.struct
+        
+        fields = struct.fields
+        fields = [i[0] for i in fields]
+        
+        columns = [i.column_name for i in node.columns]
+        values: List[List[RustBasicType]] = [[j.accept(self.type_generator) for j in i] for i in node.values]
+        
+        code = ""
+        for value in values:
+            v = [i.gen_init() for i in value]
+            constructor = ""
+            for k, v in zip(columns, v):
+                constructor += f"{k}: {v}, "
+            code += f"{var_name}.push({struct.name}{{{constructor}}});\n"
+        
+        ctx.push_code(code)
+
     def visitSetStatement(self, node: SetStatement, ctx: Context):
         var_name = node.variable.value
         ctx.rust_vars.update(
@@ -214,17 +247,42 @@ class CodeGenerator(Visitor):
         var_str = f"self.{node.value}"
         ctx.push_code(var_str)
 
+    def visitColumnValue(self, node: ColumnValue, ctx: Context):
+        tname, cname = node.table_name, node.column_name
+        if ctx.tables.get(tname) is None:
+            raise Exception(f"Table {tname} does not exist")
+        struct = ctx.tables[tname].struct
+        fields = struct.fields
+        if cname not in [i[0] for i in fields]:
+            raise Exception(f"Column {cname} does not exist in table {tname}")
+
+        table_var: RustVariable = ctx.rust_vars[tname]
+
+        var_str = f"{table_var.name}.{cname}"
+        ctx.push_code(var_str)
+        
     def visitLogicalOp(self, node: LogicalOp, ctx: Context):
         if node == LogicalOp.AND:
             op_str = "&&"
         elif node == LogicalOp.OR:
             op_str = "||"
-
+        else:
+            raise NotImplementedError
         ctx.push_code(op_str)
 
     def visitCompareOp(self, node: CompareOp, ctx: Context):
-        if node == CompareOp.LT:
+        if node == CompareOp.EQ:
+            op_str = "=="
+        elif node == CompareOp.NE:
+            op_str = "!="
+        elif node == CompareOp.LT:
             op_str = "<"
+        elif node == CompareOp.LE:
+            op_str = "<="
+        elif node == CompareOp.GT:
+            op_str = ">"
+        elif node == CompareOp.GE:
+            op_str = ">="   
         else:
             raise NotImplementedError
 

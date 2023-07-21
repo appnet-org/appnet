@@ -8,7 +8,7 @@ statement: select_statement
        | insert_select_statement
        | update_statement
 
-select_statement: "SELECT" select_list "FROM" table_name join_clause* where_clause*
+select_statement: "SELECT" select_list "FROM" table_name join_clause? where_clause?
 
 select_list: column_name ("," column_name)*
 

@@ -1,11 +1,11 @@
 from compiler.tree.visitor import *
+from tree.node import Node
 
 
 class Printer(Visitor):
     """
     ctx: indent (width=4)
     """
-
     def visitRoot(self, node: List[Statement], ctx: int = 0) -> None:
         for statement in node:
             print(statement.accept(self, ctx))
@@ -81,10 +81,8 @@ class Printer(Visitor):
             f"    columns: {', '.join(c.accept(self, 0) for c in node.columns)}",
             f"    from: {node.from_table}",
         ]
-        for c in node.join_clauses:
-            res.append(c.accept(self, 1))
-        for c in node.where_clauses:
-            res.append(c.accept(self, 1))
+        res.append(node.join_clause.accept(self, 1))
+        res.append(node.where_clause.accept(self, 1))
         return add_indent(res, ctx)
 
     def visitSetStatement(self, node: SetStatement, ctx: int) -> str:

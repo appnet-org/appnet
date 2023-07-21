@@ -43,6 +43,7 @@ class Context:
         self._rust_vars = {}
         self.is_forward = False
         self.proto = proto
+        self.name_mapping: Dict[BackendVariable, str] = {}
 
     def explain(self):
         print("Context.Explain:")

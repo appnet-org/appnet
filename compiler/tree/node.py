@@ -16,7 +16,7 @@ class Node:
     def __str__(self):
         return self.__class__.__name__
 
-    def accept(self, visitor, ctx):
+    def accept(self, visitor, ctx=None):
         class_list = type(self).__mro__
         for cls in class_list:
             func_name = "visit" + cls.__name__
@@ -206,15 +206,15 @@ class SelectStatement(Statement):
         columns: List[ColumnValue],
         from_table: str,
         to_table: str,
-        join_clauses: List[JoinClause],
-        where_clauses: List[WhereClause],
+        join_clause: JoinClause,
+        where_clause: WhereClause,
     ):
         super().__init__()
         self.columns = columns
         self.from_table = from_table
         self.to_table = to_table
-        self.join_clauses = join_clauses
-        self.where_clauses = where_clauses
+        self.join_clause = join_clause[0] if len(join_clause) > 0 else None
+        self.where_clause = where_clause[0] if len(where_clause) > 0 else None
 
 
 class SetStatement(Statement):
