@@ -10,7 +10,7 @@ class ProtoMessage:
         self.name = name
         self.fields = fields
 
-    def gen_readonly(self, proto: str):
+    def gen_readonly_def(self, proto: str):
         ret = []
         for field in self.fields:
             ret.append(
@@ -24,7 +24,6 @@ class ProtoMessage:
             )
         return ret
 
-
 class Proto:
     def __init__(self, name: str, msg: List[ProtoMessage]) -> None:
         self.name = name
@@ -33,17 +32,19 @@ class Proto:
     def namespace(self):
         return self.name
 
-    def gen_readonly(self):
+    def gen_readonly_def(self):
         ret = []
         for msg in self.msg:
-            ret.append("\n".join(msg.gen_readonly(self.name)))
+            ret.append("\n".join(msg.gen_readonly_def(self.name)))
         return ret
 
+    def msg_field_readonly(self, msg: str, field: str, input):
+        return f"{self.name}_{msg}_{field}_readonly({input})"
 
 HelloProto = Proto(
     "hello",
     [
         ProtoMessage("HelloRequest", ["name"]),
-        ProtoMessage("HelloResponse", ["message"]),
+        ProtoMessage("HelloReply", ["message"]),
     ],
 )

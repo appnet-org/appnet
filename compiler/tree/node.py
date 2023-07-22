@@ -197,7 +197,7 @@ class JoinClause(Clause):
     def __init__(self, table_name: str, condition: SearchCondition):
         super().__init__()
         self.table_name = table_name
-        self.condition = condition
+        self.search_condition = condition
 
 
 class SelectStatement(Statement):
@@ -213,8 +213,8 @@ class SelectStatement(Statement):
         self.columns = columns
         self.from_table = from_table
         self.to_table = to_table
-        self.join_clause = join_clause[0] if len(join_clause) > 0 else None
-        self.where_clause = where_clause[0] if len(where_clause) > 0 else None
+        self.join_clause = join_clause
+        self.where_clause = where_clause
 
 
 class SetStatement(Statement):

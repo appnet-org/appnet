@@ -19,16 +19,16 @@ class ADNTransformer(Transformer):
         return CreateTableAsStatement(c[0]["table_name"], c[1])
 
     def select_statement(self, s):
-        join_clauses, where_clauses = [], []
+        join_clause, where_clause = None, None 
         for clause in s[2:]:
             if clause.name == "WhereClause":
-                where_clauses.append(clause)
+                where_clause = clause
             elif clause.name == "JoinClause":
-                join_clauses.append(clause)
+                join_clause = clause
             else:
                 raise ValueError("Unrecognized clause")
         return SelectStatement(
-            s[0], s[1]["table_name"], "", join_clauses, where_clauses
+            s[0], s[1]["table_name"], "", join_clause, where_clause
         )
 
     def set_statement(self, n):

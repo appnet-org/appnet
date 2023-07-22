@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mrpc_dir",
         type=str,
-        default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
+        default=f"../../phoenix/experimental/mrpc",
     )
     parser.add_argument(
         "-o", "--output", type=str, help="Output type: ast, ir, mrpc", default="mrpc"
@@ -118,7 +118,9 @@ if __name__ == "__main__":
             init, process = elem.sql
             init, process = compiler.transform(init), compiler.transform(process)
             ctx = init_ctx()
-            init, process = compiler.gen(init, ctx), compiler.gen(process, ctx)
+            init = compiler.gen(init, ctx)
+            process = compiler.gen(process, ctx)
+            ctx.explain()
             os.system("mkdir -p ./generated/ir")
             with open(os.path.join(COMPILER_ROOT, f"generated/ir/{engine_name}.rs"), "w") as f:
                 f.write("// def code\n")

@@ -272,8 +272,10 @@ def init_ctx() -> Context:
     output_vec = RustVariable(
         "output", RustContainerType("Vec", tx_struct), True, None, OutputTable
     )
-    return Context([InputTable, OutputTable], [input_vec, output_vec], HelloProto)
+    ret = Context([InputTable, OutputTable], [input_vec, output_vec], HelloProto)
+    ret.def_code += ret.proto.gen_readonly_def()
 
+    return ret
     # def init_ctx():
     return {
         "tables": {

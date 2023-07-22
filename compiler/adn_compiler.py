@@ -39,6 +39,11 @@ class ADNCompiler:
 
         init, process = self.transform(init), self.transform(process)
         # todo verbose
-        init, process = self.gen(init, ctx), self.gen(process, ctx)
-
+        init = self.gen(init, ctx)
+        while ctx.empty() is False:
+            ctx.init_code.append(ctx.pop_code())
+        ctx.current = "process"
+        process = self.gen(process, ctx)
+        while ctx.empty() is False:
+            ctx.process_code.append(ctx.pop_code())
         return finalize(elem.name, ctx, output_dir)
