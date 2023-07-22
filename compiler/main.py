@@ -18,7 +18,8 @@ from compiler.tree.visitor import *
 def preprocess(sql_file: str) -> Tuple[str, str]:
     with open(os.path.join(ADN_ROOT, f"elements/{sql_file}"), "r") as file:
         sql_file_content = file.read()
-
+    print(sql_file, ":")
+    print(sql_file_content)
     # Remove comments from the SQL file
     sql_file_content = re.sub(
         r"/\*.*?\*/", "", sql_file_content, flags=re.DOTALL
@@ -76,13 +77,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mrpc_dir",
         type=str,
-        default=f"/users/{os.getlogin()}/phoenix/experimental/mrpc",
+        default=f"../../phoenix/experimental/mrpc",
+    )
+    parser.add_argument(
+        "-o", "--output", type=str, help="Output type: ast, ir, mrpc", default="mrpc"
     )
     args = parser.parse_args()
     mrpc_dir = os.path.abspath(args.mrpc_dir)
 
     engine_name = [i.strip() for i in args.engine.split("->")]
-    print("Engines: ", engine_name)
+    print("Engines:", engine_name)
+    print("Output:", args.output)
     compiler = ADNCompiler(args.verbose)
 
     elems: List[Element] = []
@@ -99,10 +104,37 @@ if __name__ == "__main__":
 
     graph = Graph(elems, edges)
 
+    printer = Printer()
+
     for elem in graph:
-        compiler.compile(elem, mrpc_dir)
+        if args.output == "ast":
+            print(elem.name, ":")
+            init, process = elem.sql
+            init, process = compiler.transform(init), compiler.transform(process)
+            printer.visitRoot(init)
+            printer.visitRoot(process)
+        elif args.output == "ir":
+            print(elem.name, ":")
+            init, process = elem.sql
+            init, process = compiler.transform(init), compiler.transform(process)
+            ctx = init_ctx()
+            init = compiler.gen(init, ctx)
+            process = compiler.gen(process, ctx)
+            ctx.explain()
+            os.system("mkdir -p ./generated/ir")
+            with open(os.path.join(COMPILER_ROOT, f"generated/ir/{engine_name}.rs"), "w") as f:
+                f.write("// def code\n")
+                f.write("\n".join(ctx.def_code))
+                f.write("// init code\n")
+                f.write("\n".join(ctx.init_code))
+                f.write("// process code\n")
+                f.write("\n".join(ctx.process_code))
+        else:         
+            print(elem.name, ":")
+            compiler.compile(elem, mrpc_dir)
 
-    ctx = graph.gen_toml()
-    finalize_graph(ctx, mrpc_dir)
+    if args.output == "mrpc":
+        ctx = graph.gen_toml()
+        finalize_graph(ctx, mrpc_dir)
 
-    print("All Done!")
+    print("Done!")

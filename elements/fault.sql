@@ -1,7 +1,7 @@
 /*
 Initialization:
 */
-SET probability = 0.2;
+SET probability = 0.9;
 
 --processing--
 

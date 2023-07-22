@@ -16,7 +16,7 @@ class Node:
     def __str__(self):
         return self.__class__.__name__
 
-    def accept(self, visitor, ctx):
+    def accept(self, visitor, ctx=None):
         class_list = type(self).__mro__
         for cls in class_list:
             func_name = "visit" + cls.__name__
@@ -171,7 +171,7 @@ class LogicalOp(Operator):
 
 class SearchCondition(Node):
     def __init__(
-        self, lvalue: SearchCondition, rvalue: SearchCondition, operator: Operator
+        self, lvalue: SearchCondition or Value, rvalue: SearchCondition or Value, operator: Operator
     ):
         self.lvalue = lvalue
         self.rvalue = rvalue
@@ -194,11 +194,10 @@ class WhereClause(Clause):
 
 
 class JoinClause(Clause):
-    def __init__(self, table_name: str, lvalue: Value, rvalue: Value):
+    def __init__(self, table_name: str, condition: SearchCondition):
         super().__init__()
         self.table_name = table_name
-        self.lvalue = lvalue
-        self.rvalue = rvalue
+        self.search_condition = condition
 
 
 class SelectStatement(Statement):
@@ -207,15 +206,15 @@ class SelectStatement(Statement):
         columns: List[ColumnValue],
         from_table: str,
         to_table: str,
-        join_clauses: List[JoinClause],
-        where_clauses: List[WhereClause],
+        join_clause: JoinClause,
+        where_clause: WhereClause,
     ):
         super().__init__()
         self.columns = columns
         self.from_table = from_table
         self.to_table = to_table
-        self.join_clauses = join_clauses
-        self.where_clauses = where_clauses
+        self.join_clause = join_clause
+        self.where_clause = where_clause
 
 
 class SetStatement(Statement):

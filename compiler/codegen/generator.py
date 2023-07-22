@@ -5,20 +5,23 @@ Module that defines the base type of visitor.
 
 from __future__ import annotations
 
-from typing import Callable, List, Protocol, Sequence, TypeVar
+from typing import Callable, List, Protocol, Sequence, TypeVar, Optional
 
 from codegen.codegen import init_ctx
 from codegen.context import *
 from codegen.snippet import *
 from tree.node import *
-from tree.node import InsertSelectStatement, SelectStatement
+from tree.node import ColumnValue, InsertSelectStatement, InsertValueStatement, SelectStatement
 from tree.visitor import Visitor
 
 
 class RustTypeGenerator(Visitor):
     def visitNumberValue(self, node: NumberValue, ctx=None) -> RustType:
         return RustBasicType("f32", node.value)
-
+    
+    def visitStringValue(self, node: StringValue, ctx=None) -> RustType:
+        val = node.value.replace("\'", "")
+        return RustBasicType("String", f"String::from(\"{val}\")")
 
 class CodeGenerator(Visitor):
     def __init__(self):
@@ -27,7 +30,11 @@ class CodeGenerator(Visitor):
 
     def visitRoot(self, node: List[Statement], ctx: Context) -> None:
         for statement in node:
-            statement.accept(self, ctx)
+            try:
+                statement.accept(self, ctx)
+            except Exception as e:
+                print(statement)
+                raise e
 
     def visitCreateTableStatement(
         self, node: CreateTableStatement, ctx: Context
@@ -44,7 +51,6 @@ class CodeGenerator(Visitor):
         table = Table(
             table_name, [trans_col(table_name, i) for i in node.columns], rust_struct
         )
-        # print(rust_struct)
         if ctx.tables.get(table_name) is None:
             ctx.tables[table_name] = table
         else:
@@ -135,10 +141,7 @@ class CodeGenerator(Visitor):
         ctx.push_code(code)
 
     def visitSelectStatement(self, node: SelectStatement, ctx: Context):
-        assert len(node.join_clauses) == 0
-
         table_from = node.from_table
-        # print(table_from)
         if ctx.tables.get(table_from) is None:
             raise ValueError("Table does not exist")
         table_from = ctx.tables[table_from]
@@ -152,15 +155,21 @@ class CodeGenerator(Visitor):
             columns = [i for i, _ in table_from.struct.fields]
             columns = [f"req.{i}.clone()" for i in columns]
             columns = ", ".join(columns)
+            vec_from = table_from_name
         elif table_from_name == "input":
             # TODO test protobuf
             columns = [input_mapping(i) for i in columns]
             columns = ", ".join(columns)
+            vec_from = table_from_name
         else:
             columns = [f"req.{i.cname}.clone()" for i in columns]
             columns = ", ".join(columns).replace(
                 "req.CURRENT_TIMESTAMP.clone()", "Utc::now()"
             )
+            vec_from = ctx.rust_vars[table_from_name].name
+
+        if vec_from != "input" and vec_from != "output":
+            vec_from = f"self.{vec_from}"
 
         if node.to_table == "":
             struct = table_from.struct
@@ -171,22 +180,107 @@ class CodeGenerator(Visitor):
             table_to = ctx.tables[table_to_name]
             struct = table_to.struct
 
-        original_rpc = f"{struct.name}::new({columns})"
+        result_rpc = f"{struct.name}::new({columns})"
+        
         if ctx.is_forward:
-            send_logic = f"RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage({original_rpc}))"
+            send_logic = """let raw_ptr: *const hello::HelloRequest = rpc_message;
+                                        let new_msg = RpcMessageTx {
+                                            meta_buf_ptr: req.meta_buf_ptr.clone(),
+                                            addr_backend: raw_ptr.addr(),
+                                        };
+                                        RpcMessageGeneral::TxMessage(EngineTxMessage::RpcMessage(
+                                            new_msg,
+                                        ))"""
         else:
-            send_logic = original_rpc
+            send_logic = result_rpc
 
-        rpc_id = "RpcId::new(unsafe {&*req.meta_buf_ptr.as_meta_ptr()}.conn_id, unsafe {&*req.meta_buf_ptr.as_meta_ptr()}.call_id)"
-        error_rpc = f"let error = EngineRxMessage::Ack({rpc_id}, TransportStatus::Error(unsafe {{NonZeroU32::new_unchecked(403)}}),); RpcMessageGeneral::RxMessage(error)"
+        prelude ="""let rpc_message = materialize_nocopy(&req);
+            let conn_id = unsafe { &*req.meta_buf_ptr.as_meta_ptr() }.conn_id;
+            let call_id = unsafe { &*req.meta_buf_ptr.as_meta_ptr() }.call_id;
+            let rpc_id = RpcId::new(conn_id, call_id);"""
 
-        for where_clause in node.where_clauses:
-            where_clause.search_condition.accept(self, ctx)
-            cond_str = ctx.pop_code()
-            send_logic = f"if !({cond_str}) {{ {error_rpc} }} else {{ {send_logic} }}"
+        drop_logic = f"let error = EngineRxMessage::Ack(rpc_id, TransportStatus::Error(unsafe {{NonZeroU32::new_unchecked(403)}}),); RpcMessageGeneral::RxMessage(error)"
+        break_logic = "RpcMessageGeneral::Pass"
+        
+        where = node.where_clause
+        join = node.join_clause
+        
+        ctx.name_mapping["rpc"] = "rpc_message"
+        ctx.name_mapping[table_from_name] = "req"
 
-        code = f"{table_from_name}.iter().map(|req| {send_logic}).collect::<Vec<_>>()"
+        if join is not None:
+            
+            table_join = join.table_name
+            if ctx.tables.get(table_join) is None:
+                raise ValueError("Table does not exist")
+            vec_join = ctx.rust_vars[table_join].name
+            
+            if vec_join != "input" and vec_join != "output":
+                vec_join = f"self.{vec_join}"
+            
+            ctx.name_mapping[table_join] = "join"
+            
+            join.search_condition.accept(self, ctx)
+            
+            
+            join_str = ctx.pop_code()
 
+            # TODO! this is correct only if join is over all input rpcs, 
+            # TODO! further check is needed for other cases
+            if where is not None:
+                where.search_condition.accept(self, ctx)
+                where_str = ctx.pop_code()    
+                send_logic = f"if ({where_str}) {{ {send_logic} }} else {{ {drop_logic} }}"
+                send_logic = f"if ({join_str}) {{ {send_logic} }} else {{ {break_logic} }}"
+            else:
+                send_logic = f"if ({join_str}) {{ {send_logic} }} else {{ {break_logic} }}"
+            
+            ctx.name_mapping.pop(table_join)
+
+            code = f"iproduct!({vec_from}.iter(), {vec_join}.iter()).map(|(req, join)| {{ {prelude} {send_logic} }}).collect()"
+        else:
+
+            if where is not None:
+                where.search_condition.accept(self, ctx)
+                where_str = ctx.pop_code()
+                send_logic = f"if ({where_str}) {{ {send_logic} }} else {{ {drop_logic} }}"
+            else:
+                pass
+            code = f"{vec_from}.iter().map(|req| {{ {prelude} {send_logic} }}).collect()"
+
+        ctx.name_mapping.pop("rpc")
+        ctx.name_mapping.pop(table_from_name)
+        code = code
+        ctx.push_code(code)
+
+    def visitInsertValueStatement(self, node: InsertValueStatement, ctx: Context):
+        table_name = node.table_name
+
+        table = ctx.tables.get(table_name)
+        if table is None:
+            raise ValueError("Table does not exist")
+
+        var_name = ctx.rust_vars[table_name].name
+        
+        if var_name != "output" and ctx.current == "process":
+            var_name = f"self.{var_name}"
+            
+        struct = table.struct
+        
+        fields = struct.fields
+        fields = [i[0] for i in fields]
+        
+        columns = [i.column_name for i in node.columns]
+        values: List[List[RustBasicType]] = [[j.accept(self.type_generator) for j in i] for i in node.values]
+        
+        code = ""
+        for value in values:
+            v = [i.gen_init() for i in value]
+            constructor = ""
+            for k, v in zip(columns, v):
+                constructor += f"{k}: {v}, "
+            code += f"{var_name}.push({struct.name}{{{constructor}}});\n"
+        
         ctx.push_code(code)
 
     def visitSetStatement(self, node: SetStatement, ctx: Context):
@@ -214,17 +308,61 @@ class CodeGenerator(Visitor):
         var_str = f"self.{node.value}"
         ctx.push_code(var_str)
 
+    def visitColumnValue(self, node: ColumnValue, ctx: Context):
+        tname, cname = node.table_name, node.column_name
+        if ctx.tables.get(tname) is None:
+            raise Exception(f"Table {tname} does not exist")
+        struct = ctx.tables[tname].struct
+        fields = struct.fields
+        if tname == "input":
+            #todo also check meta fields
+            input_name = ctx.name_mapping["rpc"]
+            for msg in ctx.proto.msg:
+                #todo add info for msg type
+                for field in msg.fields:
+                    if field == cname:
+                        right = ctx.proto.msg_field_readonly(msg.name, field, input_name)
+                        ctx.push_code(right) 
+                        return 
+        else:
+            right = cname
+            if cname not in [i[0] for i in fields]:
+                raise Exception(f"Column {cname} does not exist in table {tname}")
+
+        if ctx.name_mapping.get(tname) is not None:
+            left = ctx.name_mapping[tname]
+        else:
+            table_var: RustVariable = ctx.rust_vars[tname]
+            left = f"self.{table_var.name}"
+            
+        ctx.push_code(f"{left}.{right}")
+    
+    def visitStringValue(self, node: StringValue, ctx: Context):
+        code = node.value.replace("\'", "")
+        ctx.push_code(f"String::from(\"{code}\")")
+        
     def visitLogicalOp(self, node: LogicalOp, ctx: Context):
         if node == LogicalOp.AND:
             op_str = "&&"
         elif node == LogicalOp.OR:
             op_str = "||"
-
+        else:
+            raise NotImplementedError
         ctx.push_code(op_str)
 
     def visitCompareOp(self, node: CompareOp, ctx: Context):
-        if node == CompareOp.LT:
+        if node == CompareOp.EQ:
+            op_str = "=="
+        elif node == CompareOp.NE:
+            op_str = "!="
+        elif node == CompareOp.LT:
             op_str = "<"
+        elif node == CompareOp.LE:
+            op_str = "<="
+        elif node == CompareOp.GT:
+            op_str = ">"
+        elif node == CompareOp.GE:
+            op_str = ">="   
         else:
             raise NotImplementedError
 

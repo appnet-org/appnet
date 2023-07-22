@@ -37,12 +37,15 @@ class Context:
         self._init_code = []
         self._process_code = []
         self._tables = {}
+        self._temp_code = []
         for i in tables:
             self._tables[i.name] = i
         self._sql_vars = {}
         self._rust_vars = {}
         self.is_forward = False
         self.proto = proto
+        self.name_mapping: Dict[str, str] = {}
+        self.current: str = "init"
 
     def explain(self):
         print("Context.Explain:")
@@ -102,11 +105,15 @@ class Context:
             ret.append(i.gen_struct_declaration())
         return ret
 
+    def empty(self) -> bool:
+        return len(self._temp_code) == 0
+
     def push_code(self, code: str):
-        self.process_code.append(code)
+        self._temp_code.append(code)
 
     def pop_code(self) -> str:
-        return self.process_code.pop()
+        assert(not self.empty())
+        return self._temp_code.pop()
 
     @property
     def def_code(self) -> List[str]:
