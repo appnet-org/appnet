@@ -1,0 +1,34 @@
+graphspec: (declaration | order)*
+
+declaration: "[" element_name "," configs "," properties "]"
+
+element_name: CNAME
+
+configs: "(" config? ("," config)* ")"
+
+config: config_name "=" config_value
+
+config_name: CNAME
+
+config_value: CNAME | NUMBER
+
+properties: "(" property? ("," property)* ")"
+
+property: bool_property | string_property
+
+bool_property: bpname "=" ("True" | "False")
+
+string_property: spname "=" CNAME
+
+bpname: "drop" | "modify" | "state" | "record"
+
+spname: "read" | "write"
+
+order: element_name "->" element_name ";"
+
+%import common.SIGNED_NUMBER -> NUMBER
+%import common.WS
+%import common.SH_COMMENT
+%import common.CNAME
+%ignore WS
+%ignore SH_COMMENT
