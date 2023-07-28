@@ -4,7 +4,7 @@ declaration: "[" element_name "," configs "," properties "]"
 
 element_name: CNAME
 
-configs: "(" config? ("," config)* ")"
+configs: "config=(" config? ("," config)* ")"
 
 config: config_name "=" config_value
 
@@ -12,17 +12,22 @@ config_name: CNAME
 
 config_value: CNAME | NUMBER
 
-properties: "(" property? ("," property)* ")"
+properties: "property=(" property? ("," property)* ")"
 
-property: bool_property | string_property
+?property: bool_property | string_property
 
-bool_property: bpname "=" ("True" | "False")
+bool_property: bpname "=" bvalue
 
-string_property: spname "=" CNAME
+bpname: CNAME
 
-bpname: "drop" | "modify" | "state" | "record"
+?bvalue: "True" -> true_value
+      | "False" -> false_value
 
-spname: "read" | "write"
+string_property: spname "=" svalue
+
+spname: CNAME
+
+svalue: "[" CNAME ("," CNAME)* "]"
 
 order: element_name "->" element_name ";"
 
