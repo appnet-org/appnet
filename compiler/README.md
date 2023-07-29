@@ -19,13 +19,13 @@ python3 main.py -e [ENGINE_NAME_CHAIN] --mrpc_dir [MRPC_PATH]
 # python main.py -e "logging->logging" --mrpc_dir ../../phoenix/experimental/mrpc
 ```
 
-- ENGINE_NAME_CHAIN 
+- ENGINE_NAME_CHAIN
   - should be a chain of engine names, separated by `->`. For example, `logging->logging` means that we have two logging engine. `fault->logging` means that we have a fault engine followed by a logging engine. Currently we only support `logging` and `fault`.
 
 - MRPC_PATH
   - which is the path to mRPC repo. It should be something like `${PATH_TO_PHOENIX}/phoenix/experimental/mrpc`.
   - By default it is `/users/${UserName}/phoenix/experimental/mrpc`.
-  
+
 # Overveiw
 
 ```

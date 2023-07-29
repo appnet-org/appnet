@@ -58,6 +58,9 @@ class Visitor(ABC):
     def visitWhereClause(self, node: WhereClause, ctx):
         pass
 
+    def visitExpression(self, node: Expression, ctx):
+        pass
+
 
 def add_indent(slist: List[str], indent: int) -> str:
     return "\n".join(map(lambda s: " " * 4 * indent + s, slist))

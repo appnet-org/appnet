@@ -50,9 +50,10 @@ class NumberValue(Value):
 
 
 class FunctionValue(Value):
-    def __init__(self, func_name: str):
+    def __init__(self, func_name: str, parameters: List[Value]):
         super().__init__()
         self.value = func_name
+        self.parameters = parameters
 
 
 class VariableValue(Value):
@@ -169,9 +170,19 @@ class LogicalOp(Operator):
     OR = 2
 
 
+class ArithmeticOp(Operator):
+    ADD = 1
+    SUB = 2
+    MUL = 3
+    DIV = 4
+
+
 class SearchCondition(Node):
     def __init__(
-        self, lvalue: SearchCondition or Value, rvalue: SearchCondition or Value, operator: Operator
+        self,
+        lvalue: SearchCondition or Value,
+        rvalue: SearchCondition or Value,
+        operator: Operator,
     ):
         self.lvalue = lvalue
         self.rvalue = rvalue
@@ -208,6 +219,8 @@ class SelectStatement(Statement):
         to_table: str,
         join_clause: JoinClause,
         where_clause: WhereClause,
+        aggregator: Aggregator,
+        limit: Value,
     ):
         super().__init__()
         self.columns = columns
@@ -215,11 +228,36 @@ class SelectStatement(Statement):
         self.to_table = to_table
         self.join_clause = join_clause
         self.where_clause = where_clause
+        self.aggregator = aggregator
+        self.limit = limit
 
 
 class SetStatement(Statement):
-    def __init__(self, variable: VariableValue, value: Value):
+    def __init__(self, variable: VariableValue, expr: Expression):
         super().__init__()
         self.variable = variable
-        self.value = value
-        self.variable.data_type = self.value.data_type
+        self.expr = expr
+        self.variable.data_type = self.expr.data_type
+
+
+class Expression(Value):
+    def __init__(
+        self,
+        lvalue: Expression or Value,
+        rvalue: Expression or Value,
+        operator: Operator,
+    ):
+        self.lvalue = lvalue
+        self.rvalue = rvalue
+        self.operator = operator
+        self.value = None
+        assert self.lvalue.data_type == self.rvalue.data_type
+        self.data_type = self.lvalue.data_type
+
+
+class Aggregator(Operator):
+    COUNT = 1
+    SUM = 2
+    AVG = 3
+    MIN = 4
+    MAX = 5

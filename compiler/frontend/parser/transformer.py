@@ -18,20 +18,23 @@ class ADNTransformer(Transformer):
     def create_table_as_statement(self, c):
         return CreateTableAsStatement(c[0]["table_name"], c[1])
 
-    def select_statement(self, s):
-        join_clause, where_clause = None, None 
-        for clause in s[2:]:
-            if clause.name == "WhereClause":
-                where_clause = clause
-            elif clause.name == "JoinClause":
-                join_clause = clause
-            else:
-                raise ValueError("Unrecognized clause")
+    def normal_select_statement(self, s):
+        join_clause, where_clause, limit = s[2], s[3], s[4]
         return SelectStatement(
-            s[0], s[1]["table_name"], "", join_clause, where_clause
+            s[0], s[1]["table_name"], "", join_clause, where_clause, None, limit
         )
 
+    def aggregated_select_statement(self, s):
+        aggregator, join_clause, where_clause, limit = s[0], s[3], s[4], s[5]
+        return SelectStatement(
+            s[1], s[2]["table_name"], "", join_clause, where_clause, aggregator, limit
+        )
+
+    def limit(self, l):
+        return l[0]
+
     def set_statement(self, n):
+        # print(n)
         (n,) = n
         self.variables[n["variable"].value] = n["value"]
         return SetStatement(n["variable"], n["value"])
@@ -71,6 +74,23 @@ class ADNTransformer(Transformer):
         }
         # print("assignment", n)
         return res
+
+    def expression(self, e):
+        # print("expression", e)
+        return e[0]
+
+    def add_expression(self, e):
+        # print("add_expression", e)
+        return Expression(e[0], e[1], ArithmeticOp.ADD)
+
+    def sub_expression(self, e):
+        return Expression(e[0], e[1], ArithmeticOp.SUB)
+
+    def mul_expression(self, e):
+        return Expression(e[0], e[1], ArithmeticOp.MUL)
+
+    def div_expression(self, e):
+        return Expression(e[0], e[1], ArithmeticOp.DIV)
 
     def data_type(self, d):
         (d,) = d
@@ -141,8 +161,14 @@ class ADNTransformer(Transformer):
     def random_func(self, r):
         return "random"
 
+    def parameters(self, p):
+        if p[0] == None:
+            return []
+        else:
+            return p
+
     def function(self, f):
-        return FunctionValue(f[0])
+        return FunctionValue(f[0], f[1])
 
     def comparison_condition(self, c):
         return SearchCondition(c[0], c[2], c[1])
@@ -187,4 +213,21 @@ class ADNTransformer(Transformer):
 
     def column_field(self, c):
         return ColumnValue(c[0]["table_name"], c[1])
-    
+
+    def aggregator(self, a):
+        return a[0]
+
+    def count(self, c):
+        return Aggregator.COUNT
+
+    def sum(self, s):
+        return Aggregator.SUM
+
+    def avg(self, a):
+        return Aggregator.AVG
+
+    def max(self, m):
+        return Aggregator.MAX
+
+    def min(self, m):
+        return Aggregator.MIN

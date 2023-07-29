@@ -122,14 +122,16 @@ if __name__ == "__main__":
             process = compiler.gen(process, ctx)
             ctx.explain()
             os.system("mkdir -p ./generated/ir")
-            with open(os.path.join(COMPILER_ROOT, f"generated/ir/{engine_name}.rs"), "w") as f:
+            with open(
+                os.path.join(COMPILER_ROOT, f"generated/ir/{engine_name}.rs"), "w"
+            ) as f:
                 f.write("// def code\n")
                 f.write("\n".join(ctx.def_code))
                 f.write("// init code\n")
                 f.write("\n".join(ctx.init_code))
                 f.write("// process code\n")
                 f.write("\n".join(ctx.process_code))
-        else:         
+        else:
             print(elem.name, ":")
             compiler.compile(elem, mrpc_dir)
 

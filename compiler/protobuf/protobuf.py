@@ -24,6 +24,7 @@ class ProtoMessage:
             )
         return ret
 
+
 class Proto:
     def __init__(self, name: str, msg: List[ProtoMessage]) -> None:
         self.name = name
@@ -40,6 +41,7 @@ class Proto:
 
     def msg_field_readonly(self, msg: str, field: str, input):
         return f"{self.name}_{msg}_{field}_readonly({input})"
+
 
 HelloProto = Proto(
     "hello",

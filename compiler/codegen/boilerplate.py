@@ -2,6 +2,7 @@ include = r"""
 use chrono::prelude::*;
 use itertools::iproduct;
 use rand::Rng;
+use minstant::Instant;
 
 """
 
@@ -10,6 +11,7 @@ use chrono::{{Datelike, Timelike, Utc}};
 use phoenix_common::log;
 use serde::{{Deserialize, Serialize}};
 {Include}
+{GlobalFunctionInclude}
 {InternalStatesDeclaration}
 
 
@@ -99,6 +101,7 @@ use super::engine::{TemplateNameFirstCap}Engine;
 use crate::config::{{create_log_file, {TemplateNameFirstCap}Config}};
 {InternalStatesDeclaration}
 {Include}
+{GlobalFunctionInclude}
 
 pub(crate) struct {TemplateNameFirstCap}EngineBuilder {{
     node: DataPathNode,

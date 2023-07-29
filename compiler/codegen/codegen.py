@@ -273,8 +273,10 @@ def init_ctx() -> Context:
         "output", RustContainerType("Vec", tx_struct), True, None, OutputTable
     )
     ret = Context([InputTable, OutputTable], [input_vec, output_vec], HelloProto)
+    for _, func in RustGlobalFunctions.items():
+        ret.def_code.append(func.gen_def())
     ret.def_code += ret.proto.gen_readonly_def()
-
+    ret.global_func = RustGlobalFunctions
     return ret
     # def init_ctx():
     return {
