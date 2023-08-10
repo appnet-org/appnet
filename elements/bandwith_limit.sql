@@ -9,6 +9,6 @@ SET last_ts = CUR_TS();
 SET size = SELECT meta_size FROM input LIMIT 1; 
 SET limit = MIN((SELECT COUNT(*) FROM input) * size, tokens);
 SET tokens = tokens - limit * size;
-CREATE TABLE output AS SELECT * FROM input LIMIT limit;
+INSERT INTO output SELECT * FROM input LIMIT limit;
 
 
