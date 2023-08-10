@@ -20,6 +20,6 @@ INSERT INTO acl (name, permission) VALUES ('Apple', 'N') ('Banana', 'Y');
 /*
 Processing Logic: block users that do not have permission
 */
-CREATE TABLE output AS
+INSERT INTO output
 SELECT * FROM input JOIN acl ON input.name = acl.name
 WHERE acl.permission = 'Y';

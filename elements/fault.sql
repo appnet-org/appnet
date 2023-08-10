@@ -8,5 +8,5 @@ SET probability = 0.9;
 /*
   Processing Logic: Drop requests based on the preset probability
 */
-CREATE TABLE output AS
+INSERT INTO output 
 SELECT * FROM input WHERE random() < probability;
