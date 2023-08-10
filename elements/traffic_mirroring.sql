@@ -4,14 +4,14 @@
 Initilization:
  NOTE: this can be store as a table so that there can be multiple mirroring rules
 */
-SET @service_name = service_name
+SET mirror = "service_address"
 
 /*
   Processing Logic:
 */
-CREATE TABLE output AS
-SELECT *
-FROM input
-UNION ALL
-SELECT *, @service_name AS dst_svc
-FROM input;
+
+INSERT INTO output SELECT * FROM input;
+UPDATE output SET meta_dst = mirror;
+
+INSERT INTO output SELECT * FROM input;
+

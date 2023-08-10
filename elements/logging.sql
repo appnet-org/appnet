@@ -23,5 +23,5 @@ INSERT INTO rpc_events_file (timestamp, type, source, destination, rpc)
 SELECT CURRENT_TIMESTAMP, event_type, src, dst, rpc
 FROM input;
 
-CREATE TABLE output AS
+INSERT INTO output 
 SELECT * FROM input;
