@@ -1,0 +1,51 @@
+app_structure:
+    - "FrontEnd->Search"
+    - "FrontEnd->Reservation"
+    - "FrontEnd->Recommendation"
+    - "FrontEnd->User"
+    - "Search->Profile"
+    - "Search->Geo"
+    - "Search->Rate"
+ingress:
+    Recommendation:
+    -
+        func: "Metrics"
+        config:
+            type: "count"
+            field: "status"
+        position: "S"
+egress:
+    FrontEnd:
+    -
+        func: "RateLimit"
+        config:
+            bucket_size: 10
+            fill_interval: 60
+        position: "C"
+    -
+        func: "LoadBalancing"
+        config:
+            strategy: "sticky"
+        position: "C"
+edge:
+    FrontEnd->Recommendation:
+    -
+        func: "RetryTimeout"
+        config:
+            timeout: 10
+            retry: 3
+        position: "C"
+    -
+        func: "AdmissionControl"
+        config:
+            strategy: "SuccessRate"
+        position: "C/S"
+link:
+    FrontEnd->Recommendation:
+    -
+        func1: "Compressor"
+        config1:
+            library: "gzip"
+        func2: "Decompressor"
+        config2:
+            library: "gzip"

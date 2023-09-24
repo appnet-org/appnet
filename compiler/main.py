@@ -4,7 +4,6 @@ import pathlib
 import re
 import sys
 
-from graph import Graph
 from graph.element import Element
 
 from compiler.adn_compiler import ADNCompiler
@@ -12,6 +11,8 @@ from compiler.codegen.codegen import *
 from compiler.codegen.finalizer import finalize_graph
 from compiler.config import ADN_ROOT, COMPILER_ROOT
 from compiler.frontend.printer import Printer
+from compiler.graph import graph_base_dir
+from compiler.graph.frontend import GCParser
 from compiler.tree.visitor import *
 
 
@@ -71,72 +72,76 @@ if __name__ == "__main__":
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-e", "--engine", type=str, help="(Engine_name ',') *", required=True
+        "-s",
+        "--spec_path",
+        help="User specification file",
+        type=str,
+        default=os.path.join(graph_base_dir, "example_spec/hotel.yml"),
     )
     parser.add_argument("--verbose", help="Print Debug info", action="store_true")
     parser.add_argument(
         "--mrpc_dir",
         type=str,
-        default=f"../../phoenix/experimental/mrpc",
-    )
-    parser.add_argument(
-        "-o", "--output", type=str, help="Output type: ast, ir, mrpc", default="mrpc"
+        default=os.path.join(os.getenv("HOME"), "phoenix/experimental/mrpc"),
     )
     args = parser.parse_args()
-    mrpc_dir = os.path.abspath(args.mrpc_dir)
 
-    engine_name = [i.strip() for i in args.engine.split("->")]
-    print("Engines:", engine_name)
-    print("Output:", args.output)
-    compiler = ADNCompiler(args.verbose)
+    parser = GCParser()
+    parser.parse(args.spec_path)
 
-    elems: List[Element] = []
-    elem_name: List[str] = []
-    for engine in engine_name:
-        name = f"gen_{engine}_{len(elem_name)}"
-        elem_name.append(name)
-        elem = Element(name, preprocess(f"{engine}.sql"), HelloProto)
-        elems.append(elem)
+    # mrpc_dir = os.path.abspath(args.mrpc_dir)
+    # engine_name = [i.strip() for i in args.engine.split("->")]
+    # print("Engines:", engine_name)
+    # print("Output:", args.output)
+    # compiler = ADNCompiler(args.verbose)
 
-    edges: List[Tuple[str, str]] = []
-    for i in range(len(elem_name) - 1):
-        edges.append((elem_name[i], elem_name[(i + 1) % len(elem_name)]))
+    # elems: List[Element] = []
+    # elem_name: List[str] = []
+    # for engine in engine_name:
+    #     name = f"gen_{engine}_{len(elem_name)}"
+    #     elem_name.append(name)
+    #     elem = Element(name, preprocess(f"{engine}.sql"), HelloProto)
+    #     elems.append(elem)
 
-    graph = Graph(elems, edges)
+    # edges: List[Tuple[str, str]] = []
+    # for i in range(len(elem_name) - 1):
+    #     edges.append((elem_name[i], elem_name[(i + 1) % len(elem_name)]))
 
-    printer = Printer()
+    # graph = Graph(elems, edges)
 
-    for elem in graph:
-        if args.output == "ast":
-            print(elem.name, ":")
-            init, process = elem.sql
-            init, process = compiler.transform(init), compiler.transform(process)
-            printer.visitRoot(init)
-            printer.visitRoot(process)
-        elif args.output == "ir":
-            print(elem.name, ":")
-            init, process = elem.sql
-            init, process = compiler.transform(init), compiler.transform(process)
-            ctx = init_ctx()
-            init = compiler.gen(init, ctx)
-            process = compiler.gen(process, ctx)
-            ctx.explain()
-            os.system("mkdir -p ./generated/ir")
-            with open(
-                os.path.join(COMPILER_ROOT, f"generated/ir/{engine_name}.rs"), "w"
-            ) as f:
-                f.write("// def code\n")
-                f.write("\n".join(ctx.def_code))
-                f.write("// init code\n")
-                f.write("\n".join(ctx.init_code))
-                f.write("// process code\n")
-                f.write("\n".join(ctx.process_code))
-        else:
-            print(elem.name, ":")
-            compiler.compile(elem, mrpc_dir)
+    # printer = Printer()
 
-    if args.output == "mrpc":
-        ctx = graph.gen_toml()
-        finalize_graph(ctx, mrpc_dir)
+    # for elem in graph:
+    #     if args.output == "ast":
+    #         print(elem.name, ":")
+    #         init, process = elem.sql
+    #         init, process = compiler.transform(init), compiler.transform(process)
+    #         printer.visitRoot(init)
+    #         printer.visitRoot(process)
+    #     elif args.output == "ir":
+    #         print(elem.name, ":")
+    #         init, process = elem.sql
+    #         init, process = compiler.transform(init), compiler.transform(process)
+    #         ctx = init_ctx()
+    #         init = compiler.gen(init, ctx)
+    #         process = compiler.gen(process, ctx)
+    #         ctx.explain()
+    #         os.system("mkdir -p ./generated/ir")
+    #         with open(
+    #             os.path.join(COMPILER_ROOT, f"generated/ir/{engine_name}.rs"), "w"
+    #         ) as f:
+    #             f.write("// def code\n")
+    #             f.write("\n".join(ctx.def_code))
+    #             f.write("// init code\n")
+    #             f.write("\n".join(ctx.init_code))
+    #             f.write("// process code\n")
+    #             f.write("\n".join(ctx.process_code))
+    #     else:
+    #         print(elem.name, ":")
+    #         compiler.compile(elem, mrpc_dir)
 
-    print("Done!")
+    # if args.output == "mrpc":
+    #     ctx = graph.gen_toml()
+    #     finalize_graph(ctx, mrpc_dir)
+
+    # print("Done!")
