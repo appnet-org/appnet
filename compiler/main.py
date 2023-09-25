@@ -13,6 +13,7 @@ from compiler.config import ADN_ROOT, COMPILER_ROOT
 from compiler.frontend.printer import Printer
 from compiler.graph import graph_base_dir
 from compiler.graph.frontend import GCParser
+from compiler.graph.graphir import GraphIR
 from compiler.tree.visitor import *
 
 

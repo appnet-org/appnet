@@ -2,13 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-global_element_id = 0
-
-
-def fetch_global_id():
-    global global_element_id
-    global_element_id += 1
-    return global_element_id
+from compiler.graph.graphir.element import AbsElement
 
 
 class GraphIR:
@@ -24,7 +18,7 @@ class GraphIR:
         # determine an initial client-server boundary
         # principle:
         # - valid ("C" goes to client, "S" goes to server)
-        # - #element of c/s sides are as close as possible
+        # - balanced #element on c/s sides
         c_id, s_id = 0, len(chain)
         for i, element in enumerate(chain):
             if element["position"] == "C":
@@ -60,14 +54,3 @@ class GraphIR:
         s += " (network) "
         s += " -> ".join(map(str, self.server_elements))
         return s
-
-
-class AbsElement:
-    def __init__(self, edict: Dict[str, Any]):
-        self.id = fetch_global_id()
-        self.func = edict["func"]
-        self.config = edict["config"]
-        self.position = edict["position"]
-
-    def __str__(self):
-        return self.func
