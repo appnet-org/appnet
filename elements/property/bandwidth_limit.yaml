@@ -1,0 +1,5 @@
+request:
+    read:
+    - "meta_size"
+    - "count"
+response:

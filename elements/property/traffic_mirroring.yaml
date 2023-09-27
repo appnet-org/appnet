@@ -1,0 +1,5 @@
+request:
+    copy: True
+    maywrite:
+    - "dst"
+response:
