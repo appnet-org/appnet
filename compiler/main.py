@@ -85,10 +85,14 @@ if __name__ == "__main__":
         type=str,
         default=os.path.join(os.getenv("HOME"), "phoenix/experimental/mrpc"),
     )
+    parser.add_argument("--pseudo_element", action="store_true")
     args = parser.parse_args()
 
     parser = GCParser()
-    parser.parse(args.spec_path)
+    graphir = parser.parse(args.spec_path)
+
+    for gir in graphir.values():
+        gir.optimize(args.pseudo_element)
 
     # mrpc_dir = os.path.abspath(args.mrpc_dir)
     # engine_name = [i.strip() for i in args.engine.split("->")]

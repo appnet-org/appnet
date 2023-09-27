@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, Tuple
 
 import yaml
 
@@ -15,7 +15,7 @@ class GCParser:
         self.req_graphir: Dict[str, GraphIR] = dict()
         self.res_graphir: Dict[str, GraphIR] = dict()
 
-    def parse(self, spec_path: str):
+    def parse(self, spec_path: str) -> Dict[str, GraphIR]:
         with open(spec_path, "r") as f:
             spec_dict = yaml.safe_load(f)
         for edge in spec_dict["app_structure"]:
@@ -24,6 +24,7 @@ class GCParser:
             self.services.add(client)
             self.services.add(server)
             self.app_edges.append((client, server))
+        graphir: Dict[str, GraphIR] = dict()
         for client, server in self.app_edges:
             chain, pair, eid = [], [], f"{client}->{server}"
             # client's egress
@@ -39,5 +40,5 @@ class GCParser:
             if f"{client}->{server}" in spec_dict["link"]:
                 pair.extend(spec_dict["link"][eid])
             if len(chain) + len(pair) > 0:
-                self.req_graphir[eid] = GraphIR(client, server, chain, pair, "request")
-                self.res_graphir[eid] = GraphIR(client, server, chain, pair, "response")
+                graphir[eid] = GraphIR(client, server, chain, pair)
+        return graphir

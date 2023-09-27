@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+import os
+from typing import Any, Dict, List
+
+import yaml
+
+from compiler.graph import adn_base_dir
 
 global_element_id = 0
 
@@ -8,15 +13,47 @@ global_element_id = 0
 def fetch_global_id() -> str:
     global global_element_id
     global_element_id += 1
-    return "Element" + str(global_element_id)
+    return global_element_id
 
 
 class AbsElement:
     def __init__(self, edict: Dict[str, Any]):
         self.id = fetch_global_id()
-        self.func = edict["func"]
-        self.config = edict["config"]
-        self.position = edict["position"]
+        self.name: List[str] = [edict["name"]]
+        self.spec: List[str] = [edict["spec"]]
+        self.config = [edict["config"]]
+        self.position = [edict["position"]]
 
     def __str__(self):
-        return self.func
+        return "+".join(self.name)
+
+    def gen_property(self, pseudo: bool):
+        self.property: Dict[str, Dict[str, Any]] = {
+            "request": dict(),
+            "response": dict(),
+        }
+        if pseudo:
+            # read handwritten properties
+            for spec in self.spec:
+                filename = spec.split("/")[-1].replace("sql", "yaml")
+                with open(
+                    os.path.join(adn_base_dir, "elements/property", filename), "r"
+                ) as f:
+                    current_dict = yaml.safe_load(f)
+                for t in ["request", "response"]:
+                    if current_dict[t] is not None:
+                        for p, value in current_dict["t"].items():
+                            if p not in self.property[t]:
+                                self.property[t][p] = value
+                            elif type(value) == list:
+                                self.property[t][p].extend(value)
+        else:
+            pass
+            # TODO: call element compiler to generate properties
+
+    def fuse(self, other: AbsElement):
+        self.name.extend(other.name)
+        self.spec.extend(other.spec)
+        self.config.extend(other.config)
+        self.position.extend(other.position)
+        # TODO: fuse properties

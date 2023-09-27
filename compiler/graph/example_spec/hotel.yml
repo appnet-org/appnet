@@ -9,7 +9,8 @@ app_structure:
 ingress:
     Recommendation:
     -
-        func: "Metrics"
+        name: "Metrics"
+        spec: "elements/metrics.sql"
         config:
             type: "count"
             field: "status"
@@ -17,35 +18,38 @@ ingress:
 egress:
     FrontEnd:
     -
-        func: "RateLimit"
+        name: "RateLimit"
+        spec: "elements/ratelimit_drop.sql"
         config:
             bucket_size: 10
             fill_interval: 60
         position: "C"
     -
-        func: "LoadBalancing"
+        name: "LoadBalancing"
+        spec: "elements/load_balance_sticky.sql"
         config:
             strategy: "sticky"
         position: "C"
 edge:
     FrontEnd->Recommendation:
     -
-        func: "RetryTimeout"
+        name: "RetryTimeout"
+        spec: "elements/retry_timeout.sql"
         config:
             timeout: 10
             retry: 3
         position: "C"
     -
-        func: "AdmissionControl"
+        name: "AdmissionControl"
+        spec: "elements/admission_control.sql"
         config:
             strategy: "SuccessRate"
         position: "C/S"
 link:
     FrontEnd->Recommendation:
     -
-        func1: "Compressor"
-        config1:
-            library: "gzip"
-        func2: "Decompressor"
-        config2:
+        name1: "Compressor"
+        name2: "Decompressor"
+        spec: "elements/compressor_decompressor.sql"
+        config:
             library: "gzip"
