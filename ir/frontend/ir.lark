@@ -1,0 +1,53 @@
+start: def procedure procedure procedure
+
+def: "internal" "{" declaration* "}"
+
+declaration: identifier ":" type 
+
+identifier: CNAME
+
+type: date_type | "RPC_REQ" | "RPC_RESP" | 
+        "Vec" "<" type ">" | "Map" "<" type "," type ">"
+
+date_type: "int" | "float" | "bool"
+
+procedure: name parameters body 
+
+name: CNAME
+
+parameters: "(" parameter* ")"
+
+parameter: "rpc_req" | "rpc_resp" | identifier
+
+body: "{" stage* "}"
+
+stage: statement | match
+
+statement: (expr | assign | primitive) ";"
+
+match: "match" "(" expr ")" "{" action* "}"
+
+action: pattern "=>" "{" statement* "}"
+
+pattern: "True" | "False" | "Some" "(" identifier ")" | "None"
+
+expr: identifier | method | func | const | expr op expr
+
+method: identifier "." (get | set | delete)
+
+func: identifier "(" parameters ")"
+
+const: CNAME
+
+get: "get" "(" expr ")"
+set: "set" "(" expr "," expr ")"
+delete: "delete" "(" expr ")"
+
+op: "+" | "-" | "*" | "&&" | "||"
+
+%import common.SIGNED_NUMBER -> NUMBER
+%import common.WS
+%import common.SH_COMMENT
+%import common.CNAME
+%ignore WS
+%ignore SH_COMMENT
