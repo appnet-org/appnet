@@ -7,7 +7,7 @@ fn init() {
 }
 
 fn req(rpc_req) {
-	match(acl.get(rpc_req.get('name')) == 'Yes') {
+	match (acl.get(rpc_req.get('name')) == 'Yes') {
 		True => {
 			send(rpc_req, NET);
 		}
