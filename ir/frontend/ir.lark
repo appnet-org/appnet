@@ -38,7 +38,7 @@ pattern: "True" | "False" | "Some" "(" identifier ")" | "None"
 
 expr: identifier | method | func | const | expr op expr | "(" expr ")"
 
-method: expr "." (get | set_ | delete)
+method: expr "." (get | set_ | delete | len | size)
 
 func: identifier arguments 
 
@@ -47,8 +47,10 @@ arguments: "(" (expr | expr ",") *  ")"
 const: CNAME | quoted_string | NUMBER
 
 get: "get" "(" expr ")"
-set_: "set" "(" expr "," expr ")"
+set_: "set" ( "(" expr "," expr ")" | "(" expr ")" )
 delete: "delete" "(" expr ")"
+len: "len()"
+size: "size()"
 
 op: "+" | "-" | "*" | "&&" | "||" | "==" | "!=" | "<" | ">" | "<=" | ">="
 
