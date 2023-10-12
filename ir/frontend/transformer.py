@@ -1,5 +1,5 @@
 from lark import Transformer
-
+from ir.node import *
 
 class IRTransformer(Transformer):
     def __init__(self):
@@ -15,25 +15,35 @@ class IRTransformer(Transformer):
         return d
    
     def identifier(self, i):
+        i = i[0]
         return i
     
     def type_(self, t):
         return t
     
     def data_type(self, d):
+        d = d[0]
         return d
     
     def procedure(self, p):
         return p
     
     def name(self, n):
+        n = n[0]
         return n
     
     def parameters(self, p):
-        return p
+        ret = []
+        for i in p:
+            if i != None:
+                ret.append(i)
+        return ret
     
     def parameter(self, p):
-        return p
+        if len(p) == 1:
+            return p[0]
+        else:
+            return None
     
     def body(self, b):
         return b
@@ -63,6 +73,7 @@ class IRTransformer(Transformer):
         return f
     
     def const(self, c):
+        c = c[0]
         return c
     
     def get(self, g):
@@ -75,4 +86,13 @@ class IRTransformer(Transformer):
         return d
     
     def op(self, o):
+        o = o[0]
         return o
+    
+    def quoted_string(self, s):
+        s = s[0]
+        return s
+    
+    def CNAME(self, c):
+        return c.value
+    

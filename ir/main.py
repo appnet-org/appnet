@@ -4,6 +4,8 @@ import os
 import pathlib
 import re
 import sys
+from pprint import pprint
+
 
 if __name__ == "__main__":
     compiler = IRCompiler()
@@ -26,9 +28,8 @@ if __name__ == "__main__":
     engine = args.engine
     with open(f"../elements/ir/{engine}.rs") as f:
         spec = f.read()
-        print(spec)
         ir = compiler.compile(spec)
-        print(ir)
+        pprint(ir)
         
         
         
