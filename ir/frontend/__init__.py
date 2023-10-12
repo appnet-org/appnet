@@ -14,4 +14,4 @@ class IRCompiler:
         ast = self.parser.parse(spec)
         # print(ast.pretty())
         ir = self.transformer.transform(ast)
-        ir.display()
+        return ir

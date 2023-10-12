@@ -26,28 +26,71 @@ class Node:
     
     
 class Program(Node):
+    def __init__(self, definition: Internal, init: Procedure, req: Procedure, resp: Procedure):
+        self.definition = definition
+        self.init = init
+        self.req = req
+        self.resp = resp
+        
     
 class Internal(Node):
+    def __init__(self, internal: List[Tuple[Identifier, Type]]):
+        self.internal = internal
     
 class Procedure(Node):
+    def __init__(self, name: str, params: List[Identifier], body: List[Statement]):
+        self.name = name
+        self.params = params
+        self.body = body
     
 class Statement(Node):   
+    pass
 
 class Match(Statement):
+    def __init__(self, match: Expr, actions: List[Tuple[Pattern, List[Statement]]]):
+        self.expr = expr
+        self.patterns = patterns
     
 class Assign(Statement):    
+    def __init__(self, left: Identifier, right: Expr):
+        self.left = left
+        self.right = right
     
 class Pattern(Node):
+    def __init__(self, value: Union[Identifier, Literal]):
+        self.value = value
 
 class Expr(Node):
+    def __init__(self, lhs: Expr, op: Operator, rhs: Expr):
+        self.lhs = lhs
+        self.op = op
+        self.rhs = rhs
 
 class Identifier(Node):
+    def __init__(self, name: str):
+        self.name = name
     
 class FuncCall(Node):
+    def __init__(self, name: str, args: List[Expr]):
+        self.name = name
+        self.args = args
     
 class MethodCall(Node):
-    
-    
+    def __init__(self, obj: Identifier, method: MethodType, args: List[Expr]):
+        self.obj = obj
+        self.method = method
+        self.args = args
+        
+class Send(Node):
+    def __init__(self, direction: str, msg: Expr):
+        self.direction = direction
+        self.msg = msg
+
+class Type(Node):
+    def __init__(self, name: str, args: List[Type]):
+        self.name = name
+        self.args = args
+        
 class EnumNode(Enum):
     def accept(self, visitor, ctx):
         class_list = type(self).__mro__
@@ -71,9 +114,9 @@ class Operator(EnumNode):
     GE = 10
     LOR = 11
     LAND = 12
-    OR = 11  # bitwise
-    AND = 12 # bitwise 
-    XOR = 13 # bitwise
+    OR = 13  # bitwise
+    AND = 14 # bitwise 
+    XOR = 15 # bitwise
     
 class DataType(EnumNode):
     INT = 1
@@ -83,4 +126,12 @@ class DataType(EnumNode):
     NONE = 5
     BYTE = 6
     
-    
+class MethodType(EnumNode):
+    GET = 1
+    SET = 2
+    DELETE = 3
+    FOR_EACH = 4
+
+class ContainerType(EnumNode):
+    VEC = 1
+    MAP = 2

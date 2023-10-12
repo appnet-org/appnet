@@ -1,17 +1,18 @@
-start: def procedure procedure procedure
+start: definition procedure procedure procedure
 
-def: "internal" "{" declaration* "}"
+definition: "internal" "{" declaration* "}"
 
-declaration: identifier ":" type 
+declaration: identifier ":" type_ 
 
 identifier: CNAME
 
-type: date_type | "RPC_REQ" | "RPC_RESP" | 
-        "Vec" "<" type ">" | "Map" "<" type "," type ">"
+type_: date_type | "RPC_REQ" | "RPC_RESP" 
+       | "Vec" "<" type_ ">" 
+       | "Map" "<" type_ "," type_ ">"
 
-date_type: "int" | "float" | "bool"
+date_type: "int" | "float" | "bool" | "string"
 
-procedure: name parameters body 
+procedure: "fn" name parameters body 
 
 name: CNAME
 
@@ -25,7 +26,11 @@ stage: statement | match
 
 statement: (expr | assign | primitive) ";"
 
-match: "match" "(" expr ")" "{" action* "}"
+primitive: "send" "(" (expr | err) "," ("APP" | "NET") ")"
+
+assign: identifier ":=" expr
+
+match: "match" "(" expr ")" "{" action* "};"
 
 action: pattern "=>" "{" statement* "}"
 
@@ -33,21 +38,25 @@ pattern: "True" | "False" | "Some" "(" identifier ")" | "None"
 
 expr: identifier | method | func | const | expr op expr
 
-method: identifier "." (get | set | delete)
+method: identifier "." (get | set_ | delete)
 
 func: identifier "(" parameters ")"
 
-const: CNAME
+const: CNAME | quoted_string
 
 get: "get" "(" expr ")"
-set: "set" "(" expr "," expr ")"
+set_: "set" "(" expr "," expr ")"
 delete: "delete" "(" expr ")"
 
-op: "+" | "-" | "*" | "&&" | "||"
+op: "+" | "-" | "*" | "&&" | "||" | "==" | "!=" | "<" | ">" | "<=" | ">="
+
+quoted_string: /'[^']*'/
+
+err: "err" "(" quoted_string ")"
 
 %import common.SIGNED_NUMBER -> NUMBER
 %import common.WS
-%import common.SH_COMMENT
+%import common.CPP_COMMENT
 %import common.CNAME
 %ignore WS
-%ignore SH_COMMENT
+%ignore CPP_COMMENT
