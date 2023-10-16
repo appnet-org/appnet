@@ -8,10 +8,6 @@ class Node:
     def __init__(self):
         pass
 
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
-
     def __str__(self):
         return self.__class__.__name__
 
@@ -48,8 +44,8 @@ class Statement(Node):
 
 class Match(Statement):
     def __init__(self, match: Expr, actions: List[Tuple[Pattern, List[Statement]]]):
-        self.expr = expr
-        self.patterns = patterns
+        self.expr = match
+        self.actions = actions
     
 class Assign(Statement):    
     def __init__(self, left: Identifier, right: Expr):
@@ -87,10 +83,14 @@ class Send(Node):
         self.msg = msg
 
 class Type(Node):
-    def __init__(self, name: str, args: List[Type]):
+    def __init__(self, name: str):
         self.name = name
-        self.args = args
-        
+    
+class Literal(Node):
+    def __init__(self, value: str):
+        self.value = value
+        self.type = DataType.NONE
+
 class EnumNode(Enum):
     def accept(self, visitor, ctx):
         class_list = type(self).__mro__
@@ -130,7 +130,9 @@ class MethodType(EnumNode):
     GET = 1
     SET = 2
     DELETE = 3
-    FOR_EACH = 4
+    SIZE = 4
+    LEN = 5
+    FOR_EACH = 6
 
 class ContainerType(EnumNode):
     VEC = 1
