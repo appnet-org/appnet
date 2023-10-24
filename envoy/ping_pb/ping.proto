@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package ping_pb;
+option go_package = "./ping_pb";
+
+service EchoService {
+  rpc Ping (PingRequest) returns (PingResponse);
+  rpc Pong (PongRequest) returns (PongResponse);
+}
+
+message PingRequest {
+  string body = 1;
+}
+
+message PingResponse {
+    string body = 1;
+}
+
+message PongRequest {
+  string body = 1;
+}
+
+message PongResponse {
+  string body = 1;
+}
