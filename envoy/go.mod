@@ -14,3 +14,7 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923 // indirect
 )
+
+replace github.com/UWNetworksLab/app-defined-networks/envoy/ping_pb => ./ping_pb
+
+replace github.com/UWNetworksLab/app-defined-networks/envoy/pong_pb => ./pong_pb

@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.6.1
-// source: echo_pb/echo.proto
+// source: pong_pb/pong.proto
 
-package echo_pb
+package pong_pb
 
 import (
 	context "context"
@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	EchoService_Echo_FullMethodName  = "/echo_pb.EchoService/Echo"
-	EchoService_Hello_FullMethodName = "/echo_pb.EchoService/Hello"
+	EchoService_PongHello_FullMethodName = "/pong_pb.EchoService/PongHello"
+	EchoService_PongWorld_FullMethodName = "/pong_pb.EchoService/PongWorld"
 )
 
 // EchoServiceClient is the client API for EchoService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EchoServiceClient interface {
-	Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error)
-	Hello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
+	PongHello(ctx context.Context, in *PongHelloRequest, opts ...grpc.CallOption) (*PongHelloResponse, error)
+	PongWorld(ctx context.Context, in *PongWorldRequest, opts ...grpc.CallOption) (*PongWorldResponse, error)
 }
 
 type echoServiceClient struct {
@@ -39,18 +39,18 @@ func NewEchoServiceClient(cc grpc.ClientConnInterface) EchoServiceClient {
 	return &echoServiceClient{cc}
 }
 
-func (c *echoServiceClient) Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error) {
-	out := new(EchoResponse)
-	err := c.cc.Invoke(ctx, EchoService_Echo_FullMethodName, in, out, opts...)
+func (c *echoServiceClient) PongHello(ctx context.Context, in *PongHelloRequest, opts ...grpc.CallOption) (*PongHelloResponse, error) {
+	out := new(PongHelloResponse)
+	err := c.cc.Invoke(ctx, EchoService_PongHello_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *echoServiceClient) Hello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
-	out := new(HelloResponse)
-	err := c.cc.Invoke(ctx, EchoService_Hello_FullMethodName, in, out, opts...)
+func (c *echoServiceClient) PongWorld(ctx context.Context, in *PongWorldRequest, opts ...grpc.CallOption) (*PongWorldResponse, error) {
+	out := new(PongWorldResponse)
+	err := c.cc.Invoke(ctx, EchoService_PongWorld_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +61,8 @@ func (c *echoServiceClient) Hello(ctx context.Context, in *HelloRequest, opts ..
 // All implementations must embed UnimplementedEchoServiceServer
 // for forward compatibility
 type EchoServiceServer interface {
-	Echo(context.Context, *EchoRequest) (*EchoResponse, error)
-	Hello(context.Context, *HelloRequest) (*HelloResponse, error)
+	PongHello(context.Context, *PongHelloRequest) (*PongHelloResponse, error)
+	PongWorld(context.Context, *PongWorldRequest) (*PongWorldResponse, error)
 	mustEmbedUnimplementedEchoServiceServer()
 }
 
@@ -70,11 +70,11 @@ type EchoServiceServer interface {
 type UnimplementedEchoServiceServer struct {
 }
 
-func (UnimplementedEchoServiceServer) Echo(context.Context, *EchoRequest) (*EchoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
+func (UnimplementedEchoServiceServer) PongHello(context.Context, *PongHelloRequest) (*PongHelloResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PongHello not implemented")
 }
-func (UnimplementedEchoServiceServer) Hello(context.Context, *HelloRequest) (*HelloResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Hello not implemented")
+func (UnimplementedEchoServiceServer) PongWorld(context.Context, *PongWorldRequest) (*PongWorldResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PongWorld not implemented")
 }
 func (UnimplementedEchoServiceServer) mustEmbedUnimplementedEchoServiceServer() {}
 
@@ -89,38 +89,38 @@ func RegisterEchoServiceServer(s grpc.ServiceRegistrar, srv EchoServiceServer) {
 	s.RegisterService(&EchoService_ServiceDesc, srv)
 }
 
-func _EchoService_Echo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EchoRequest)
+func _EchoService_PongHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PongHelloRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EchoServiceServer).Echo(ctx, in)
+		return srv.(EchoServiceServer).PongHello(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EchoService_Echo_FullMethodName,
+		FullMethod: EchoService_PongHello_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).Echo(ctx, req.(*EchoRequest))
+		return srv.(EchoServiceServer).PongHello(ctx, req.(*PongHelloRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EchoService_Hello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HelloRequest)
+func _EchoService_PongWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PongWorldRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EchoServiceServer).Hello(ctx, in)
+		return srv.(EchoServiceServer).PongWorld(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EchoService_Hello_FullMethodName,
+		FullMethod: EchoService_PongWorld_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).Hello(ctx, req.(*HelloRequest))
+		return srv.(EchoServiceServer).PongWorld(ctx, req.(*PongWorldRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -129,18 +129,18 @@ func _EchoService_Hello_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var EchoService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "echo_pb.EchoService",
+	ServiceName: "pong_pb.EchoService",
 	HandlerType: (*EchoServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Echo",
-			Handler:    _EchoService_Echo_Handler,
+			MethodName: "PongHello",
+			Handler:    _EchoService_PongHello_Handler,
 		},
 		{
-			MethodName: "Hello",
-			Handler:    _EchoService_Hello_Handler,
+			MethodName: "PongWorld",
+			Handler:    _EchoService_PongWorld_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "echo_pb/echo.proto",
+	Metadata: "pong_pb/pong.proto",
 }

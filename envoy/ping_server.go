@@ -7,7 +7,8 @@ import (
 
 	"golang.org/x/net/context"
 
-	echo "github.com/UWNetworksLab/app-defined-networks/envoy/echo_pb"
+	ping "github.com/UWNetworksLab/app-defined-networks/envoy/ping_pb"
+	pong "github.com/UWNetworksLab/app-defined-networks/envoy/pong_pb"
 	"google.golang.org/grpc"
 )
 
