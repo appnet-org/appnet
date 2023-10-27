@@ -6,7 +6,8 @@ class IRTransformer(Transformer):
         pass
     
     def start(self, n):
-        return n
+        assert(len(n) == 4)
+        return Program(n[0], n[1], n[2], n[3])
    
     def definition(self, d) -> Internal:
         return Internal(d)
