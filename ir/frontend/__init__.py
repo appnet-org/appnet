@@ -2,7 +2,7 @@ import re
 
 from ir.frontend.parser import IRParser
 from ir.frontend.transformer import IRTransformer
-
+from ir.frontend.printer import Printer
 
 class IRCompiler:
     def __init__(self):

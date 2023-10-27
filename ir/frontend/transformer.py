@@ -75,10 +75,11 @@ class IRTransformer(Transformer):
         return Assign(a[0], a[1])
     
     def match(self, m) -> Match:
-        return m
+        return Match(m[0], m[1:])
     
-    def action(self, a) -> List[Statement]:
-        return a
+    def action(self, a) -> Tuple[Pattern, List[Statement]]:
+        p = a[0]
+        return (p, a[1:])
     
     def pattern(self, p) -> Pattern:
         return Pattern(p[0])
@@ -95,10 +96,10 @@ class IRTransformer(Transformer):
             raise Exception("Invalid expression: " + str(e))
     
     def method(self, m) -> MethodCall:
-        return MethodCall(m[0], m[1][0], m[1][1])
+        return MethodCall(m[0], m[1][0], [m[1][1]])
     
     def func(self, f) -> FuncCall:
-        return f
+        return FuncCall(f[0], f[1])
     
     def arguments(self, a) -> List[Expr]:
         return a

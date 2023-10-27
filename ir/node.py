@@ -18,7 +18,7 @@ class Node:
             visit_func = getattr(visitor, func_name, None)
             if visit_func is not None:
                 return visit_func(self, ctx)
-        raise Exception(f"visit function for {self.name} not implemented")
+        raise Exception(f"visit function for {self.__class__.__name__} not implemented")
     
     
 class Program(Node):
@@ -67,7 +67,7 @@ class Identifier(Node):
         self.name = name
     
 class FuncCall(Node):
-    def __init__(self, name: str, args: List[Expr]):
+    def __init__(self, name: Identifier, args: List[Expr]):
         self.name = name
         self.args = args
     

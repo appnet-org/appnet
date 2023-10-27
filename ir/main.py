@@ -1,4 +1,4 @@
-from ir.frontend import IRCompiler
+from ir.frontend import IRCompiler, Printer
 import argparse
 import os
 import pathlib
@@ -8,7 +8,6 @@ from pprint import pprint
 
 
 if __name__ == "__main__":
-    compiler = IRCompiler()
     
         # Parse command line arguments
     parser = argparse.ArgumentParser()
@@ -26,10 +25,15 @@ if __name__ == "__main__":
     # )
     args = parser.parse_args()
     engine = args.engine
+    
+    compiler = IRCompiler()
+    printer = Printer()
+    
     with open(f"../elements/ir/{engine}.rs") as f:
         spec = f.read()
         ir = compiler.compile(spec)
-        pprint(ir)
+        p = ir.accept(printer, None)
+        print(p)
         
         
         
