@@ -17,7 +17,7 @@ class Printer(Visitor):
     def visitInternal(self, node: Internal, ctx):
         ret = "Internal:\n"
         for (i, t) in node.internal:
-            ret += f"{i.accept(self, ctx)}: {t.accept(self, ctx)}"
+            ret += f"{i.accept(self, ctx)}: {t.accept(self, ctx)}\n"
         return ret + "\n"
     
     def visitProcedure(self, node: Procedure, ctx):
