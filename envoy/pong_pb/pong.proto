@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package pong_pb;
+option go_package = "./pong_pb";
+
+service EchoService {
+  rpc PongHello (PongHelloRequest) returns (PongHelloResponse);
+  rpc PongWorld (PongWorldRequest) returns (PongWorldResponse);
+}
+
+message PongHelloRequest {
+  string body = 1;
+}
+
+message PongHelloResponse {
+    string body = 1;
+}
+
+message PongWorldRequest {
+  string body = 1;
+}
+
+message PongWorldResponse {
+  string body = 1;
+}
