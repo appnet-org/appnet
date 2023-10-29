@@ -20,6 +20,7 @@ class IRTransformer(Transformer):
         return Identifier(i)
     
     def type_(self, t):
+        t = t[0]
         return t
     
     def vec_type(self, t) -> Type:
@@ -99,6 +100,9 @@ class IRTransformer(Transformer):
         return MethodCall(m[0], m[1][0], [m[1][1]])
     
     def func(self, f) -> FuncCall:
+        # todo! check function name is valid
+        # todo! change send to Send primitive
+        # ! maybe we should have a global function list first
         return FuncCall(f[0], f[1])
     
     def arguments(self, a) -> List[Expr]:
@@ -150,6 +154,11 @@ class IRTransformer(Transformer):
     def op_neq(self, o):
         return Operator.NEQ
     
+    def op_le(self, o):
+        return Operator.LE
+    
+    def op_ge(self, o):
+        return Operator.GE
     
     def quoted_string(self, s):
         s = s[0]

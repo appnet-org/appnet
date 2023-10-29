@@ -52,6 +52,9 @@ class Printer(Visitor):
     def visitIdentifier(self, node: Identifier, ctx):
         return node.name
     
+    def visitType(self, node: Type, ctx):
+        return node.name
+    
     def visitFuncCall(self, node: FuncCall, ctx):
         ret = "FN_"
         ret += node.name.accept(self, ctx) + "( "
@@ -65,7 +68,8 @@ class Printer(Visitor):
         ret += node.method.name + "( "
        # print("args,", node.args)
         for a in node.args:
-            ret += f"{a.accept(self, ctx)} "
+            if a != None:
+                ret += f"{a.accept(self, ctx)} "
         return ret + ")"   
     
     def visitSend(self, node: Send, ctx):
@@ -73,8 +77,3 @@ class Printer(Visitor):
     
     def visitLiteral(self, node: Literal, ctx):
         return node.value
-    
-    
-
-
-        
