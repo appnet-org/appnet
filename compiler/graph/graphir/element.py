@@ -21,8 +21,25 @@ class AbsElement:
         self.id = fetch_global_id()
         self.name: List[str] = [edict["name"]]
         self.spec: List[str] = [edict["spec"]]
-        self.config = [edict["config"]]
+        self.config = edict["config"]
         self.position = [edict["position"]]
+
+    @property
+    def desc(self) -> str:
+        return "_".join(self.name) + "_" + str(self.id)
+    
+    @property
+    def deploy_name(self) -> str:
+        return "".join(self.name)
+
+    @property
+    def lib_name(self) -> str:
+        names = [sname.split("/")[-1].split(".")[0] for sname in self.spec]
+        return "_".join(names)
+
+    @property
+    def configs(self) -> str:
+        return "\n".join(self.config)
 
     def __str__(self):
         return "+".join(self.name)
@@ -42,7 +59,7 @@ class AbsElement:
                     current_dict = yaml.safe_load(f)
                 for t in ["request", "response"]:
                     if current_dict[t] is not None:
-                        for p, value in current_dict["t"].items():
+                        for p, value in current_dict[t].items():
                             if p not in self.property[t]:
                                 self.property[t][p] = value
                             elif type(value) == list:
