@@ -27,7 +27,7 @@ class AbsElement:
     @property
     def desc(self) -> str:
         return "_".join(self.name) + "_" + str(self.id)
-    
+
     @property
     def deploy_name(self) -> str:
         return "".join(self.name)

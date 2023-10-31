@@ -4,12 +4,8 @@
 
 import os
 
-support_list = [
-    "logging",
-    "qos",
-    "null",
-    "ratelimit"
-]
+support_list = ["logging", "qos", "null", "ratelimit"]
+
 
 def pseudo_compile(spec: str, gen_dir: str, backend: str):
     assert backend in ["mrpc"], f"backend {backend} not supported"
@@ -20,6 +16,10 @@ def pseudo_compile(spec: str, gen_dir: str, backend: str):
         phoenix_dir = os.getenv("PHOENIX_DIR")
         assert phoenix_dir is not None, "environment variable PHOENIX_DIR not set"
         os.system(f"mkdir -p {gen_dir}/{ename}_mrpc/api")
-        os.system(f"cp -Tr {phoenix_dir}/experimental/mrpc/phoenix-api/policy/{ename} {gen_dir}/{ename}_mrpc/api/{ename}")
+        os.system(
+            f"cp -Tr {phoenix_dir}/experimental/mrpc/phoenix-api/policy/{ename} {gen_dir}/{ename}_mrpc/api/{ename}"
+        )
         os.system(f"mkdir -p {gen_dir}/{ename}_mrpc/plugin")
-        os.system(f"cp -Tr {phoenix_dir}/experimental/mrpc/plugin/policy/{ename} {gen_dir}/{ename}_mrpc/plugin/{ename}")
+        os.system(
+            f"cp -Tr {phoenix_dir}/experimental/mrpc/plugin/policy/{ename} {gen_dir}/{ename}_mrpc/plugin/{ename}"
+        )

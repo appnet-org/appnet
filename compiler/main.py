@@ -102,7 +102,9 @@ if __name__ == "__main__":
             for spec in element.spec:
                 if spec not in compiled_spec:
                     if args.pseudo_element:
-                        pseudo_compile(spec, os.path.join(graph_base_dir, "gen"), args.backend)
+                        pseudo_compile(
+                            spec, os.path.join(graph_base_dir, "gen"), args.backend
+                        )
                     else:
                         raise NotImplementedError("element compiler not implemented")
                 compiled_spec.add(spec)
