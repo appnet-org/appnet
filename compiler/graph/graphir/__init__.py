@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Dict, List
 
-from compiler.graph.backend import gen_attach_detach
 from compiler.graph.graphir.element import AbsElement
 
 
@@ -42,26 +41,32 @@ class GraphIR:
             else:
                 self.elements["req_server"].insert(0, AbsElement(chain[s_pt]))
                 s_pt -= 1
+        # The initial response graph is identical to the request graph, except for
+        # the required positions of element pairs
+        self.elements["res_client"] = deepcopy(self.elements["req_client"])
+        self.elements["res_server"] = deepcopy(self.elements["req_server"])
         # add element pairs to c/s sides
         for pdict in pair:
-            p1, p2 = ("C", "S") if type == "request" else ("S", "C")
             edict1 = {
                 "name": "-".join([pdict["name1"], pdict["name2"]]),
                 "spec": pdict["spec"],
                 "config": pdict["config"],
-                "position": p1,
+                "position": "C",
             }
             edict2 = {
                 "name": "-".join([pdict["name2"], pdict["name1"]]),
                 "spec": pdict["spec"],
                 "config": pdict["config"],
-                "position": p2,
+                "position": "S",
             }
             self.elements["req_client"].append(AbsElement(edict1))
             self.elements["req_server"].insert(0, AbsElement(edict2))
-        # The initial response graph is identical to the request graph
-        self.elements["res_client"] = deepcopy(self.elements["req_client"])
-        self.elements["res_server"] = deepcopy(self.elements["req_server"])
+            edict1["position"], edict2["position"] = (
+                edict2["position"],
+                edict1["position"],
+            )
+            self.elements["res_client"].append(AbsElement(edict2))
+            self.elements["res_server"].insert(0, AbsElement(edict1))
 
     def __str__(self):
         s = f"{self.client}->{self.server} request GraphIR:\n"
@@ -75,12 +80,3 @@ class GraphIR:
             for element in self.elements[chain_name]:
                 element.gen_property(pseudo)
         # TODO: optimization algorithm
-
-    def gen_attach_detach(self, backend: str):
-        assert backend in ["mrpc"], f"backend {backend} not supported"
-        self.client_attach, self.client_detach = gen_attach_detach(
-            self.elements["req_client"], self.elements["res_client"], backend
-        )
-        self.server_attach, self.server_detach = gen_attach_detach(
-            self.elements["req_server"], self.elements["res_server"], backend
-        )
