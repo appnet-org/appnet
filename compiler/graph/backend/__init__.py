@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from typing import List, Tuple
+import importlib
+from typing import Dict
 
-from compiler.graph.backend.boilerplate import *
-from compiler.graph.graphir.element import AbsElement
+from compiler.graph.graphir import GraphIR
 
 
-def gen_attach_detach(
-    req_chain: List[AbsElement], res_chain: List[AbsElement], backend: str
-):
-    pre, nxt = "MrpcEngine", "TcpAdapterEngine"
-    for element in chain:
-        pass
-        # TODO: compute prev, nxt
-        # TODO: discuss whether non-linear structures are reasonable
+def scriptgen(girs: Dict[str, GraphIR], backend: str, service_pos: Dict[str, str]):
+    try:
+        module = importlib.import_module(f"compiler.graph.backend.{backend}")
+    except:
+        raise ValueError(f"backend {backend} not supportd")
+    generator = getattr(module, f"scriptgen_{backend}")
+    generator(girs, service_pos)
