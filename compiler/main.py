@@ -12,8 +12,9 @@ from compiler.codegen.finalizer import finalize_graph
 from compiler.config import ADN_ROOT, COMPILER_ROOT
 from compiler.frontend.printer import Printer
 from compiler.graph import graph_base_dir
+from compiler.graph.backend import scriptgen
 from compiler.graph.frontend import GCParser
-from compiler.graph.graphir import GraphIR
+from compiler.graph.pseudo_element_compiler import pseudo_compile
 from compiler.tree.visitor import *
 
 
@@ -77,22 +78,36 @@ if __name__ == "__main__":
         "--spec_path",
         help="User specification file",
         type=str,
-        default=os.path.join(graph_base_dir, "example_spec/hotel.yml"),
+        default=os.path.join(graph_base_dir, "example_spec/dummy.yml"),
     )
     parser.add_argument("--verbose", help="Print Debug info", action="store_true")
+    parser.add_argument("--pseudo_element", action="store_true")
+    parser.add_argument("--backend", type=str, default="mrpc")
     parser.add_argument(
         "--mrpc_dir",
         type=str,
         default=os.path.join(os.getenv("HOME"), "phoenix/experimental/mrpc"),
     )
-    parser.add_argument("--pseudo_element", action="store_true")
     args = parser.parse_args()
 
     parser = GCParser()
-    graphir = parser.parse(args.spec_path)
+    graphirs, service_pos = parser.parse(args.spec_path)
 
-    for gir in graphir.values():
+    compiled_spec = set()
+    for gir in graphirs.values():
+        if args.verbose:
+            print(gir)
         gir.optimize(args.pseudo_element)
+        for element in gir.elements["req_client"] + gir.elements["req_server"]:
+            for spec in element.spec:
+                if spec not in compiled_spec:
+                    if args.pseudo_element:
+                        pseudo_compile(spec, os.path.join(graph_base_dir, "gen"), args.backend)
+                    else:
+                        raise NotImplementedError("element compiler not implemented")
+                compiled_spec.add(spec)
+
+    scriptgen(graphirs, args.backend, service_pos)
 
     # mrpc_dir = os.path.abspath(args.mrpc_dir)
     # engine_name = [i.strip() for i in args.engine.split("->")]
