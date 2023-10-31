@@ -3,7 +3,7 @@ syntax = "proto3";
 package ping_pb;
 option go_package = "./ping_pb";
 
-service EchoService {
+service PingService {
   rpc PingHello (PingHelloRequest) returns (PingHelloResponse);
   rpc PingWorld (PingWorldRequest) returns (PingWorldResponse);
 }

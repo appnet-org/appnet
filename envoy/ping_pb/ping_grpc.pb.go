@@ -19,126 +19,126 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	EchoService_PingHello_FullMethodName = "/ping_pb.EchoService/PingHello"
-	EchoService_PingWorld_FullMethodName = "/ping_pb.EchoService/PingWorld"
+	PingService_PingHello_FullMethodName = "/ping_pb.PingService/PingHello"
+	PingService_PingWorld_FullMethodName = "/ping_pb.PingService/PingWorld"
 )
 
-// EchoServiceClient is the client API for EchoService service.
+// PingServiceClient is the client API for PingService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type EchoServiceClient interface {
+type PingServiceClient interface {
 	PingHello(ctx context.Context, in *PingHelloRequest, opts ...grpc.CallOption) (*PingHelloResponse, error)
 	PingWorld(ctx context.Context, in *PingWorldRequest, opts ...grpc.CallOption) (*PingWorldResponse, error)
 }
 
-type echoServiceClient struct {
+type pingServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewEchoServiceClient(cc grpc.ClientConnInterface) EchoServiceClient {
-	return &echoServiceClient{cc}
+func NewPingServiceClient(cc grpc.ClientConnInterface) PingServiceClient {
+	return &pingServiceClient{cc}
 }
 
-func (c *echoServiceClient) PingHello(ctx context.Context, in *PingHelloRequest, opts ...grpc.CallOption) (*PingHelloResponse, error) {
+func (c *pingServiceClient) PingHello(ctx context.Context, in *PingHelloRequest, opts ...grpc.CallOption) (*PingHelloResponse, error) {
 	out := new(PingHelloResponse)
-	err := c.cc.Invoke(ctx, EchoService_PingHello_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, PingService_PingHello_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *echoServiceClient) PingWorld(ctx context.Context, in *PingWorldRequest, opts ...grpc.CallOption) (*PingWorldResponse, error) {
+func (c *pingServiceClient) PingWorld(ctx context.Context, in *PingWorldRequest, opts ...grpc.CallOption) (*PingWorldResponse, error) {
 	out := new(PingWorldResponse)
-	err := c.cc.Invoke(ctx, EchoService_PingWorld_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, PingService_PingWorld_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// EchoServiceServer is the server API for EchoService service.
-// All implementations must embed UnimplementedEchoServiceServer
+// PingServiceServer is the server API for PingService service.
+// All implementations must embed UnimplementedPingServiceServer
 // for forward compatibility
-type EchoServiceServer interface {
+type PingServiceServer interface {
 	PingHello(context.Context, *PingHelloRequest) (*PingHelloResponse, error)
 	PingWorld(context.Context, *PingWorldRequest) (*PingWorldResponse, error)
-	mustEmbedUnimplementedEchoServiceServer()
+	mustEmbedUnimplementedPingServiceServer()
 }
 
-// UnimplementedEchoServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedEchoServiceServer struct {
+// UnimplementedPingServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPingServiceServer struct {
 }
 
-func (UnimplementedEchoServiceServer) PingHello(context.Context, *PingHelloRequest) (*PingHelloResponse, error) {
+func (UnimplementedPingServiceServer) PingHello(context.Context, *PingHelloRequest) (*PingHelloResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PingHello not implemented")
 }
-func (UnimplementedEchoServiceServer) PingWorld(context.Context, *PingWorldRequest) (*PingWorldResponse, error) {
+func (UnimplementedPingServiceServer) PingWorld(context.Context, *PingWorldRequest) (*PingWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PingWorld not implemented")
 }
-func (UnimplementedEchoServiceServer) mustEmbedUnimplementedEchoServiceServer() {}
+func (UnimplementedPingServiceServer) mustEmbedUnimplementedPingServiceServer() {}
 
-// UnsafeEchoServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to EchoServiceServer will
+// UnsafePingServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PingServiceServer will
 // result in compilation errors.
-type UnsafeEchoServiceServer interface {
-	mustEmbedUnimplementedEchoServiceServer()
+type UnsafePingServiceServer interface {
+	mustEmbedUnimplementedPingServiceServer()
 }
 
-func RegisterEchoServiceServer(s grpc.ServiceRegistrar, srv EchoServiceServer) {
-	s.RegisterService(&EchoService_ServiceDesc, srv)
+func RegisterPingServiceServer(s grpc.ServiceRegistrar, srv PingServiceServer) {
+	s.RegisterService(&PingService_ServiceDesc, srv)
 }
 
-func _EchoService_PingHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PingService_PingHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PingHelloRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EchoServiceServer).PingHello(ctx, in)
+		return srv.(PingServiceServer).PingHello(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EchoService_PingHello_FullMethodName,
+		FullMethod: PingService_PingHello_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).PingHello(ctx, req.(*PingHelloRequest))
+		return srv.(PingServiceServer).PingHello(ctx, req.(*PingHelloRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EchoService_PingWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PingService_PingWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PingWorldRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EchoServiceServer).PingWorld(ctx, in)
+		return srv.(PingServiceServer).PingWorld(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EchoService_PingWorld_FullMethodName,
+		FullMethod: PingService_PingWorld_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).PingWorld(ctx, req.(*PingWorldRequest))
+		return srv.(PingServiceServer).PingWorld(ctx, req.(*PingWorldRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// EchoService_ServiceDesc is the grpc.ServiceDesc for EchoService service.
+// PingService_ServiceDesc is the grpc.ServiceDesc for PingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var EchoService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ping_pb.EchoService",
-	HandlerType: (*EchoServiceServer)(nil),
+var PingService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ping_pb.PingService",
+	HandlerType: (*PingServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "PingHello",
-			Handler:    _EchoService_PingHello_Handler,
+			Handler:    _PingService_PingHello_Handler,
 		},
 		{
 			MethodName: "PingWorld",
-			Handler:    _EchoService_PingWorld_Handler,
+			Handler:    _PingService_PingWorld_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

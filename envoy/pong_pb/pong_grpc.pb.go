@@ -19,126 +19,126 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	EchoService_PongHello_FullMethodName = "/pong_pb.EchoService/PongHello"
-	EchoService_PongWorld_FullMethodName = "/pong_pb.EchoService/PongWorld"
+	PongService_PongHello_FullMethodName = "/pong_pb.PongService/PongHello"
+	PongService_PongWorld_FullMethodName = "/pong_pb.PongService/PongWorld"
 )
 
-// EchoServiceClient is the client API for EchoService service.
+// PongServiceClient is the client API for PongService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type EchoServiceClient interface {
+type PongServiceClient interface {
 	PongHello(ctx context.Context, in *PongHelloRequest, opts ...grpc.CallOption) (*PongHelloResponse, error)
 	PongWorld(ctx context.Context, in *PongWorldRequest, opts ...grpc.CallOption) (*PongWorldResponse, error)
 }
 
-type echoServiceClient struct {
+type pongServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewEchoServiceClient(cc grpc.ClientConnInterface) EchoServiceClient {
-	return &echoServiceClient{cc}
+func NewPongServiceClient(cc grpc.ClientConnInterface) PongServiceClient {
+	return &pongServiceClient{cc}
 }
 
-func (c *echoServiceClient) PongHello(ctx context.Context, in *PongHelloRequest, opts ...grpc.CallOption) (*PongHelloResponse, error) {
+func (c *pongServiceClient) PongHello(ctx context.Context, in *PongHelloRequest, opts ...grpc.CallOption) (*PongHelloResponse, error) {
 	out := new(PongHelloResponse)
-	err := c.cc.Invoke(ctx, EchoService_PongHello_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, PongService_PongHello_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *echoServiceClient) PongWorld(ctx context.Context, in *PongWorldRequest, opts ...grpc.CallOption) (*PongWorldResponse, error) {
+func (c *pongServiceClient) PongWorld(ctx context.Context, in *PongWorldRequest, opts ...grpc.CallOption) (*PongWorldResponse, error) {
 	out := new(PongWorldResponse)
-	err := c.cc.Invoke(ctx, EchoService_PongWorld_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, PongService_PongWorld_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// EchoServiceServer is the server API for EchoService service.
-// All implementations must embed UnimplementedEchoServiceServer
+// PongServiceServer is the server API for PongService service.
+// All implementations must embed UnimplementedPongServiceServer
 // for forward compatibility
-type EchoServiceServer interface {
+type PongServiceServer interface {
 	PongHello(context.Context, *PongHelloRequest) (*PongHelloResponse, error)
 	PongWorld(context.Context, *PongWorldRequest) (*PongWorldResponse, error)
-	mustEmbedUnimplementedEchoServiceServer()
+	mustEmbedUnimplementedPongServiceServer()
 }
 
-// UnimplementedEchoServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedEchoServiceServer struct {
+// UnimplementedPongServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPongServiceServer struct {
 }
 
-func (UnimplementedEchoServiceServer) PongHello(context.Context, *PongHelloRequest) (*PongHelloResponse, error) {
+func (UnimplementedPongServiceServer) PongHello(context.Context, *PongHelloRequest) (*PongHelloResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PongHello not implemented")
 }
-func (UnimplementedEchoServiceServer) PongWorld(context.Context, *PongWorldRequest) (*PongWorldResponse, error) {
+func (UnimplementedPongServiceServer) PongWorld(context.Context, *PongWorldRequest) (*PongWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PongWorld not implemented")
 }
-func (UnimplementedEchoServiceServer) mustEmbedUnimplementedEchoServiceServer() {}
+func (UnimplementedPongServiceServer) mustEmbedUnimplementedPongServiceServer() {}
 
-// UnsafeEchoServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to EchoServiceServer will
+// UnsafePongServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PongServiceServer will
 // result in compilation errors.
-type UnsafeEchoServiceServer interface {
-	mustEmbedUnimplementedEchoServiceServer()
+type UnsafePongServiceServer interface {
+	mustEmbedUnimplementedPongServiceServer()
 }
 
-func RegisterEchoServiceServer(s grpc.ServiceRegistrar, srv EchoServiceServer) {
-	s.RegisterService(&EchoService_ServiceDesc, srv)
+func RegisterPongServiceServer(s grpc.ServiceRegistrar, srv PongServiceServer) {
+	s.RegisterService(&PongService_ServiceDesc, srv)
 }
 
-func _EchoService_PongHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PongService_PongHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PongHelloRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EchoServiceServer).PongHello(ctx, in)
+		return srv.(PongServiceServer).PongHello(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EchoService_PongHello_FullMethodName,
+		FullMethod: PongService_PongHello_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).PongHello(ctx, req.(*PongHelloRequest))
+		return srv.(PongServiceServer).PongHello(ctx, req.(*PongHelloRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EchoService_PongWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PongService_PongWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PongWorldRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EchoServiceServer).PongWorld(ctx, in)
+		return srv.(PongServiceServer).PongWorld(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EchoService_PongWorld_FullMethodName,
+		FullMethod: PongService_PongWorld_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).PongWorld(ctx, req.(*PongWorldRequest))
+		return srv.(PongServiceServer).PongWorld(ctx, req.(*PongWorldRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// EchoService_ServiceDesc is the grpc.ServiceDesc for EchoService service.
+// PongService_ServiceDesc is the grpc.ServiceDesc for PongService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var EchoService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pong_pb.EchoService",
-	HandlerType: (*EchoServiceServer)(nil),
+var PongService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "pong_pb.PongService",
+	HandlerType: (*PongServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "PongHello",
-			Handler:    _EchoService_PongHello_Handler,
+			Handler:    _PongService_PongHello_Handler,
 		},
 		{
 			MethodName: "PongWorld",
-			Handler:    _EchoService_PongWorld_Handler,
+			Handler:    _PongService_PongWorld_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

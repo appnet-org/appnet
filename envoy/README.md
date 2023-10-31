@@ -2,6 +2,12 @@
 
 This is a simple Echo server built using Go and gRPC.
 
+## Proto
+
+- `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ping_pb/ping.proto`
+- `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pong_pb/pong.proto`
+
+
 ## Run as docker container 
 To run the server as a Docker container, follow these steps:
 - Change ":9000" to "server:9000" in frontend.go (this is only required for Docker deployments).
