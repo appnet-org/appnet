@@ -1,0 +1,78 @@
+start: definition procedure procedure procedure
+
+definition: "internal" "{" declaration* "}"
+
+declaration: identifier ":" type_ 
+
+identifier: CNAME
+
+type_: single_type
+       | "Vec" "<" single_type ">"  -> vec_type
+       | "Map" "<" single_type "," single_type ">" -> map_type
+
+single_type: CNAME
+
+procedure: "fn" name parameters body 
+
+name: CNAME
+
+parameters: "(" (parameter | parameter ",") *  ")"
+
+parameter: "rpc_req" | "rpc_resp" | identifier
+
+body: "{" stage* "}"
+
+stage: statement | match
+
+statement: (expr | assign | primitive) ";"
+
+primitive: "send" "(" (expr | err) "," ("APP" | "NET") ")"
+
+assign: identifier ":=" expr
+
+match: "match" "(" expr ")" "{" action* "};"
+
+action: pattern "=>" "{" statement* "}"
+
+pattern: const 
+        | "Some" "(" identifier ")" -> some_pattern
+
+
+expr: identifier | method | func | const | expr op expr | "(" expr ")"
+
+method: expr "." (get | set_ | delete | len_ | size)
+
+func: identifier arguments 
+
+arguments: "(" (expr | (expr ","))*  ")"
+
+const: CNAME | quoted_string | NUMBER
+
+get: "get" "(" expr ")"
+set_: "set" ( "(" expr "," expr ")" | "(" expr ")" )
+delete: "delete" "(" expr ")"
+len_: "len()"
+size: "size()"
+
+op: "+" -> op_add 
+       | "-" -> op_sub
+       | "*" -> op_mul
+       | "&&" -> op_land
+       | "||" -> op_lor
+       | "==" -> op_eq
+       | "!=" -> op_neq
+       | "<" -> op_le
+       | ">" -> op_ge
+       | "<=" -> op_leq
+       | ">=" -> op_geq
+
+quoted_string: /'[^']*'/
+
+err: "err" "(" quoted_string ")"
+
+%import common.SIGNED_NUMBER -> NUMBER
+%import common.WS
+%import common.CPP_COMMENT
+%import common.CNAME
+%ignore WS
+%ignore CPP_COMMENT
