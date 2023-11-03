@@ -88,9 +88,7 @@ if __name__ == "__main__":
         type=str,
         default=os.path.join(os.getenv("HOME"), "phoenix/experimental/mrpc"),
     )
-    parser.add_argument(
-        "--no_run_container", action="store_true"
-    )
+    parser.add_argument("--no_run_container", action="store_true")
     args = parser.parse_args()
 
     if args.no_run_container:
