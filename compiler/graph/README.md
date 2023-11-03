@@ -7,13 +7,14 @@ Install the multithreaded version of Mrpc hotel-reservation application.
 ```bash
 # in $HOME
 git clone https://github.com/kristoff-starling/phoenix -b multi
-# in all worker machines
-docker pull kristoffstarling/hotel-service:multi
 ```
 
 Fire up phoenixos and hotel applications.
 
 ```bash
+# in all worker machines
+docker pull kristoffstarling/hotel-service:multi
+
 # in $HOME/phoenix/eval/hotel-bench
 # By default, the services are deployed at
 # Frontend - h2
@@ -27,7 +28,7 @@ Fire up phoenixos and hotel applications.
 ./start_service
 ```
 
-Install necessary dependencies and environment variables.
+Install necessary dependencies and set environment variables.
 
 ```bash
 # in compiler/
@@ -38,12 +39,13 @@ Run the compiler.
 
 ```bash
 # in compiler/
-python3 main.py [--verbose] [--pseudo_element] [--spec path_to_spec] [--backend BACKEND]
+python3 main.py [--verbose] [--pseudo_element] [--spec path_to_spec] [--backend BACKEND] [--no_run_container]
 ```
 * `--verbose`: makes the compiler more chatty.
 * `--pseudo_element`: use the pseudo element compiler provided by the graph compiler, which reads element properties in `element/property/` and copy existing implementations from the phoenix local repository.
 * `--spec path_to_spec`: if not specified, `example_spec/dummy.yml` will be used by default.
 * `--backend BACKEND`: if not specified, the graph compiler generates mrpc scripts by default.
+* `--no_run_container`: if used, the graph compiler will not send remote commands into the container but only print the commands on the screen.
 
 The compiler will automatically install engines on all the machines and generate an `attach_all.sh` and `detach_all.sh` in `graph/gen`.
 
