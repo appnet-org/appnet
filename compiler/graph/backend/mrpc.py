@@ -239,7 +239,7 @@ def scriptgen_mrpc(girs: Dict[str, GraphIR], service_pos: Dict[str, str]):
         pid_str = execute_remote_container(
             service, host, ["pgrep", "-f", service.lower()]
         )
-        pids[service] = pid_str[:-1]
+        pids[service] = pid_str.strip()
 
     for gir in girs.values():
         if len(gir.elements["req_client"]) > 0:
