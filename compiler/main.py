@@ -88,7 +88,13 @@ if __name__ == "__main__":
         type=str,
         default=os.path.join(os.getenv("HOME"), "phoenix/experimental/mrpc"),
     )
+    parser.add_argument(
+        "--no_run_container", action="store_true"
+    )
     args = parser.parse_args()
+
+    if args.no_run_container:
+        os.environ["NO_RUN_CONTAINER"] = "1"
 
     parser = GCParser()
     graphirs, service_pos = parser.parse(args.spec_path)
