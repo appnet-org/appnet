@@ -1,5 +1,5 @@
 # install python dependencies
-pip install lark pre-commit
+pip install lark pre-commit tomli tomli_w
 
 COMPILER_DIR=$(pwd)
 ROOT_DIR=$(dirname $(pwd))
