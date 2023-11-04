@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 import yaml
 
 from compiler.graph import adn_base_dir
+from compiler.graph.pseudo_element_compiler import pseudo_gen_property
 
 global_element_id = 0
 
@@ -45,10 +46,14 @@ class AbsElement:
         return "+".join(self.name)
 
     def gen_property(self, pseudo: bool):
-        self.property: Dict[str, Dict[str, Any]] = {
-            "request": dict(),
-            "response": dict(),
-        }
+        if pseudo:
+            self.property = pseudo_gen_property(self)
+        else:
+            self.property: Dict[str, Dict[str, Any]] = {
+                "request": dict(),
+                "response": dict(),
+            }
+            # TODO: call element compiler to generate properties
         if pseudo:
             # read handwritten properties
             for spec in self.spec:
@@ -66,7 +71,6 @@ class AbsElement:
                                 self.property[t][p].extend(value)
         else:
             pass
-            # TODO: call element compiler to generate properties
 
     def fuse(self, other: AbsElement):
         self.name.extend(other.name)
