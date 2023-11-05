@@ -103,7 +103,18 @@ class IRTransformer(Transformer):
         # todo! check function name is valid
         # todo! change send to Send primitive
         # ! maybe we should have a global function list first
-        return FuncCall(f[0], f[1])
+        assert(len(f) == 2)
+        assert(isinstance(f[0], Identifier))
+        if f[0].name == "send":
+            assert(len(f[1]) == 2)
+            assert(f[1][1].name == "APP" or f[1][1].name == "NET")
+            # f[1][1] should be str, but it will be parsed as Identifier
+            return Send(f[1][1].name, f[1][0])
+        elif f[0].name == "err":
+            assert(len(f[1]) == 1)
+            return Error(f[1][0])
+        else:
+            return FuncCall(f[0], f[1])
     
     def arguments(self, a) -> List[Expr]:
         return a
@@ -111,6 +122,10 @@ class IRTransformer(Transformer):
     def const(self, c) -> Literal:
         c = c[0]
         return Literal(c)
+    
+    def err(self, e) -> Error:
+        e = e[0]
+        return Error(e)
     
     def get(self, g):
         return MethodType.GET, g[0]

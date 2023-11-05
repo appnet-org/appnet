@@ -44,6 +44,7 @@ class Printer(Visitor):
         return f"{node.left.accept(self, ctx)} := {node.right.accept(self, ctx)}"
     
     def visitPattern(self, node: Pattern, ctx):
+        print("pattern", node.value)
         return node.value.accept(self, ctx)
     
     def visitExpr(self, node: Expr, ctx):
@@ -72,8 +73,16 @@ class Printer(Visitor):
                 ret += f"{a.accept(self, ctx)} "
         return ret + ")"   
     
-    def visitSend(self, node: Send, ctx):
-        return "Send:" + node.direction + node.msg.accept(self, ctx)
+    def visitSend(self, node: Send, ctx) -> str:
+        print("send", node.direction, node.msg)
+        return "Send: " + node.msg.accept(self, ctx) + "->" + node.direction
     
     def visitLiteral(self, node: Literal, ctx):
         return node.value
+    
+    def visitError(self, node: Error, ctx) -> str:
+        # change this str to Literal
+        if isinstance(node.msg, str):
+            return "Err(" + node.msg + ")"
+        else:
+            return "Err(" + node.msg.accept(self, ctx) + ")"

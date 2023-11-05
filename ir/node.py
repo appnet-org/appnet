@@ -53,7 +53,7 @@ class Assign(Statement):
         self.right = right
     
 class Pattern(Node):
-    def __init__(self, value: Union[Identifier, Literal]):
+    def __init__(self, value: Union[Identifier, Literal, Error]):
         self.value = value
 
 class Expr(Node):
@@ -65,7 +65,11 @@ class Expr(Node):
 class Identifier(Node):
     def __init__(self, name: str):
         self.name = name
-    
+
+class Error(Node):
+    def __init__(self, msg: str):
+        self.msg = msg
+
 class FuncCall(Node):
     def __init__(self, name: Identifier, args: List[Expr]):
         self.name = name
