@@ -1,19 +1,19 @@
 // here we assume Random is global methods
 internal {
-	string mirror_address
+	mirror_address: string
 }
 
 fn init(mirror_address) {
-	mirror_address = "xxx"
+	mirror_address := 'xxx';
 }
 
 fn req(mirror_address, rpc_req) {
-	send(rpc_req, NET)
-	rpc_req.meta.dst = mirror_address
-	rpc_req.meta.src = "" 
-	send(rpc_req, NET)
+	send(rpc_req, NET);
+	rpc_req.get('meta').get('dst').set(mirror_address);
+	rpc_req.get('meta').get('src').set('');
+	send(rpc_req, NET);
 }
 
 fn resp(rpc_resp) {
-	send(rpc_resp, APP)
+	send(rpc_resp, APP);
 }

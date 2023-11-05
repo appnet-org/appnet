@@ -1,21 +1,21 @@
 internal {
-	float prob
+	prob: float
 }
 fn init(prob) {
-	prob = 0.9
+	prob := 0.9;
 }
 
 fn req() {
-	Match(randomf(0,1) < prob) {
+	match(randomf(0,1) < prob) {
 		true => {
-			send(rpc_req, NET)
+			send(rpc_req, NET);
 		}
 		false => {
-			send(err("fault injected"), APP) 
+			send(err('fault injected'), APP);
 		}
-	} 
+	};
 }
 
 fn resp() {
-    send(rpc_resp, APP)	
+    send(rpc_resp, APP);
 }

@@ -54,7 +54,7 @@ class IRTransformer(Transformer):
         ret = []
         for i in p:
             if i != None:
-                ret.append(Identifier(i))
+                ret.append(i)
         return ret
     
     def parameter(self, p) -> str:

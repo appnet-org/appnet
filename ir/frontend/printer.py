@@ -21,11 +21,12 @@ class Printer(Visitor):
         return ret + "\n"
     
     def visitProcedure(self, node: Procedure, ctx):
-        ret = f"Procedure {node.name}:\n"
+        ret = f"Procedure {node.name}: "
         for p in node.params:
             ret += f"{p.accept(self, ctx)}"
+        ret += "\n"
         for s in node.body:
-            ret += f"{s.accept(self, ctx)}"
+            ret += f"{s.accept(self, ctx)}\n"
         return ret
     
     def visitStatement(self, node: Statement, ctx):
@@ -44,7 +45,6 @@ class Printer(Visitor):
         return f"{node.left.accept(self, ctx)} := {node.right.accept(self, ctx)}"
     
     def visitPattern(self, node: Pattern, ctx):
-        print("pattern", node.value)
         return node.value.accept(self, ctx)
     
     def visitExpr(self, node: Expr, ctx):
@@ -74,7 +74,6 @@ class Printer(Visitor):
         return ret + ")"   
     
     def visitSend(self, node: Send, ctx) -> str:
-        print("send", node.direction, node.msg)
         return "Send: " + node.msg.accept(self, ctx) + "->" + node.direction
     
     def visitLiteral(self, node: Literal, ctx):

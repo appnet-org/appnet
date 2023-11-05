@@ -1,14 +1,12 @@
-# Change a existing header and add a new one
-
 internal{}
 
 fn init() {}
 
 fn req(rpc_req) {
-	write(rpc_req, "language", "english")
-  write(rpc_req, "location", "seattle")
+  rpc_req.set("language", "english");
+  rpc_req.set("location", "seattle");
 }
 
 fn resp(rpc_resp) {
-	send(rpc_resp, APP)
+	send(rpc_resp, APP);
 }

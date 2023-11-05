@@ -1,19 +1,19 @@
 internal 
 {
-	map<int, int> record
-  vector<int> latency
+	record: map<int, int>
+  latency: vec<int>
 }
 
 fn init() {
 }
 
-fn req() {
-	write(record, rpc_req.id, current_timestamp())
-	send(rpc_req, NET)
+fn req(rpc_req) {
+	record.set(rpc_req.get('meta').get('id'), current_timestamp());
+	send(rpc_req, NET);
 }
 
-fn resp() {
-  rpc_id = get(rpc_resp, "id")
-  latency = currentimestamp() - get(record, rpc_id)
-  write(vector, latency)
+fn resp(rpc_resp) {
+  rpc_id := rpc_resp.get('id')
+  lat := curren_time() - rec_record.get(rpc_id)
+  latency.set(latency.size(), lat);
 }
