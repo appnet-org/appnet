@@ -1,3 +1,7 @@
+"""
+The file implements Mrpc backend, which is responsible for reconfiguring phoenixos,
+installing new elements, and generating attach/detach scripts.
+"""
 from __future__ import annotations
 
 import os
@@ -67,6 +71,17 @@ def gen_attach_detach(
     res_chain: List[AbsElement],
     pos: str,
 ):
+    """Generate Mrpc attach/detach scripts and copy them to target containers.
+
+    Args:
+        service: Service name.
+        host: hostname that the service is deployed on.
+        pid: pid of the service.
+        sid: sid of the thread where scripts should be deployed.
+        req_chain: List of elements on the request chain.
+        res_chain: List of elements on the response chain.
+        pos: "client" or "server", which affects the order of Mrpc engines.
+    """
     assert pos in ["client", "server"], "invalid position"
     (pre, nxt) = (
         ("Mrpc", "TcpRpcAdapter") if pos == "client" else ("TcpRpcAdapter", "Mrpc")
@@ -90,6 +105,7 @@ def gen_attach_detach(
             "group": [f"{ename}Engine" for ename in group_list],
             "config": element.configs,
         }
+        # Find the currently installed prev/next element on the response chain.
         for res_ele in res_chain:
             if res_ele.desc == element.desc:
                 break
@@ -122,6 +138,13 @@ def gen_attach_detach(
 
 
 def gen_install(elements: List[AbsElement], service: str, host: str):
+    """Reconfigure phoenixos and install new elements in containers
+
+    Args:
+        elements: List of new elements to be deployed.
+        service: Service name.
+        host: hostname.
+    """
     lib_names = list({element.lib_name for element in elements})
     dep = [
         (f"phoenix-api-policy-{lname}", {"path": f"generated/api/{lname}"})
@@ -137,6 +160,8 @@ def gen_install(elements: List[AbsElement], service: str, host: str):
         members.append(f"generated/api/{lname}")
         members.append(f"generated/plugin/{lname}")
         # TODO: the final version won't include initial engines in Cargo.toml
+        # currently, we have to remove existing engines having the same name
+        # as the new engine in Cargo.toml.
         dup_pkg = f"phoenix-api/policy/{lname}"
         if dup_pkg in members:
             members.remove(dup_pkg)
@@ -162,14 +187,14 @@ def gen_install(elements: List[AbsElement], service: str, host: str):
     execute_remote_container(
         service, host, ["mkdir", "-p", f"{container_gen_dir}/plugin"]
     )
-    # overwrite Cargo.toml
+    # Overwrite Cargo.toml
     copy_remote_container(
         service,
         host,
         f"{graph_base_dir}/gen/Cargo.toml",
         "/root/phoenix/experimental/mrpc/Cargo.toml",
     )
-    # copy load-mrpc-plugins.toml
+    # Copy load-mrpc-plugins.toml
     copy_remote_container(
         service,
         host,
@@ -177,7 +202,7 @@ def gen_install(elements: List[AbsElement], service: str, host: str):
         f"{container_gen_dir}/load-mrpc-plugins-gen.toml",
     )
     for lname in lib_names:
-        # copy engine source code into service container
+        # Copy engine source code into the service container.
         copy_remote_container(
             service,
             host,
@@ -190,7 +215,7 @@ def gen_install(elements: List[AbsElement], service: str, host: str):
             f"{graph_base_dir}/gen/{lname}_mrpc/plugin/{lname}",
             f"{container_gen_dir}/plugin/{lname}",
         )
-    # compile & deploy engines
+    # Compile & deploy engines.
     execute_remote_container(
         service,
         host,
@@ -199,7 +224,7 @@ def gen_install(elements: List[AbsElement], service: str, host: str):
     execute_remote_container(
         service, host, ["cargo", "make", "--cwd", "experimental/mrpc", "deploy-plugins"]
     )
-    # upgrade phoenixos
+    # Upgrade phoenixos.
     execute_remote_container(
         service,
         host,
@@ -217,6 +242,15 @@ def gen_install(elements: List[AbsElement], service: str, host: str):
 
 
 def scriptgen_mrpc(girs: Dict[str, GraphIR], service_pos: Dict[str, str]):
+    """Upgrade phoenixos, install new engiens, and generate attach/detach scripts.
+
+    Args:
+        girs: A dictionary mapping edge name to corresponding graphir.
+        service_pos: A dictionary mapping service name to hostname.
+
+    Raises:
+        AssertionError: If the environment variable PHOENIX_DIR is not set.
+    """
     assert phoenix_dir is not None, "environment variable PHOENIX_DIR not set"
 
     global phoenix_gen_dir, local_gen_dir
@@ -225,6 +259,7 @@ def scriptgen_mrpc(girs: Dict[str, GraphIR], service_pos: Dict[str, str]):
     os.makedirs(phoenix_gen_dir, exist_ok=True)
     os.makedirs(local_gen_dir, exist_ok=True)
 
+    # Collect list of elements deployed on each service.
     service_elements: Dict[str, List[AbsElement]] = defaultdict(list)
     for gir in girs.values():
         service_elements[gir.client].extend(gir.elements["req_client"])
@@ -241,6 +276,7 @@ def scriptgen_mrpc(girs: Dict[str, GraphIR], service_pos: Dict[str, str]):
         )
         pids[service] = pid_str.strip()
 
+    # For each graphir, generate attach/detach scripts.
     for gir in girs.values():
         if len(gir.elements["req_client"]) > 0:
             gen_attach_detach(

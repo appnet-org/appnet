@@ -14,6 +14,15 @@ class GCParser:
         self.app_edges = []
 
     def parse(self, spec_path: str) -> Tuple[Dict[str, GraphIR], Dict[str, str]]:
+        """Parse the user specification file and produce graphirs & service locations.
+
+        Args:
+            spec_path: Path to the user specification file.
+
+        Returns:
+            * A dictionary mapping edge name to corresponding graphir.
+            * A dictionray mapping service name to hostname.
+        """
         with open(spec_path, "r") as f:
             spec_dict = yaml.safe_load(f)
         for edge in spec_dict["app_structure"]:

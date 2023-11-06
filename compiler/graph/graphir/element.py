@@ -12,6 +12,7 @@ global_element_id = 0
 
 
 def fetch_global_id() -> str:
+    """Assign a globally-unique id to the new element instance."""
     global global_element_id
     global_element_id += 1
     return global_element_id
@@ -46,6 +47,11 @@ class AbsElement:
         return "+".join(self.name)
 
     def gen_property(self, pseudo: bool):
+        """Generate properties of the element.
+
+        Args:
+            pseudo: If true, call the pseudo element compiler to generate properties.
+        """
         if pseudo:
             self.property = pseudo_gen_property(self)
         else:
@@ -73,6 +79,11 @@ class AbsElement:
             pass
 
     def fuse(self, other: AbsElement):
+        """Fuse another element in
+
+        Args:
+            other: the element to be fused.
+        """
         self.name.extend(other.name)
         self.spec.extend(other.spec)
         self.config.extend(other.config)

@@ -8,6 +8,16 @@ from compiler.graph.graphir.element import AbsElement
 
 class GraphIR:
     def __init__(self, client: str, server: str, chain: List[Dict], pair: List[Dict]):
+        """Initiate an unoptimized graphir according to the specified elements.
+
+        Args:
+            client: Client service name.
+            server: Server service name.
+            chain: A list of dictionaries including user-specified element configs.
+            pair: A list of dictionaries including user-specified paired-element configs.
+                  Pair elements are deployed on the client and server sides which cancel
+                  out each other.
+        """
         self.client = client
         self.server = server
         self.elements: Dict[str, List[AbsElement]] = {
@@ -76,6 +86,11 @@ class GraphIR:
         return s
 
     def optimize(self, pseudo: bool):
+        """Run optimization algorithm on the graphir.
+
+        Args:
+            pseudo: If true, use the pseodo element compiler to generate element properties.
+        """
         for chain_name in ["req_client", "res_client", "req_server", "res_server"]:
             for element in self.elements[chain_name]:
                 element.gen_property(pseudo)
