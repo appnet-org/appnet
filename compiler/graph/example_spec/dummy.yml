@@ -1,0 +1,18 @@
+app_structure:
+    - "Frontend->Search"
+    - "Frontend->Profile"
+    - "Search->Geo"
+    - "Search->Rate"
+service_pos:
+    Frontend: "h2"
+    Geo: "h3"
+    Profile: "h4"
+    Rate: "h5"
+    Search: "h6"
+egress:
+    Frontend:
+    -
+        name: "Logging"
+        spec: "elements/logging.sql"
+        config: []
+        position: "C"

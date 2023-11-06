@@ -1,0 +1,55 @@
+app_structure:
+    - "FrontEnd->Search"
+    - "FrontEnd->Reservation"
+    - "FrontEnd->Recommendation"
+    - "FrontEnd->User"
+    - "Search->Profile"
+    - "Search->Geo"
+    - "Search->Rate"
+ingress:
+    Recommendation:
+    -
+        name: "Metrics"
+        spec: "elements/metrics.sql"
+        config:
+            type: "count"
+            field: "status"
+        position: "S"
+egress:
+    FrontEnd:
+    -
+        name: "RateLimit"
+        spec: "elements/ratelimit_drop.sql"
+        config:
+            bucket_size: 10
+            fill_interval: 60
+        position: "C"
+    -
+        name: "LoadBalancing"
+        spec: "elements/load_balance_sticky.sql"
+        config:
+            strategy: "sticky"
+        position: "C"
+edge:
+    FrontEnd->Recommendation:
+    -
+        name: "RetryTimeout"
+        spec: "elements/retry_timeout.sql"
+        config:
+            timeout: 10
+            retry: 3
+        position: "C"
+    -
+        name: "AdmissionControl"
+        spec: "elements/admission_control.sql"
+        config:
+            strategy: "SuccessRate"
+        position: "C/S"
+link:
+    FrontEnd->Recommendation:
+    -
+        name1: "Compressor"
+        name2: "Decompressor"
+        spec: "elements/compressor_decompressor.sql"
+        config:
+            library: "gzip"
