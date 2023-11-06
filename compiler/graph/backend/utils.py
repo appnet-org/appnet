@@ -15,7 +15,7 @@ def execute_remote_host(host: str, cmd: List[str]):
 
 def execute_remote_container(service: str, host: str, cmd: List[str]):
     print(f"Executing command {' '.join(cmd)} in hotel_{service.lower()}...")
-    if os.getenv("NO_RUN_CONTAINER") == "1":
+    if os.getenv("DRY_RUN") == "1":
         return "xxx"
     res = subprocess.run(
         ["ssh", host, "docker", "exec", f"hotel_{service.lower()}"] + cmd,
@@ -27,7 +27,7 @@ def execute_remote_container(service: str, host: str, cmd: List[str]):
 
 def copy_remote_container(service: str, host: str, local_path: str, remote_path: str):
     print(f"Copy file {local_path} to hotel_{service.lower()}")
-    if os.getenv("NO_RUN_CONTAINER") == "1":
+    if os.getenv("DRY_RUN") == "1":
         return
     filename = local_path.split("/")[-1]
     res = subprocess.run(
