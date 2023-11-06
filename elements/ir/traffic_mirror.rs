@@ -11,6 +11,7 @@ fn req(mirror_address, rpc_req) {
 	send(rpc_req, NET);
 	rpc_req.get('meta').get('dst').set(mirror_address);
 	rpc_req.get('meta').get('src').set('');
+	// todo! how to deal with rpc_id
 	send(rpc_req, NET);
 }
 

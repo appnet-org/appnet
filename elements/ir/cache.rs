@@ -8,7 +8,7 @@ fn init() {
 
 
 fn req(rpc_req) {
-	match (cache.get(rpc_req.get(payload).get('key'))) {
+	match (cache.get(rpc_req.get('payload').get('key'))) {
 		Some(rpc_resp) => {
 			send(rpc_resp, APP);
 		}

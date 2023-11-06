@@ -13,7 +13,7 @@ fn init() {
 fn req(rpc_req) {
 	match (outstanding.size() < window) {
 		True => {
-			write(outstanding, rpc_req.get(id), current_time());
+			set(outstanding, rpc_req.get('id'), current_time());
 			send(rpc_req, NET);
 		}
 		False => {

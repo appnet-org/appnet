@@ -23,7 +23,7 @@ fn req() {
 	}; 
 	match(failure > 0.5 * total) {
 		true => {
-			send(err('admission control'), APP);
+			send(err('admission_control'), APP);
 		}
 		false => {
 			total := total + 1;

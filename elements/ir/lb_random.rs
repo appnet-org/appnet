@@ -4,14 +4,14 @@ internal {
 }
 
 fn init() {
-	addrs.set(addrs.len(), 'server A');
-	addrs.set(addrs.len(), 'server B');
-	addrs.set(addrs.len(), 'server C');
+	addrs.set(addrs.len(), 'server_A');
+	addrs.set(addrs.len(), 'server_B');
+	addrs.set(addrs.len(), 'server_C');
 }
 
 fn req(rpc_req) {
 	idx := random(0, len(addrs));
-	rpc_req.get(meta).get(dst).set(addrs.get(idx));
+	rpc_req.get('meta').get('dst').set(addrs.get(idx));
 	send(rpc_req, NET);
 }
 
