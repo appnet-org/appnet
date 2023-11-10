@@ -6,12 +6,12 @@ internal
 fn init() {
 }
 
-fn req(req) {
-	log.set(log.size(), req.get('payload'));
-	send(req, NET);
+fn req(rpc_req) {
+	log.set(log.size(), rpc_req.get('payload'));
+	send(rpc_req, NET);
 }
 
-fn resp(resp) {
-	log.get(log.size(), resp.get('payload'));
+fn resp(rpc_resp) {
+	log.get(log.size(), rpc_resp.get('payload'));
 	send(rpc_resp, APP);
 }

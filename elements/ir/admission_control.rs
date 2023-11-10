@@ -9,25 +9,25 @@ fn init(window) {
 	window := 5;
 }
 
-fn req() {
+fn req(rpc_req) {
 	now := current_time();
 	match(now - last > window) {
-		true => {
+		True => {
 			failure := 0;
 			total := 0;
 			last := now;
 		}
-		false => {
+		False => {
 			// do nothing
 		}
 	}; 
 	match(failure > 0.5 * total) {
-		true => {
+		True => {
 			send(err('admission_control'), APP);
 		}
-		false => {
+		False => {
 			total := total + 1;
-			send(req, NET);
+			send(rpc_req, NET);
 		}
 	};
 }

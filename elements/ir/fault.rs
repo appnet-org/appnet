@@ -5,17 +5,17 @@ fn init(prob) {
 	prob := 0.9;
 }
 
-fn req() {
+fn req(rpc_req) {
 	match(randomf(0,1) < prob) {
-		true => {
+		True => {
 			send(rpc_req, NET);
 		}
-		false => {
+		False => {
 			send(err('fault_injected'), APP);
 		}
 	};
 }
 
-fn resp() {
+fn resp(rpc_resp) {
     send(rpc_resp, APP);
 }

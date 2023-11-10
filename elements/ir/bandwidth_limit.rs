@@ -16,11 +16,11 @@ fn req(rpc_req) {
 	token := min(lim, per_sec * (current_time() - last));
 	last := current_time();
 	match(token > 1) {
-		true => {
+		True => {
 			token := token - rpc_req.get('meta').get('size');
 			send(rpc_req, NET);
 		}
-		false => {
+		False => {
 			send(err('ratelimit'), APP);
 		}
 	};
