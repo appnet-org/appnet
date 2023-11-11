@@ -1,4 +1,5 @@
 from ir.frontend import IRCompiler, Printer
+from ir.props.flow import FlowGraph
 import argparse
 import os
 import pathlib
@@ -34,6 +35,10 @@ if __name__ == "__main__":
         ir = compiler.compile(spec)
         p = ir.accept(printer, None)
         print(p)
+        
+        flow_graph = FlowGraph()
+        
+        flow_graph.analyze(ir.req)
         
         
         

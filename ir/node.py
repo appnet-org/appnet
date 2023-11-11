@@ -51,7 +51,7 @@ class Assign(Statement):
     def __init__(self, left: Identifier, right: Expr):
         self.left = left
         self.right = right
-    
+
 class Pattern(Node):
     def __init__(self, value: Union[Identifier, Literal, Error]):
         self.value = value
@@ -70,18 +70,18 @@ class Error(Node):
     def __init__(self, msg: str):
         self.msg = msg
 
-class FuncCall(Node):
+class FuncCall(Expr):
     def __init__(self, name: Identifier, args: List[Expr]):
         self.name = name
         self.args = args
     
-class MethodCall(Node):
+class MethodCall(Expr):
     def __init__(self, obj: Identifier, method: MethodType, args: List[Expr]):
         self.obj = obj
         self.method = method
         self.args = args
         
-class Send(Node):
+class Send(Statement):
     def __init__(self, direction: str, msg: Expr):
         self.direction = direction
         self.msg = msg
@@ -94,6 +94,18 @@ class Literal(Node):
     def __init__(self, value: str):
         self.value = value
         self.type = DataType.NONE
+
+class Start(Node):
+    def __init__(self):
+        pass
+    
+class End(Node):
+    def __init__(self):
+        pass
+
+START_NODE = Start()
+END_NODE = End()
+PASS_NODE = Statement()
 
 class EnumNode(Enum):
     def accept(self, visitor, ctx):
