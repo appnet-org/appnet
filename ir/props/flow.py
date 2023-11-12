@@ -42,7 +42,7 @@ class FlowGraph():
         return prev
 
     def handle_match(self, match: Match, prev: int) -> None:
-        expr_v = Vertex(match.expr, len(self.vertices), "match_expr")
+        expr_v = Vertex(Statement(match.expr), len(self.vertices), "match_expr")
         self.vertices.append(expr_v)
         self.link(prev, expr_v.idx)
         prev = expr_v.idx
@@ -118,12 +118,12 @@ class FlowGraph():
         rpc_name = f"rpc_{proc.name}"
         report = "Total #Path = " + str(len(paths)) + "\n"
 
-        for path in paths:
-            path_print = "".join([v.annotation + " -> " for v in path])
-            print(path_print)
+
             
         for path in paths:
-            report += "For path: \n"
+            report += "\nFor path: \n     "
+            report += "->".join([v.annotation for v in path if v != self.vertices[-1]])
+            report += "\n\n"
             path_nodes = [v.node for v in path]
             aa = AliasAnalyzer(rpc_name)
             targets = aa.visitBlock(path_nodes, None)
@@ -135,7 +135,8 @@ class FlowGraph():
                 for (k, v) in write_fields.items():
                     for vv in v:
                         report += f"{vv} " 
-                    
+                report += '\n'
+            
             ra = ReadAnalyzer(targets)
             read = ra.visitBlock(path_nodes, None)
                        
@@ -145,6 +146,11 @@ class FlowGraph():
                 for (k, v) in read_fields.items():
                     for vv in v:
                         report += f"({vv}) " 
+                report += '\n'
+            
+            da = DropAnalyzer(targets)
+            drop = da.visitBlock(path_nodes, None)
+            report += "Possible Drop" if drop else "No Drop"
             report += '\n'
         print(report)
         
@@ -322,6 +328,75 @@ class ReadAnalyzer(Visitor):
     def visitError(self, node: Error, ctx) -> bool:
         return False
   
+class DropAnalyzer(Visitor):
+    def __init__(self, targets: List[str]):
+        self.targets = targets
+        self.target_fields: Dict[str, List[str]] = {}
+        for t in targets:
+            self.target_fields[t] = []
+            
+    def visitBlock(self, node: List[Statement], ctx) -> bool:
+        ret = False
+        for s in node:
+            ret = s.accept(self, ctx) or ret
+        return ret
+        
+    def visitNode(self, node: Node, ctx):
+        if node == START_NODE or node == END_NODE or node == PASS_NODE:
+            return
+        print(node.__class__.__name__)
+        raise Exception("Unreachable!")
+
+    def visitProgram(self, node: Program, ctx):
+        raise Exception("Unreachable!")
+
+    def visitInternal(self, node: Internal, ctx):
+        raise Exception("Unreachable!")
+    
+    def visitProcedure(self, node: Procedure, ctx):
+        raise Exception("Unreachable!")
+    
+    def visitStatement(self, node: Statement, ctx):
+        if node.stmt == None:
+            return
+        else:
+            return node.stmt.accept(self, ctx)
+    
+    def visitMatch(self, node: Match, ctx) -> bool:
+        raise Exception("Unreachable! Match should not appear in drop analyzer")
+    
+    def visitAssign(self, node: Assign, ctx) -> bool:
+        return False
+    
+    def visitPattern(self, node: Pattern, ctx) -> bool:
+        return False
+    
+    def visitExpr(self, node: Expr, ctx) -> bool:
+        return node.lhs.accept(self, ctx) or node.rhs.accept(self, ctx)
+    
+    def visitIdentifier(self, node: Identifier, ctx) -> bool:
+        return False
+    
+    def visitType(self, node: Type, ctx) -> bool: 
+        return False
+    
+    def visitFuncCall(self, node: FuncCall, ctx) -> bool:
+        return False
+    
+    def visitMethodCall(self, node: MethodCall, ctx) -> bool:
+        return False  
+    
+    def visitSend(self, node: Send, ctx) -> bool:
+        if node.direction == "NET":
+            name = node.msg.accept(ExprResolver(), ctx)
+            return name in self.targets
+        else:
+            return False    
+    def visitLiteral(self, node: Literal, ctx) -> bool:
+        return False
+    
+    def visitError(self, node: Error, ctx) -> bool:
+        return False
    
 class AliasAnalyzer(Visitor):
     def __init__(self, target: str):
