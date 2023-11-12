@@ -17,7 +17,7 @@ egress:
         spec: "elements/logging.sql"
         config: []
         position: "C"
-    
+
 edge:
     Frontend->Search:
     -   name: "HotelAcl"

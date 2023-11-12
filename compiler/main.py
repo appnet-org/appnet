@@ -10,11 +10,7 @@ if __name__ == "__main__":
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-s",
-        "--spec_path",
-        help="User specification file",
-        type=str,
-        required=True
+        "-s", "--spec_path", help="User specification file", type=str, required=True
     )
     parser.add_argument("--verbose", help="Print Debug info", action="store_true")
     parser.add_argument("--pseudo_element", action="store_true")
