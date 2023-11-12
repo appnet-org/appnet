@@ -14,7 +14,7 @@ import yaml
 
 from compiler.graph import adn_base_dir
 
-support_list = ["logging", "qos", "null", "ratelimit"]
+support_list = ["logging", "qos", "null", "ratelimit", "hotel-acl"]
 
 
 def pseudo_gen_property(element) -> Dict[str, Dict[str, Any]]:
