@@ -1,0 +1,26 @@
+app_structure:
+    - "Frontend->Search"
+service_pos:
+    Frontend: "h2"
+    Search: "h6"
+ingress:
+    Search:
+    -   name: "RateLimit"
+        spec: "elements/ratelimit.sql"
+        config:
+        - "bucket_size = 1000"
+        - "requests_per_sec = 1000"
+        position: "S"
+egress:
+    Frontend:
+    -   name: "Logging"
+        spec: "elements/logging.sql"
+        config: []
+        position: "C"
+
+edge:
+    Frontend->Search:
+    -   name: "HotelAcl"
+        spec: "elements/hotel-acl.sql"
+        config: []
+        position: "C/S"
