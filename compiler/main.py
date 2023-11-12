@@ -35,8 +35,6 @@ if __name__ == "__main__":
 
     compiled_spec = set()
     for gir in graphirs.values():
-        if args.verbose:
-            print(gir)
         gir.optimize(args.pseudo_element)
         for element in gir.elements["req_client"] + gir.elements["req_server"]:
             for spec in element.spec:
@@ -50,3 +48,9 @@ if __name__ == "__main__":
                 compiled_spec.add(spec)
 
     scriptgen(graphirs, args.backend, service_pos)
+
+    if args.verbose:
+        print("=======================================")
+        print("Summary:")
+        for gir in graphirs.values():
+            print(gir)
