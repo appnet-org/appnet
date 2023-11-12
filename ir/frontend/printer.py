@@ -30,7 +30,13 @@ class Printer(Visitor):
         return ret
     
     def visitStatement(self, node: Statement, ctx):
-        return self.visitNode(node)
+        if node.stmt == None:
+            return "NULL_STMT;\n"
+        else:
+            if isinstance(node.stmt, Expr):
+                return node.stmt.accept(self, ctx) + ";\n"
+            else:
+                return node.stmt.accept(self, ctx)
     
     def visitMatch(self, node: Match, ctx):
         ret = f"Match {node.expr.accept(self, ctx)}:\n"

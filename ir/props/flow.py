@@ -1,5 +1,6 @@
 from typing import Callable, List, Protocol, Sequence, TypeVar, Dict, Tuple, Optional
 from ir.node import *
+from ir.node import Expr, Identifier, MethodCall
 from ir.visitor import Visitor
 
 class Edge():
@@ -86,6 +87,8 @@ class FlowGraph():
                 prev = self.handle_match(body, prev)
             elif isinstance(body, Statement):
                 prev = self.handle_block([body], prev)
+            else:
+                raise Exception("build graph encountered: ", body.__class__.__name__)
 
         self.link(prev, end_v.idx)
     
@@ -112,25 +115,57 @@ class FlowGraph():
     def analyze(self, proc: Procedure) -> List[List[Statement]]:
         self.build_graph(proc)
         paths = self.extract_path()
-        for path in paths:
-            pass
-            print("Path:")
-            for step in path:
-                print(step.annotation, step.idx)
-            print("End of path")
-        print("Total number of paths:", len(paths))
+        rpc_name = f"rpc_{proc.name}"
+        report = "Total #Path = " + str(len(paths)) + "\n"
 
+        for path in paths:
+            path_print = "".join([v.annotation + " -> " for v in path])
+            print(path_print)
+            
+        for path in paths:
+            report += "For path: \n"
+            path_nodes = [v.node for v in path]
+            aa = AliasAnalyzer(rpc_name)
+            targets = aa.visitBlock(path_nodes, None)
+            wa = WriteAnalyzer(targets)
+            write = wa.visitBlock(path_nodes, None)
+            if write:
+                write_fields = wa.target_fields
+                report += "Write: "
+                for (k, v) in write_fields.items():
+                    for vv in v:
+                        report += f"{vv} " 
+                    
+            ra = ReadAnalyzer(targets)
+            read = ra.visitBlock(path_nodes, None)
+                       
+            if read:
+                read_fields = ra.target_fields
+                report += "Read: "
+                for (k, v) in read_fields.items():
+                    for vv in v:
+                        report += f"({vv}) " 
+            report += '\n'
+        print(report)
+        
+        
 class WriteAnalyzer(Visitor):
     def __init__(self, targets: List[str]):
         self.targets = targets
+        self.target_fields: Dict[str, List[Tuple(str, str)]] = {}
+        for t in targets:
+            self.target_fields[t] = []
     
     def visitBlock(self, node: List[Statement], ctx) -> bool:
         ret = False
         for s in node:
-            ret = ret | s.accept(self, ctx)
+            ret = s.accept(self, ctx) or ret
         return ret
         
     def visitNode(self, node: Node, ctx):
+        if node == START_NODE or node == END_NODE or node == PASS_NODE:
+            return
+        print(node.__class__.__name__)
         raise Exception("Unreachable!")
 
     def visitProgram(self, node: Program, ctx):
@@ -142,25 +177,28 @@ class WriteAnalyzer(Visitor):
     def visitProcedure(self, node: Procedure, ctx):
         raise Exception("Unreachable!")
     
-    def visitStatement(self, node: Statement, ctx) -> bool:
-        return self.visitNode(node)
+    def visitStatement(self, node: Statement, ctx):
+        if node.stmt == None:
+            return
+        else:
+            return node.stmt.accept(self, ctx)
     
     def visitMatch(self, node: Match, ctx) -> bool:
         ret = False
         for (p, s) in node.actions:
-            ret = ret | p.accept(self, ctx)
+            ret = p.accept(self, ctx) or ret
             for st in s:
-                ret = ret | st.accept(self, ctx)
+                ret = st.accept(self, ctx) or ret
         return ret
     
     def visitAssign(self, node: Assign, ctx) -> bool:
-        return node.left.accept(self, ctx) | node.right.accept(self, ctx)
+        return node.left.accept(self, ctx) or node.right.accept(self, ctx)
     
     def visitPattern(self, node: Pattern, ctx) -> bool:
         return node.value.accept(self, ctx)
     
     def visitExpr(self, node: Expr, ctx) -> bool:
-        return node.lhs.accept(self, ctx) | node.rhs.accept(self, ctx)
+        return node.lhs.accept(self, ctx) or node.rhs.accept(self, ctx)
     
     def visitIdentifier(self, node: Identifier, ctx) -> bool:
         return False
@@ -169,19 +207,23 @@ class WriteAnalyzer(Visitor):
         return False
     
     def visitFuncCall(self, node: FuncCall, ctx) -> bool:
-        ret = False
-        ret |= node.name.accept(self, ctx) 
+        ret = node.name.accept(self, ctx) 
         for a in node.args:
-            ret |= a.accept(self, ctx)
+            ret = a.accept(self, ctx) or ret
         return ret 
     
     def visitMethodCall(self, node: MethodCall, ctx) -> bool:
-        if node.obj.name in self.targets and node.method.name == "set":
+        assert(isinstance(node.obj, Identifier))
+        if node.obj.name in self.targets and node.method.name == "SET":
+            er = ExprResolver()
+            assert(len(node.args) == 2)
+            fields = [i.accept(er, None) for i in node.args]
+            self.target_fields[node.obj.name] += [(fields[0], fields[1])]
             return True
         ret = False
         for a in node.args:
             if a != None:
-                ret = ret | a.accept(self, ctx) 
+                ret = a.accept(self, ctx) or ret
         return ret   
     
     def visitSend(self, node: Send, ctx) -> bool:
@@ -193,3 +235,194 @@ class WriteAnalyzer(Visitor):
     def visitError(self, node: Error, ctx) -> bool:
         return False
   
+class ReadAnalyzer(Visitor):
+    def __init__(self, targets: List[str]):
+        self.targets = targets
+        self.target_fields: Dict[str, List[str]] = {}
+        for t in targets:
+            self.target_fields[t] = []
+            
+    def visitBlock(self, node: List[Statement], ctx) -> bool:
+        ret = False
+        for s in node:
+            ret = s.accept(self, ctx) or ret
+        return ret
+        
+    def visitNode(self, node: Node, ctx):
+        if node == START_NODE or node == END_NODE or node == PASS_NODE:
+            return
+        print(node.__class__.__name__)
+        raise Exception("Unreachable!")
+
+    def visitProgram(self, node: Program, ctx):
+        raise Exception("Unreachable!")
+
+    def visitInternal(self, node: Internal, ctx):
+        raise Exception("Unreachable!")
+    
+    def visitProcedure(self, node: Procedure, ctx):
+        raise Exception("Unreachable!")
+    
+    def visitStatement(self, node: Statement, ctx):
+        if node.stmt == None:
+            return
+        else:
+            return node.stmt.accept(self, ctx)
+    
+    def visitMatch(self, node: Match, ctx) -> bool:
+        ret = False
+        for (p, s) in node.actions:
+            ret = p.accept(self, ctx) or ret
+            for st in s:
+                ret = st.accept(self, ctx) or ret
+        return ret
+    
+    def visitAssign(self, node: Assign, ctx) -> bool:
+        return node.left.accept(self, ctx) or node.right.accept(self, ctx)
+    
+    def visitPattern(self, node: Pattern, ctx) -> bool:
+        return node.value.accept(self, ctx)
+    
+    def visitExpr(self, node: Expr, ctx) -> bool:
+        return node.lhs.accept(self, ctx) or node.rhs.accept(self, ctx)
+    
+    def visitIdentifier(self, node: Identifier, ctx) -> bool:
+        return False
+    
+    def visitType(self, node: Type, ctx) -> bool: 
+        return False
+    
+    def visitFuncCall(self, node: FuncCall, ctx) -> bool:
+        ret = node.name.accept(self, ctx) 
+        for a in node.args:
+            ret = a.accept(self, ctx) or ret
+        return ret 
+    
+    def visitMethodCall(self, node: MethodCall, ctx) -> bool:
+        if isinstance(node.obj, Identifier):
+            if node.obj.name in self.targets and node.method.name == "GET":
+                er = ExprResolver()
+                fields = [i.accept(er, None) for i in node.args]
+                self.target_fields[node.obj.name] += fields
+                return True
+        else:
+            raise NotADirectoryError
+        ret = False
+        for a in node.args:
+            if a != None:
+                ret = a.accept(self, ctx) or ret
+        return ret   
+    
+    def visitSend(self, node: Send, ctx) -> bool:
+        return node.msg.accept(self, ctx)
+    
+    def visitLiteral(self, node: Literal, ctx) -> bool:
+        return False
+    
+    def visitError(self, node: Error, ctx) -> bool:
+        return False
+  
+   
+class AliasAnalyzer(Visitor):
+    def __init__(self, target: str):
+        self.targets: List[str] = [target]
+        self.target_fields: Dict[str, List[str]] = {}
+        for t in self.targets:
+            self.target_fields[t] = []
+            
+    def visitBlock(self, node: List[Statement], ctx) -> List[str]:
+        for s in node:
+            s.accept(self, ctx)
+        return self.targets
+    
+    def visitNode(self, node: Node, ctx):
+        if node == START_NODE or node == END_NODE or node == PASS_NODE:
+            return
+        print(node.__class__.__name__)
+        raise Exception("Unreachable!")
+
+    def visitProgram(self, node: Program, ctx):
+        raise Exception("Unreachable!")
+
+    def visitInternal(self, node: Internal, ctx):
+        raise Exception("Unreachable!")
+    
+    def visitProcedure(self, node: Procedure, ctx):
+        raise Exception("Unreachable!")
+    
+    def visitStatement(self, node: Statement, ctx):
+        if node.stmt == None:
+            return
+        else:
+            return node.stmt.accept(self, ctx)
+    
+    def visitMatch(self, node: Match, ctx):
+        for (p, s) in node.actions:
+            p.accept(self, ctx)
+            for st in s:
+                st.accept(self, ctx)
+    
+    def visitAssign(self, node: Assign, ctx):
+        name = node.left.accept(self, ctx)
+        targets = node.right.accept(self, ctx)
+        if targets == True:
+             self.targets.append(name)
+             self.target_fields[name] = []
+    
+    def visitPattern(self, node: Pattern, ctx) -> bool:
+        return node.value.accept(self, ctx)
+    
+    def visitExpr(self, node: Expr, ctx) -> bool:
+        if isinstance(node.lhs, Identifier) and node.lhs.name in self.targets:
+            return True
+        if isinstance(node.rhs, Identifier) and node.rhs.name in self.targets:
+            return True
+        return node.lhs.accept(self, ctx) or node.rhs.accept(self, ctx)
+    
+    def visitIdentifier(self, node: Identifier, ctx) -> str:
+        return node.name
+    
+    def visitType(self, node: Type, ctx) -> bool: 
+        return False
+    
+    def visitFuncCall(self, node: FuncCall, ctx) -> bool:
+        ret = node.name.accept(self, ctx) 
+        for a in node.args:
+            ret = a.accept(self, ctx) or ret
+        return ret 
+    
+    def visitMethodCall(self, node: MethodCall, ctx) -> bool:
+        assert(isinstance(node.obj, Identifier))
+        if node.obj.name in self.targets:
+            if node.method.name == "GET":
+                return True
+        return False
+    
+    def visitSend(self, node: Send, ctx) -> bool:
+        return False
+    
+    def visitLiteral(self, node: Literal, ctx) -> bool:
+        return False
+    
+    def visitError(self, node: Error, ctx) -> bool:
+        return False
+    
+class ExprResolver(Visitor):
+    def __init__(self) -> None:
+        pass
+    
+    def visitNode(self, node: Node, ctx) -> str:
+        print(node.__class__.__name__)
+        raise Exception("Unreachable!")
+    
+    def visitLiteral(self, node: Literal, ctx) -> str:
+        return node.value
+    
+    def visitIdentifier(self, node: Identifier, ctx) -> str:
+        return node.name
+        
+    def visitExpr(self, node: Expr, ctx) -> str:
+        return node.lhs.accept(self, ctx) + str(node.op) + node.rhs.accept(self, ctx)
+    
+    def visitMethodCall(self, node: MethodCall, ctx):
+        return node.obj.accept(self, ctx) + "." + node.method.name + "(" + ",".join([a.accept(self, ctx) for a in node.args]) + ")"

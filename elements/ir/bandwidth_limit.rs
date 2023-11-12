@@ -17,7 +17,7 @@ fn req(rpc_req) {
 	last := current_time();
 	match(token > 1) {
 		True => {
-			token := token - rpc_req.get('meta').get('size');
+			token := token - rpc_req.get('meta_size');
 			send(rpc_req, NET);
 		}
 		False => {

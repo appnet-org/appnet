@@ -11,7 +11,7 @@ fn init() {
 
 fn req(rpc_req) {
 	idx := random(0, len(addrs));
-	rpc_req.get('meta').get('dst').set(addrs.get(idx));
+	rpc_req.set('meta_dst', addrs.get(idx));
 	send(rpc_req, NET);
 }
 

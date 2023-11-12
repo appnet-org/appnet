@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 class Node:
     def __init__(self):
@@ -40,7 +40,9 @@ class Procedure(Node):
         self.body = body
     
 class Statement(Node):   
-    pass
+    def __init__(self, stmt: Optional[Union[Match, Assign, Send, Expr]] = None):
+        self.stmt = stmt
+        
 
 class Match(Statement):
     def __init__(self, match: Expr, actions: List[Tuple[Pattern, List[Statement]]]):
@@ -76,7 +78,7 @@ class FuncCall(Expr):
         self.args = args
     
 class MethodCall(Expr):
-    def __init__(self, obj: Identifier, method: MethodType, args: List[Expr]):
+    def __init__(self, obj: Identifier , method: MethodType, args: List[Expr]):
         self.obj = obj
         self.method = method
         self.args = args

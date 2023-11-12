@@ -70,7 +70,10 @@ class IRTransformer(Transformer):
         return s[0]
     
     def statement(self, s):
-        return s[0]
+        if isinstance(s[0], Statement):
+            return s[0]
+        else:
+            return Statement(s[0])
     
     def assign(self, a) -> Assign:
         return Assign(a[0], a[1])
@@ -97,7 +100,7 @@ class IRTransformer(Transformer):
             raise Exception("Invalid expression: " + str(e))
     
     def method(self, m) -> MethodCall:
-        return MethodCall(m[0], m[1][0], [m[1][1]])
+        return MethodCall(m[0], m[1][0], m[1][1])
     
     def func(self, f) -> FuncCall:
         # todo! check function name is valid
@@ -128,19 +131,19 @@ class IRTransformer(Transformer):
         return Error(e)
     
     def get(self, g):
-        return MethodType.GET, g[0]
+        return MethodType.GET, g
     
     def set_(self, s):
-        return MethodType.SET, s[0]
+        return MethodType.SET, s
     
     def delete(self, d):
-        return MethodType.DELETE, d[0]
+        return MethodType.DELETE, d
     
     def size(self, s):
-        return MethodType.SIZE, None
+        return MethodType.SIZE, []
     
     def len_(self, l):
-        return MethodType.LEN, None
+        return MethodType.LEN, []
     
     def op(self, o) -> Operator:
         return o[0]
@@ -177,7 +180,7 @@ class IRTransformer(Transformer):
     
     def quoted_string(self, s):
         s = s[0]
-        return s
+        return str(s)
     
     def CNAME(self, c):
         return c.value

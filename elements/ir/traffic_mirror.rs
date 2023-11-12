@@ -9,8 +9,8 @@ fn init(mirror_address) {
 
 fn req(mirror_address, rpc_req) {
 	send(rpc_req, NET);
-	rpc_req.get('meta').get('dst').set(mirror_address);
-	rpc_req.get('meta').get('src').set('');
+	rpc_req.set('meta_dst', mirror_address);
+	rpc_req.set('meta_src', '');
 	// todo! how to deal with rpc_id
 	send(rpc_req, NET);
 }
