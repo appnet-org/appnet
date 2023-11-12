@@ -1,0 +1,25 @@
+app_structure:
+    - "Frontend->Search"
+    - "Frontend->Profile"
+    - "Search->Geo"
+    - "Search->Rate"
+service_pos:
+    Frontend: "h2"
+    Geo: "h3"
+    Profile: "h4"
+    Rate: "h5"
+    Search: "h6"
+egress:
+    Frontend:
+    -
+        name: "Logging"
+        spec: "elements/logging.sql"
+        config: []
+        position: "C"
+    -
+        name: "RateLimit"
+        spec: "elements/ratelimit.sql"
+        config:
+        - "bucket_size = 1000"
+        - "requests_per_sec = 1000"
+        position: "C"
