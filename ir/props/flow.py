@@ -438,9 +438,9 @@ class AliasAnalyzer(Visitor):
                 st.accept(self, ctx)
     
     def visitAssign(self, node: Assign, ctx):
-        name = node.left.accept(self, ctx)
-        targets = node.right.accept(self, ctx)
-        if targets == True:
+        name = node.left.name
+        is_target = node.right.accept(self, ctx)
+        if is_target == True:
              self.targets.append(name)
              self.target_fields[name] = []
     
@@ -455,7 +455,7 @@ class AliasAnalyzer(Visitor):
         return node.lhs.accept(self, ctx) or node.rhs.accept(self, ctx)
     
     def visitIdentifier(self, node: Identifier, ctx) -> str:
-        return node.name
+        return node.name in self.targets
     
     def visitType(self, node: Type, ctx) -> bool: 
         return False
