@@ -55,8 +55,8 @@ Note:
 - `kubectl apply -f echo-server-grpc-istio-full.yaml` 
 - `kubectl apply -f wasm_acl.yaml`
 
-Note: Go filter is not runnabel yet.. See reference: https://github.com/envoyproxy/envoy/tree/main/examples/golang-http/simple
+Note: Go filter is not runnable yet.. See reference: https://github.com/envoyproxy/envoy/tree/main/examples/golang-http/simple
 
 ### Acknowledgement
 
-Thanks to the mRPC team for the wasm rust code.
+Thanks to the mRPC team for the WASM rust code.

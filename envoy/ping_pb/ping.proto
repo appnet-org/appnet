@@ -23,3 +23,11 @@ message PingWorldRequest {
 message PingWorldResponse {
   string body = 1;
 }
+
+message PingEchoRequest {
+  string body = 1;
+}
+
+message PingEchoResponse {
+  string body = 1;
+}
