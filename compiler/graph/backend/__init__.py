@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib
 from typing import Dict
 
-from compiler.graph.graphir import GraphIR
+from compiler.graph.ir import GraphIR
 
 
 def scriptgen(girs: Dict[str, GraphIR], backend: str, service_pos: Dict[str, str]):

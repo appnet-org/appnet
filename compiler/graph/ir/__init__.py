@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Dict, List
 
-from compiler.graph.graphir.element import AbsElement
+from compiler.graph.ir.element import AbsElement
 
 
 class GraphIR:

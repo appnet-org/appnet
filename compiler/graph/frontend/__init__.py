@@ -5,7 +5,7 @@ from typing import Dict, Tuple
 
 import yaml
 
-from compiler.graph.graphir import GraphIR
+from compiler.graph.ir import GraphIR
 
 
 class GCParser:

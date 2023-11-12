@@ -13,8 +13,8 @@ import tomli_w
 
 from compiler.graph import graph_base_dir
 from compiler.graph.backend.utils import copy_remote_container, execute_remote_container
-from compiler.graph.graphir import GraphIR
-from compiler.graph.graphir.element import AbsElement
+from compiler.graph.ir import GraphIR
+from compiler.graph.ir.element import AbsElement
 
 phoenix_dir = os.getenv("PHOENIX_DIR")
 
