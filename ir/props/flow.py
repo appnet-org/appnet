@@ -149,8 +149,8 @@ class FlowGraph():
                 report += '\n'
             
             da = DropAnalyzer(targets)
-            drop = da.visitBlock(path_nodes, None)
-            report += "Possible Drop" if drop else "No Drop"
+            no_drop = da.visitBlock(path_nodes, None)
+            report += "No Drop" if no_drop else "Possible Drop"
             report += '\n'
         print(report)
         
