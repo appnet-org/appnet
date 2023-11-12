@@ -3,6 +3,23 @@ from ir.node import *
 from ir.node import Expr, Identifier, MethodCall
 from ir.visitor import Visitor
 
+class Property():
+    def __init__(self) -> None:
+        self.drop: bool = False
+        self.read: List[str] = []
+        self.write: List[str] = []
+    def to_yaml(self) -> str:
+        self.write = list(set(self.write))
+        self.read = list(set(self.read))
+        ret = "    write:\n"
+        for w in self.write:
+            ret += f"   - {w}\n"
+        ret += "    read:\n"
+        for r in self.read:
+            ret += f"   - {r}\n"
+        ret += "    drop: " + str(self.drop) + "\n"
+        return ret
+
 class Edge():
     def __init__(self, u: int, v: int, w: Tuple[Expr, Expr] = []) -> None:
         self.u = u
@@ -112,13 +129,19 @@ class FlowGraph():
                         q.append(e.v)
         return ret[1]
             
-    def analyze(self, proc: Procedure) -> List[List[Statement]]:
+    def analyze(self, proc: Procedure, verbose: bool = False) -> Property:
         self.build_graph(proc)
         paths = self.extract_path()
         rpc_name = f"rpc_{proc.name}"
+        
+        if proc.name == "req":
+            direction = "NET"
+        elif proc.name == "resp":
+            direction = "APP"
+        
         report = "Total #Path = " + str(len(paths)) + "\n"
 
-
+        ret = Property()
             
         for path in paths:
             report += "\nFor path: \n     "
@@ -135,6 +158,7 @@ class FlowGraph():
                 for (k, v) in write_fields.items():
                     for vv in v:
                         report += f"{vv} " 
+                        ret.write.append(vv[0])
                 report += '\n'
             
             ra = ReadAnalyzer(targets)
@@ -146,13 +170,18 @@ class FlowGraph():
                 for (k, v) in read_fields.items():
                     for vv in v:
                         report += f"({vv}) " 
+                        ret.read.append(vv)
                 report += '\n'
             
-            da = DropAnalyzer(targets)
+            da = DropAnalyzer(targets, direction)
             no_drop = da.visitBlock(path_nodes, None)
+            ret.drop = ret.drop or (not no_drop)
+            
             report += "No Drop" if no_drop else "Possible Drop"
             report += '\n'
-        print(report)
+        if verbose:
+            print(report)        
+        return ret
         
         
 class WriteAnalyzer(Visitor):
@@ -329,7 +358,8 @@ class ReadAnalyzer(Visitor):
         return False
   
 class DropAnalyzer(Visitor):
-    def __init__(self, targets: List[str]):
+    def __init__(self, targets: List[str], direction: str):
+        self.direction = direction
         self.targets = targets
         self.target_fields: Dict[str, List[str]] = {}
         for t in targets:
@@ -387,7 +417,7 @@ class DropAnalyzer(Visitor):
         return False  
     
     def visitSend(self, node: Send, ctx) -> bool:
-        if node.direction == "NET":
+        if node.direction == self.direction:
             name = node.msg.accept(ExprResolver(), ctx)
             return name in self.targets
         else:
