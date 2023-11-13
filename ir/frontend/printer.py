@@ -21,15 +21,22 @@ class Printer(Visitor):
         return ret + "\n"
     
     def visitProcedure(self, node: Procedure, ctx):
-        ret = f"Procedure {node.name}:\n"
+        ret = f"Procedure {node.name}: "
         for p in node.params:
             ret += f"{p.accept(self, ctx)}"
+        ret += "\n"
         for s in node.body:
-            ret += f"{s.accept(self, ctx)}"
+            ret += f"{s.accept(self, ctx)}\n"
         return ret
     
     def visitStatement(self, node: Statement, ctx):
-        return self.visitNode(node)
+        if node.stmt == None:
+            return "NULL_STMT;\n"
+        else:
+            if isinstance(node.stmt, Expr):
+                return node.stmt.accept(self, ctx) + ";\n"
+            else:
+                return node.stmt.accept(self, ctx)
     
     def visitMatch(self, node: Match, ctx):
         ret = f"Match {node.expr.accept(self, ctx)}:\n"
@@ -72,8 +79,17 @@ class Printer(Visitor):
                 ret += f"{a.accept(self, ctx)} "
         return ret + ")"   
     
-    def visitSend(self, node: Send, ctx):
-        return "Send:" + node.direction + node.msg.accept(self, ctx)
+    def visitSend(self, node: Send, ctx) -> str:
+        return "Send: " + node.msg.accept(self, ctx) + "->" + node.direction
     
     def visitLiteral(self, node: Literal, ctx):
         return node.value
+    
+    def visitError(self, node: Error, ctx) -> str:
+        # change this str to Literal
+        if isinstance(node.msg, str):
+            return "Err(" + node.msg + ")"
+        else:
+            return "Err(" + node.msg.accept(self, ctx) + ")"
+        
+        

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 class Node:
     def __init__(self):
@@ -40,7 +40,9 @@ class Procedure(Node):
         self.body = body
     
 class Statement(Node):   
-    pass
+    def __init__(self, stmt: Optional[Union[Match, Assign, Send, Expr]] = None):
+        self.stmt = stmt
+        
 
 class Match(Statement):
     def __init__(self, match: Expr, actions: List[Tuple[Pattern, List[Statement]]]):
@@ -51,9 +53,9 @@ class Assign(Statement):
     def __init__(self, left: Identifier, right: Expr):
         self.left = left
         self.right = right
-    
+
 class Pattern(Node):
-    def __init__(self, value: Union[Identifier, Literal]):
+    def __init__(self, value: Union[Identifier, Literal, Error]):
         self.value = value
 
 class Expr(Node):
@@ -65,19 +67,23 @@ class Expr(Node):
 class Identifier(Node):
     def __init__(self, name: str):
         self.name = name
-    
-class FuncCall(Node):
+
+class Error(Node):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+class FuncCall(Expr):
     def __init__(self, name: Identifier, args: List[Expr]):
         self.name = name
         self.args = args
     
-class MethodCall(Node):
-    def __init__(self, obj: Identifier, method: MethodType, args: List[Expr]):
+class MethodCall(Expr):
+    def __init__(self, obj: Identifier , method: MethodType, args: List[Expr]):
         self.obj = obj
         self.method = method
         self.args = args
         
-class Send(Node):
+class Send(Statement):
     def __init__(self, direction: str, msg: Expr):
         self.direction = direction
         self.msg = msg
@@ -90,6 +96,18 @@ class Literal(Node):
     def __init__(self, value: str):
         self.value = value
         self.type = DataType.NONE
+
+class Start(Node):
+    def __init__(self):
+        pass
+    
+class End(Node):
+    def __init__(self):
+        pass
+
+START_NODE = Start()
+END_NODE = End()
+PASS_NODE = Statement()
 
 class EnumNode(Enum):
     def accept(self, visitor, ctx):
