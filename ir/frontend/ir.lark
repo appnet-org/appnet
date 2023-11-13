@@ -35,12 +35,12 @@ match: "match" "(" expr ")" "{" action* "};"
 action: pattern "=>" "{" statement* "}"
 
 pattern: const 
-        | "Some" "(" identifier ")" -> some_pattern
+        | "Some" "(" (identifier | err) ")" -> some_pattern
 
 
 expr: identifier | method | func | const | expr op expr | "(" expr ")"
 
-method: expr "." (get | set_ | delete | len_ | size)
+method: identifier "." (get | set_ | delete | len_ | size)
 
 func: identifier arguments 
 
@@ -68,7 +68,7 @@ op: "+" -> op_add
 
 quoted_string: /'[^']*'/
 
-err: "err" "(" quoted_string ")"
+err: "err" "(" (quoted_string | CNAME) ")" 
 
 %import common.SIGNED_NUMBER -> NUMBER
 %import common.WS

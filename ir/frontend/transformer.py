@@ -54,7 +54,7 @@ class IRTransformer(Transformer):
         ret = []
         for i in p:
             if i != None:
-                ret.append(Identifier(i))
+                ret.append(i)
         return ret
     
     def parameter(self, p) -> str:
@@ -70,7 +70,10 @@ class IRTransformer(Transformer):
         return s[0]
     
     def statement(self, s):
-        return s[0]
+        if isinstance(s[0], Statement):
+            return s[0]
+        else:
+            return Statement(s[0])
     
     def assign(self, a) -> Assign:
         return Assign(a[0], a[1])
@@ -97,13 +100,24 @@ class IRTransformer(Transformer):
             raise Exception("Invalid expression: " + str(e))
     
     def method(self, m) -> MethodCall:
-        return MethodCall(m[0], m[1][0], [m[1][1]])
+        return MethodCall(m[0], m[1][0], m[1][1])
     
     def func(self, f) -> FuncCall:
         # todo! check function name is valid
         # todo! change send to Send primitive
         # ! maybe we should have a global function list first
-        return FuncCall(f[0], f[1])
+        assert(len(f) == 2)
+        assert(isinstance(f[0], Identifier))
+        if f[0].name == "send":
+            assert(len(f[1]) == 2)
+            assert(f[1][1].name == "APP" or f[1][1].name == "NET")
+            # f[1][1] should be str, but it will be parsed as Identifier
+            return Send(f[1][1].name, f[1][0])
+        elif f[0].name == "err":
+            assert(len(f[1]) == 1)
+            return Error(f[1][0])
+        else:
+            return FuncCall(f[0], f[1])
     
     def arguments(self, a) -> List[Expr]:
         return a
@@ -112,20 +126,24 @@ class IRTransformer(Transformer):
         c = c[0]
         return Literal(c)
     
+    def err(self, e) -> Error:
+        e = e[0]
+        return Error(e)
+    
     def get(self, g):
-        return MethodType.GET, g[0]
+        return MethodType.GET, g
     
     def set_(self, s):
-        return MethodType.SET, s[0]
+        return MethodType.SET, s
     
     def delete(self, d):
-        return MethodType.DELETE, d[0]
+        return MethodType.DELETE, d
     
     def size(self, s):
-        return MethodType.SIZE, None
+        return MethodType.SIZE, []
     
     def len_(self, l):
-        return MethodType.LEN, None
+        return MethodType.LEN, []
     
     def op(self, o) -> Operator:
         return o[0]
@@ -162,7 +180,7 @@ class IRTransformer(Transformer):
     
     def quoted_string(self, s):
         s = s[0]
-        return s
+        return str(s)
     
     def CNAME(self, c):
         return c.value
