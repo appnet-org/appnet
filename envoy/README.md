@@ -1,6 +1,8 @@
 # gRPC echo server
 
-This is a simple Echo server built using Go and gRPC.
+This is a simple ping pong service built using Go and gRPC.
+
+![Application](./ping-pong-app.png)
 
 ## Proto
 
