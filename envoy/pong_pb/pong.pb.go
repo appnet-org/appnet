@@ -20,7 +20,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type PongHelloRequest struct {
+type PongRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -28,8 +28,8 @@ type PongHelloRequest struct {
 	Body string `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
 }
 
-func (x *PongHelloRequest) Reset() {
-	*x = PongHelloRequest{}
+func (x *PongRequest) Reset() {
+	*x = PongRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pong_pb_pong_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -37,13 +37,13 @@ func (x *PongHelloRequest) Reset() {
 	}
 }
 
-func (x *PongHelloRequest) String() string {
+func (x *PongRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PongHelloRequest) ProtoMessage() {}
+func (*PongRequest) ProtoMessage() {}
 
-func (x *PongHelloRequest) ProtoReflect() protoreflect.Message {
+func (x *PongRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pong_pb_pong_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,19 +55,19 @@ func (x *PongHelloRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PongHelloRequest.ProtoReflect.Descriptor instead.
-func (*PongHelloRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use PongRequest.ProtoReflect.Descriptor instead.
+func (*PongRequest) Descriptor() ([]byte, []int) {
 	return file_pong_pb_pong_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PongHelloRequest) GetBody() string {
+func (x *PongRequest) GetBody() string {
 	if x != nil {
 		return x.Body
 	}
 	return ""
 }
 
-type PongHelloResponse struct {
+type PongResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -75,8 +75,8 @@ type PongHelloResponse struct {
 	Body string `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
 }
 
-func (x *PongHelloResponse) Reset() {
-	*x = PongHelloResponse{}
+func (x *PongResponse) Reset() {
+	*x = PongResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pong_pb_pong_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -84,13 +84,13 @@ func (x *PongHelloResponse) Reset() {
 	}
 }
 
-func (x *PongHelloResponse) String() string {
+func (x *PongResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PongHelloResponse) ProtoMessage() {}
+func (*PongResponse) ProtoMessage() {}
 
-func (x *PongHelloResponse) ProtoReflect() protoreflect.Message {
+func (x *PongResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pong_pb_pong_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -102,106 +102,12 @@ func (x *PongHelloResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PongHelloResponse.ProtoReflect.Descriptor instead.
-func (*PongHelloResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use PongResponse.ProtoReflect.Descriptor instead.
+func (*PongResponse) Descriptor() ([]byte, []int) {
 	return file_pong_pb_pong_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PongHelloResponse) GetBody() string {
-	if x != nil {
-		return x.Body
-	}
-	return ""
-}
-
-type PongWorldRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Body string `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
-}
-
-func (x *PongWorldRequest) Reset() {
-	*x = PongWorldRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pong_pb_pong_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PongWorldRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PongWorldRequest) ProtoMessage() {}
-
-func (x *PongWorldRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pong_pb_pong_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PongWorldRequest.ProtoReflect.Descriptor instead.
-func (*PongWorldRequest) Descriptor() ([]byte, []int) {
-	return file_pong_pb_pong_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *PongWorldRequest) GetBody() string {
-	if x != nil {
-		return x.Body
-	}
-	return ""
-}
-
-type PongWorldResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Body string `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
-}
-
-func (x *PongWorldResponse) Reset() {
-	*x = PongWorldResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pong_pb_pong_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PongWorldResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PongWorldResponse) ProtoMessage() {}
-
-func (x *PongWorldResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pong_pb_pong_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PongWorldResponse.ProtoReflect.Descriptor instead.
-func (*PongWorldResponse) Descriptor() ([]byte, []int) {
-	return file_pong_pb_pong_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *PongWorldResponse) GetBody() string {
+func (x *PongResponse) GetBody() string {
 	if x != nil {
 		return x.Body
 	}
@@ -219,7 +125,7 @@ type PongEchoRequest struct {
 func (x *PongEchoRequest) Reset() {
 	*x = PongEchoRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pong_pb_pong_proto_msgTypes[4]
+		mi := &file_pong_pb_pong_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -232,7 +138,7 @@ func (x *PongEchoRequest) String() string {
 func (*PongEchoRequest) ProtoMessage() {}
 
 func (x *PongEchoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pong_pb_pong_proto_msgTypes[4]
+	mi := &file_pong_pb_pong_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -245,7 +151,7 @@ func (x *PongEchoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PongEchoRequest.ProtoReflect.Descriptor instead.
 func (*PongEchoRequest) Descriptor() ([]byte, []int) {
-	return file_pong_pb_pong_proto_rawDescGZIP(), []int{4}
+	return file_pong_pb_pong_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *PongEchoRequest) GetBody() string {
@@ -266,7 +172,7 @@ type PongEchoResponse struct {
 func (x *PongEchoResponse) Reset() {
 	*x = PongEchoResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pong_pb_pong_proto_msgTypes[5]
+		mi := &file_pong_pb_pong_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -279,7 +185,7 @@ func (x *PongEchoResponse) String() string {
 func (*PongEchoResponse) ProtoMessage() {}
 
 func (x *PongEchoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pong_pb_pong_proto_msgTypes[5]
+	mi := &file_pong_pb_pong_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -292,7 +198,7 @@ func (x *PongEchoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PongEchoResponse.ProtoReflect.Descriptor instead.
 func (*PongEchoResponse) Descriptor() ([]byte, []int) {
-	return file_pong_pb_pong_proto_rawDescGZIP(), []int{5}
+	return file_pong_pb_pong_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *PongEchoResponse) GetBody() string {
@@ -306,37 +212,26 @@ var File_pong_pb_pong_proto protoreflect.FileDescriptor
 
 var file_pong_pb_pong_proto_rawDesc = []byte{
 	0x0a, 0x12, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2f, 0x70, 0x6f, 0x6e, 0x67, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x07, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x22, 0x26, 0x0a,
-	0x10, 0x50, 0x6f, 0x6e, 0x67, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x12, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x04, 0x62, 0x6f, 0x64, 0x79, 0x22, 0x27, 0x0a, 0x11, 0x50, 0x6f, 0x6e, 0x67, 0x48, 0x65, 0x6c,
-	0x6c, 0x6f, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x62, 0x6f,
-	0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22, 0x26,
-	0x0a, 0x10, 0x50, 0x6f, 0x6e, 0x67, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22, 0x27, 0x0a, 0x11, 0x50, 0x6f, 0x6e, 0x67, 0x57, 0x6f,
-	0x72, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x62,
-	0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22,
-	0x25, 0x0a, 0x0f, 0x50, 0x6f, 0x6e, 0x67, 0x45, 0x63, 0x68, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22, 0x26, 0x0a, 0x10, 0x50, 0x6f, 0x6e, 0x67, 0x45, 0x63,
-	0x68, 0x6f, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x62, 0x6f,
-	0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x32, 0xd6,
-	0x01, 0x0a, 0x0b, 0x50, 0x6f, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x42,
-	0x0a, 0x09, 0x50, 0x6f, 0x6e, 0x67, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x12, 0x19, 0x2e, 0x70, 0x6f,
-	0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62,
-	0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x42, 0x0a, 0x09, 0x50, 0x6f, 0x6e, 0x67, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x12,
-	0x19, 0x2e, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x57, 0x6f,
-	0x72, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x70, 0x6f, 0x6e,
-	0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3f, 0x0a, 0x08, 0x50, 0x6f, 0x6e, 0x67, 0x45, 0x63,
-	0x68, 0x6f, 0x12, 0x18, 0x2e, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e,
-	0x67, 0x45, 0x63, 0x68, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x70,
-	0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x45, 0x63, 0x68, 0x6f, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x0b, 0x5a, 0x09, 0x2e, 0x2f, 0x70, 0x6f, 0x6e,
-	0x67, 0x5f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x07, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x22, 0x21, 0x0a,
+	0x0b, 0x50, 0x6f, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04,
+	0x62, 0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79,
+	0x22, 0x22, 0x0a, 0x0c, 0x50, 0x6f, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x12, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x62, 0x6f, 0x64, 0x79, 0x22, 0x25, 0x0a, 0x0f, 0x50, 0x6f, 0x6e, 0x67, 0x45, 0x63, 0x68, 0x6f,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22, 0x26, 0x0a, 0x10, 0x50,
+	0x6f, 0x6e, 0x67, 0x45, 0x63, 0x68, 0x6f, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x12, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x62,
+	0x6f, 0x64, 0x79, 0x32, 0x83, 0x01, 0x0a, 0x0b, 0x50, 0x6f, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x12, 0x33, 0x0a, 0x04, 0x50, 0x6f, 0x6e, 0x67, 0x12, 0x14, 0x2e, 0x70, 0x6f,
+	0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x15, 0x2e, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e, 0x67,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3f, 0x0a, 0x08, 0x50, 0x6f, 0x6e, 0x67,
+	0x45, 0x63, 0x68, 0x6f, 0x12, 0x18, 0x2e, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50,
+	0x6f, 0x6e, 0x67, 0x45, 0x63, 0x68, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19,
+	0x2e, 0x70, 0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x45, 0x63, 0x68,
+	0x6f, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x0b, 0x5a, 0x09, 0x2e, 0x2f, 0x70,
+	0x6f, 0x6e, 0x67, 0x5f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -351,24 +246,20 @@ func file_pong_pb_pong_proto_rawDescGZIP() []byte {
 	return file_pong_pb_pong_proto_rawDescData
 }
 
-var file_pong_pb_pong_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_pong_pb_pong_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_pong_pb_pong_proto_goTypes = []interface{}{
-	(*PongHelloRequest)(nil),  // 0: pong_pb.PongHelloRequest
-	(*PongHelloResponse)(nil), // 1: pong_pb.PongHelloResponse
-	(*PongWorldRequest)(nil),  // 2: pong_pb.PongWorldRequest
-	(*PongWorldResponse)(nil), // 3: pong_pb.PongWorldResponse
-	(*PongEchoRequest)(nil),   // 4: pong_pb.PongEchoRequest
-	(*PongEchoResponse)(nil),  // 5: pong_pb.PongEchoResponse
+	(*PongRequest)(nil),      // 0: pong_pb.PongRequest
+	(*PongResponse)(nil),     // 1: pong_pb.PongResponse
+	(*PongEchoRequest)(nil),  // 2: pong_pb.PongEchoRequest
+	(*PongEchoResponse)(nil), // 3: pong_pb.PongEchoResponse
 }
 var file_pong_pb_pong_proto_depIdxs = []int32{
-	0, // 0: pong_pb.PongService.PongHello:input_type -> pong_pb.PongHelloRequest
-	2, // 1: pong_pb.PongService.PongWorld:input_type -> pong_pb.PongWorldRequest
-	4, // 2: pong_pb.PongService.PongEcho:input_type -> pong_pb.PongEchoRequest
-	1, // 3: pong_pb.PongService.PongHello:output_type -> pong_pb.PongHelloResponse
-	3, // 4: pong_pb.PongService.PongWorld:output_type -> pong_pb.PongWorldResponse
-	5, // 5: pong_pb.PongService.PongEcho:output_type -> pong_pb.PongEchoResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	0, // 0: pong_pb.PongService.Pong:input_type -> pong_pb.PongRequest
+	2, // 1: pong_pb.PongService.PongEcho:input_type -> pong_pb.PongEchoRequest
+	1, // 2: pong_pb.PongService.Pong:output_type -> pong_pb.PongResponse
+	3, // 3: pong_pb.PongService.PongEcho:output_type -> pong_pb.PongEchoResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -381,7 +272,7 @@ func file_pong_pb_pong_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_pong_pb_pong_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PongHelloRequest); i {
+			switch v := v.(*PongRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -393,7 +284,7 @@ func file_pong_pb_pong_proto_init() {
 			}
 		}
 		file_pong_pb_pong_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PongHelloResponse); i {
+			switch v := v.(*PongResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -405,30 +296,6 @@ func file_pong_pb_pong_proto_init() {
 			}
 		}
 		file_pong_pb_pong_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PongWorldRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pong_pb_pong_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PongWorldResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pong_pb_pong_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PongEchoRequest); i {
 			case 0:
 				return &v.state
@@ -440,7 +307,7 @@ func file_pong_pb_pong_proto_init() {
 				return nil
 			}
 		}
-		file_pong_pb_pong_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_pong_pb_pong_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PongEchoResponse); i {
 			case 0:
 				return &v.state
@@ -459,7 +326,7 @@ func file_pong_pb_pong_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pong_pb_pong_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

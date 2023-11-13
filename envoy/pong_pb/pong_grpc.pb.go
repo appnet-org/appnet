@@ -19,17 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PongService_PongHello_FullMethodName = "/pong_pb.PongService/PongHello"
-	PongService_PongWorld_FullMethodName = "/pong_pb.PongService/PongWorld"
-	PongService_PongEcho_FullMethodName  = "/pong_pb.PongService/PongEcho"
+	PongService_Pong_FullMethodName     = "/pong_pb.PongService/Pong"
+	PongService_PongEcho_FullMethodName = "/pong_pb.PongService/PongEcho"
 )
 
 // PongServiceClient is the client API for PongService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PongServiceClient interface {
-	PongHello(ctx context.Context, in *PongHelloRequest, opts ...grpc.CallOption) (*PongHelloResponse, error)
-	PongWorld(ctx context.Context, in *PongWorldRequest, opts ...grpc.CallOption) (*PongWorldResponse, error)
+	Pong(ctx context.Context, in *PongRequest, opts ...grpc.CallOption) (*PongResponse, error)
 	PongEcho(ctx context.Context, in *PongEchoRequest, opts ...grpc.CallOption) (*PongEchoResponse, error)
 }
 
@@ -41,18 +39,9 @@ func NewPongServiceClient(cc grpc.ClientConnInterface) PongServiceClient {
 	return &pongServiceClient{cc}
 }
 
-func (c *pongServiceClient) PongHello(ctx context.Context, in *PongHelloRequest, opts ...grpc.CallOption) (*PongHelloResponse, error) {
-	out := new(PongHelloResponse)
-	err := c.cc.Invoke(ctx, PongService_PongHello_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *pongServiceClient) PongWorld(ctx context.Context, in *PongWorldRequest, opts ...grpc.CallOption) (*PongWorldResponse, error) {
-	out := new(PongWorldResponse)
-	err := c.cc.Invoke(ctx, PongService_PongWorld_FullMethodName, in, out, opts...)
+func (c *pongServiceClient) Pong(ctx context.Context, in *PongRequest, opts ...grpc.CallOption) (*PongResponse, error) {
+	out := new(PongResponse)
+	err := c.cc.Invoke(ctx, PongService_Pong_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +61,7 @@ func (c *pongServiceClient) PongEcho(ctx context.Context, in *PongEchoRequest, o
 // All implementations must embed UnimplementedPongServiceServer
 // for forward compatibility
 type PongServiceServer interface {
-	PongHello(context.Context, *PongHelloRequest) (*PongHelloResponse, error)
-	PongWorld(context.Context, *PongWorldRequest) (*PongWorldResponse, error)
+	Pong(context.Context, *PongRequest) (*PongResponse, error)
 	PongEcho(context.Context, *PongEchoRequest) (*PongEchoResponse, error)
 	mustEmbedUnimplementedPongServiceServer()
 }
@@ -82,11 +70,8 @@ type PongServiceServer interface {
 type UnimplementedPongServiceServer struct {
 }
 
-func (UnimplementedPongServiceServer) PongHello(context.Context, *PongHelloRequest) (*PongHelloResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PongHello not implemented")
-}
-func (UnimplementedPongServiceServer) PongWorld(context.Context, *PongWorldRequest) (*PongWorldResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PongWorld not implemented")
+func (UnimplementedPongServiceServer) Pong(context.Context, *PongRequest) (*PongResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Pong not implemented")
 }
 func (UnimplementedPongServiceServer) PongEcho(context.Context, *PongEchoRequest) (*PongEchoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PongEcho not implemented")
@@ -104,38 +89,20 @@ func RegisterPongServiceServer(s grpc.ServiceRegistrar, srv PongServiceServer) {
 	s.RegisterService(&PongService_ServiceDesc, srv)
 }
 
-func _PongService_PongHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PongHelloRequest)
+func _PongService_Pong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PongRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PongServiceServer).PongHello(ctx, in)
+		return srv.(PongServiceServer).Pong(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PongService_PongHello_FullMethodName,
+		FullMethod: PongService_Pong_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PongServiceServer).PongHello(ctx, req.(*PongHelloRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PongService_PongWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PongWorldRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PongServiceServer).PongWorld(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: PongService_PongWorld_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PongServiceServer).PongWorld(ctx, req.(*PongWorldRequest))
+		return srv.(PongServiceServer).Pong(ctx, req.(*PongRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -166,12 +133,8 @@ var PongService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PongServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "PongHello",
-			Handler:    _PongService_PongHello_Handler,
-		},
-		{
-			MethodName: "PongWorld",
-			Handler:    _PongService_PongWorld_Handler,
+			MethodName: "Pong",
+			Handler:    _PongService_Pong_Handler,
 		},
 		{
 			MethodName: "PongEcho",

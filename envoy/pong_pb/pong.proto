@@ -4,24 +4,15 @@ package pong_pb;
 option go_package = "./pong_pb";
 
 service PongService {
-  rpc PongHello (PongHelloRequest) returns (PongHelloResponse);
-  rpc PongWorld (PongWorldRequest) returns (PongWorldResponse);
+  rpc Pong (PongRequest) returns (PongResponse);
   rpc PongEcho (PongEchoRequest) returns (PongEchoResponse);
 }
 
-message PongHelloRequest {
+message PongRequest {
   string body = 1;
 }
 
-message PongHelloResponse {
-    string body = 1;
-}
-
-message PongWorldRequest {
-  string body = 1;
-}
-
-message PongWorldResponse {
+message PongResponse {
   string body = 1;
 }
 

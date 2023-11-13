@@ -4,24 +4,25 @@ package ping_pb;
 option go_package = "./ping_pb";
 
 service PingService {
-  rpc PingHello (PingHelloRequest) returns (PingHelloResponse);
-  rpc PingWorld (PingWorldRequest) returns (PingWorldResponse);
+  rpc Ping (PingRequest) returns (PingResponse);
+  rpc PingPong (PingPongRequest) returns (PingPongResponse);
+  rpc PingEcho (PingEchoRequest) returns (PingEchoResponse);
 }
 
-message PingHelloRequest {
+message PingRequest {
   string body = 1;
 }
 
-message PingHelloResponse {
+message PingResponse {
     string body = 1;
 }
 
-message PingWorldRequest {
+message PingPongRequest {
   string body = 1;
 }
 
-message PingWorldResponse {
-  string body = 1;
+message PingPongResponse {
+    string body = 1;
 }
 
 message PingEchoRequest {
