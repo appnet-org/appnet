@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	services "github.com/UWNetworksLab/app-defined-networks/tree/main/envoy/services"
+	services "github.com/UWNetworksLab/adn-controller/envoy/services"
 )
 
 type server interface {
@@ -19,8 +19,11 @@ func main() {
 		pingPort       = flag.Int("pingport", 8081, "ping service port")
 		pongPort       = flag.Int("pongport", 8082, "pong service port")
 
-		pingAddr      = flag.String("pingaddr", "ping:8081", "ping service address")
-		pongAddr      = flag.String("pongaddr", "pong:8082", "pong service addr")
+		// pingAddr      = flag.String("pingaddr", "ping:8081", "ping service address")
+		// pongAddr      = flag.String("pongaddr", "pong:8082", "pong service addr")
+
+		pingAddr      = flag.String("pingaddr", ":8081", "ping service address")
+		pongAddr      = flag.String("pongaddr", ":8082", "pong service addr")
 	)
 
 	// Parse the flags

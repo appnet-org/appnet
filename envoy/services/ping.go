@@ -6,12 +6,9 @@ import (
 	"log"
 	"net"
 
-	"github.com/UWNetworksLab/app-defined-networks/envoy/ping_pb"
-	"github.com/UWNetworksLab/app-defined-networks/envoy/pong_pb"
+	ping "github.com/UWNetworksLab/adn-controller/envoy/ping_pb"
+	pong "github.com/UWNetworksLab/adn-controller/envoy/pong_pb"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 )
 
 // Ping implements the ping service
@@ -54,33 +51,30 @@ func (s *Ping) Run() error {
 }
 
 func (s *Ping) Ping(ctx context.Context, req *ping.PingRequest) (*ping.PingResponse, error) {
-	pingResponse := &ping.GetPingResponse{body: "ping response"}
+	pingResponse := &ping.PingResponse{Body: "ping response"}
 
-	return pingResponse, err
+	return pingResponse, nil
 }
 
 func (s *Ping) PingEcho(ctx context.Context, req *ping.PingEchoRequest) (*ping.PingEchoResponse, error) {
 
 	body := req.GetBody()
-	pingEchoResponse := &ping.PingEchoResponse{body: body}
+	pingEchoResponse := &ping.PingEchoResponse{Body: body}
 
-	return pingEchoResponse, err
+	return pingEchoResponse, nil
 }
 
-
-// PostPing adds or updates the pings of a restaurant in the in-memory dataStore.
 func (s *Ping) PingPong(ctx context.Context, req *ping.PingPongRequest) (*ping.PingPongResponse, error) {
-	ctx := r.Context()
+	// ctx := r.Context()
 
-	req := &pong.PongRequest{body: "ping pong request"}
-	reply, err := s.pongClient.pong(ctx, req)
+	pongReq := &pong.PongRequest{Body: "ping pong request"}
+	_, err := s.pongClient.Pong(ctx, pongReq)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
-	pingPongResponse := &ping.PingPongResponse{body: "ping pong response"}
+	pingPongResponse := &ping.PingPongResponse{Body: "ping pong response"}
 
 	// Return the response object and any error.
 	return pingPongResponse, err

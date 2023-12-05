@@ -6,11 +6,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/UWNetworksLab/app-defined-networks/envoy/pong_pb"
+	pong "github.com/UWNetworksLab/adn-controller/envoy/pong_pb"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 )
 
 // Pong implements the pong service
@@ -21,7 +18,7 @@ type Pong struct {
 }
 
 // NewPong returns a new server
-func NewPong(name string, pongPort int, pongaddr string) *Pong {
+func NewPong(name string, pongPort int) *Pong {
 	return &Pong{
 		name:      name,
 		port:      pongPort,
@@ -51,15 +48,15 @@ func (s *Pong) Run() error {
 }
 
 func (s *Pong) Pong(ctx context.Context, req *pong.PongRequest) (*pong.PongResponse, error) {
-	pongResponse := &pong.GetPongResponse{body: "pong response"}
+	pongResponse := &pong.PongResponse{Body: "pong response"}
 
-	return pongResponse, err
+	return pongResponse, nil
 }
 
 func (s *Pong) PongEcho(ctx context.Context, req *pong.PongEchoRequest) (*pong.PongEchoResponse, error) {
 
 	body := req.GetBody()
-	pongEchoResponse := &pong.PongEchoResponse{body: body}
+	pongEchoResponse := &pong.PongEchoResponse{Body: body}
 
-	return pongEchoResponse, err
+	return pongEchoResponse, nil
 }

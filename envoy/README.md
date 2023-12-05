@@ -32,7 +32,7 @@ To run the server as a Docker container, follow these steps:
 ## How to build and run ACL wasm filter 
 
 Install:
-- `curl https://sh.rustup.rs -sSf | sh`
+- `curl https://sh.rustup.rs -sSf | sh -s -- -y`
 - `sudo apt update`
 - `sudo apt install -y protobuf-compiler`
 

@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
-	"time"
 
-	"github.com/UWNetworksLab/app-defined-networks/envoy/ping_pb"
-	"github.com/UWNetworksLab/app-defined-networks/envoy/pong_pb"
+	ping "github.com/UWNetworksLab/adn-controller/envoy/ping_pb"
+	pong "github.com/UWNetworksLab/adn-controller/envoy/pong_pb"
 )
 
 // Frontend implements a service that acts as an interface to interact with different microservices.
@@ -45,23 +43,8 @@ func (s *Frontend) Run() error {
 func (s *Frontend) pingHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	req := &ping.PingRequest{body: "ping request"}
-	reply, err := s.pingClient.ping(ctx, req)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(reply)
-}
-
-func (s *Frontend) pingHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-
-	req := &ping.PingRequest{body: "ping request"}
-	reply, err := s.pingClient.ping(ctx, req)
+	req := &ping.PingRequest{Body: "ping request"}
+	reply, err := s.pingClient.Ping(ctx, req)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -76,8 +59,8 @@ func (s *Frontend) pingEchoHandler(w http.ResponseWriter, r *http.Request) {
 
 	body := r.URL.Query().Get("body")
 
-	req := &ping.PingEchoRequest{body: body}
-	reply, err := s.pingClient.pingEcho(ctx, req)
+	req := &ping.PingEchoRequest{Body: body}
+	reply, err := s.pingClient.PingEcho(ctx, req)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -90,8 +73,8 @@ func (s *Frontend) pingEchoHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Frontend) pongHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	req := &pong.PongRequest{body: "pong request"}
-	reply, err := s.pongClient.pong(ctx, req)
+	req := &pong.PongRequest{Body: "pong request"}
+	reply, err := s.pongClient.Pong(ctx, req)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -106,8 +89,8 @@ func (s *Frontend) pongEchoHandler(w http.ResponseWriter, r *http.Request) {
 
 	body := r.URL.Query().Get("body")
 
-	req := &pong.PongEchoRequest{body: body}
-	reply, err := s.pongClient.pongEcho(ctx, req)
+	req := &pong.PongEchoRequest{Body: body}
+	reply, err := s.pongClient.PongEcho(ctx, req)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -120,8 +103,8 @@ func (s *Frontend) pongEchoHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Frontend) pingPongHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	req := &ping.PingRequest{body: "ping pong request"}
-	reply, err := s.pingClient.pingPong(ctx, req)
+	req := &ping.PingPongRequest{Body: "ping pong request"}
+	reply, err := s.pingClient.PingPong(ctx, req)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
