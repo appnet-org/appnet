@@ -9,25 +9,10 @@ This is a simple ping pong service built using Go and gRPC.
 - `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ping_pb/ping.proto`
 - `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pong_pb/pong.proto`
 
+## Build Images
 
-## Run as docker container 
-To run the server as a Docker container, follow these steps:
-- Change ":9000" to "server:9000" in frontend.go (this is only required for Docker deployments).
-- `docker build --tag echo-frontend -f Dockerfile-frontend .`
-- `docker build --tag echo-server -f Dockerfile-server  .`
-- `docker network create test`
-- `docker run --rm -d --net test -p 9000:9000 --name server echo-server`
-- `docker run --rm -d --net test -p 8080:8080 --name frontend echo-frontend`
-- `curl http://localhost:8080/echo`
+- `sudo ./scripts/build_images.sh -u xzhu0027 -t latest`
 
-## Push docker container
-- Change ":9000" to "echo-server:9000" in frontend.go (this is only required for Kubernetes deployments).
-- `docker build --tag echo-frontend -f Dockerfile-frontend .`
-- `docker build --tag echo-server -f Dockerfile-server  .`
-- `docker tag echo-frontend xzhu0027/echo-frontend-grpc`
-- `docker push xzhu0027/echo-frontend-grpc`
-- `docker tag echo-server xzhu0027/echo-server-grpc`
-- `docker push xzhu0027/echo-server-grpc`
 
 ## How to build and run ACL wasm filter 
 

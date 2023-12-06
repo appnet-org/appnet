@@ -19,11 +19,9 @@ func main() {
 		pingPort       = flag.Int("pingport", 8081, "ping service port")
 		pongPort       = flag.Int("pongport", 8082, "pong service port")
 
-		// pingAddr      = flag.String("pingaddr", "ping:8081", "ping service address")
-		// pongAddr      = flag.String("pongaddr", "pong:8082", "pong service addr")
-
-		pingAddr      = flag.String("pingaddr", ":8081", "ping service address")
-		pongAddr      = flag.String("pongaddr", ":8082", "pong service addr")
+		// Change ping:8081 to :8081 when running localiy
+		pingAddr      = flag.String("pingaddr", "ping:8081", "ping service address")
+		pongAddr      = flag.String("pongaddr", "pong:8082", "pong service addr")
 	)
 
 	// Parse the flags
