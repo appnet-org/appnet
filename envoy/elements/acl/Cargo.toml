@@ -1,5 +1,5 @@
 [package]
-name = "content-based-acl"
+name = "acl"
 version = "0.1.0"
 edition = "2021"
 

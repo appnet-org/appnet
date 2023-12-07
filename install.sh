@@ -44,4 +44,22 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 echo "Installing Rust"
 curl https://sh.rustup.rs -sSf | sh -s -- -y
 
+# Install wrk and wrk2
+cd $ADN_DIR
+sudo apt-get install luarocks -y
+sudo luarocks install luasocket
+
+git clone https://github.com/wg/wrk.git
+cd wrk
+make -j $(nproc)
+
+
+cd $ADN_DIR
+sudo apt-get install libssl-dev
+sudo apt-get install libz-dev
+
+git clone https://github.com/giltene/wrk2.git
+cd wrk2
+make -j $(nproc)
+
 set +e

@@ -58,6 +58,7 @@ func (s *Frontend) pingEchoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	body := r.URL.Query().Get("body")
+	log.Printf("pongEchoHandler get a request with body: %s", body)
 
 	req := &ping.PingEchoRequest{Body: body}
 	reply, err := s.pingClient.PingEcho(ctx, req)
@@ -88,6 +89,7 @@ func (s *Frontend) pongEchoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	body := r.URL.Query().Get("body")
+	log.Printf("pongEchoHandler get a request with body: %s", body)
 
 	req := &pong.PongEchoRequest{Body: body}
 	reply, err := s.pongClient.PongEcho(ctx, req)
