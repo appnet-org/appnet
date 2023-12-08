@@ -207,6 +207,10 @@ spec:
         # Add here
         - mountPath: /etc/acl.wasm
           name: acl-wasm
+        - mountPath: /etc/logging.wasm
+          name: logging-wasm
+        - mountPath: /etc/mutation.wasm
+          name: mutation-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -254,6 +258,14 @@ spec:
       - name: acl-wasm
         hostPath:
           path: /tmp/acl.wasm
+          type: File
+      - name: logging-wasm
+        hostPath:
+          path: /tmp/logging.wasm
+          type: File
+      - name: mutation-wasm
+        hostPath:
+          path: /tmp/mutation.wasm
           type: File
       - name: workload-socket
       - name: credential-socket
