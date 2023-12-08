@@ -74,4 +74,22 @@ impl HttpContext for Mutation {
 
         Action::Continue
     }
+
+    fn on_http_response_headers(&mut self, _num_headers: usize, end_of_stream: bool) -> Action {
+        log::warn!("executing on_http_response_headers");
+        if !end_of_stream {
+            return Action::Continue;
+        }
+
+        Action::Continue
+    }
+
+    fn on_http_response_body(&mut self, _body_size: usize, end_of_stream: bool) -> Action {
+        log::warn!("executing on_http_response_body");
+        if !end_of_stream {
+            return Action::Pause;
+        }
+
+        Action::Continue
+    }
 }

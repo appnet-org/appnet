@@ -211,6 +211,10 @@ spec:
           name: logging-wasm
         - mountPath: /etc/mutation.wasm
           name: mutation-wasm
+        - mountPath: /etc/fault.wasm
+          name: fault-wasm
+        - mountPath: /etc/metrics.wasm
+          name: metrics-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -255,6 +259,14 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: metrics-wasm
+        hostPath:
+          path: /tmp/metrics.wasm
+          type: File
+      - name: fault-wasm
+        hostPath:
+          path: /tmp/fault.wasm
+          type: File
       - name: acl-wasm
         hostPath:
           path: /tmp/acl.wasm
