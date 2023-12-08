@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: acl
+  name: acl-server
 spec:
   workloadSelector:
     labels:
@@ -24,10 +24,10 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: acl-block
-            root_id: acl-block
+            name: acl-block-server
+            root_id: acl-block-server
             vm_config:
-              vm_id: vm.sentinel.acl-block
+              vm_id: vm.sentinel.acl-block-server
               runtime: envoy.wasm.runtime.v8
               code:
                 local:
