@@ -215,6 +215,14 @@ spec:
           name: fault-wasm
         - mountPath: /etc/metrics.wasm
           name: metrics-wasm
+        - mountPath: /etc/admissionControl.wasm
+          name: admission-control-wasm
+        - mountPath: /etc/ratelimit.wasm
+          name: ratelimit-wasm
+        - mountPath: /etc/cache.wasm
+          name: cache-wasm
+        - mountPath: /etc/compression.wasm
+          name: compression-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -259,6 +267,22 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: compression-wasm
+        hostPath:
+          path: /tmp/compression.wasm
+          type: File
+      - name: cache-wasm
+        hostPath:
+          path: /tmp/cache.wasm
+          type: File
+      - name: ratelimit-wasm
+        hostPath:
+          path: /tmp/ratelimit.wasm
+          type: File
+      - name: admission-control-wasm
+        hostPath:
+          path: /tmp/admissionControl.wasm
+          type: File
       - name: metrics-wasm
         hostPath:
           path: /tmp/metrics.wasm
