@@ -3,6 +3,9 @@
 WORKDIR=`dirname $(realpath $0)`
 cd $WORKDIR
 
-cargo build --target=wasm32-unknown-unknown --release
-cp target/wasm32-unknown-unknown/release/fault.wasm /tmp
+# cargo build --target=wasm32-unknown-unknown --release
+# cp target/wasm32-unknown-unknown/release/fault.wasm /tmp
+
+cargo build --target=wasm32-wasi --release
+cp target/wasm32-wasi/release/fault.wasm /tmp
 
