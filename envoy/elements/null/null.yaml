@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: null-filter # TODO: change your filter name here
+spec:
+  workloadSelector:
+    labels:
+      app: ping # TODO: Change your app label here
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        portNumber: 8081
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value: 
+        name: envoy.filters.http.wasm
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+          config:
+            name: null # TODO
+            root_id: null # TODO
+            vm_config:
+              vm_id: vm.sentinel.null # TODO
+              runtime: envoy.wasm.runtime.v8
+              code:
+                local:
+                  filename: /etc/null.wasm # TODO
+              allow_precompiled: false
