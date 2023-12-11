@@ -1,11 +1,11 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: logging
+  name: fault-server
 spec:
   workloadSelector:
     labels:
-      app: ping
+      app: frontend
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -24,12 +24,12 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: logging
-            root_id: logging
+            name: fault-server
+            root_id: fault-server
             vm_config:
-              vm_id: vm.sentinel.logging
+              vm_id: vm.sentinel.fault-server
               runtime: envoy.wasm.runtime.v8
               code:
                 local:
-                  filename: /etc/logging.wasm
+                  filename: /etc/fault.wasm
               allow_precompiled: false

@@ -45,7 +45,6 @@ impl HttpContext for Logging {
             // Parse grpc payload, skip the first 5 bytes
             match ping::PingEchoRequest::decode(&body[5..]) {
                 Ok(req) => {
-                    log::info!("req: {:?}", req);
                     log::warn!("body.len(): {}", req.body.len());
                     log::warn!("body : {}", req.body);
                 }

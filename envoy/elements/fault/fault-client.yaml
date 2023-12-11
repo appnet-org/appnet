@@ -1,22 +1,22 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: acl-client
+  name: fault-client
 spec:
   workloadSelector:
     labels:
-      app: frontend #
+      app: frontend
   configPatches:
   - applyTo: HTTP_FILTER
     match:
-      context: SIDECAR_OUTBOUND # 
+      context: SIDECAR_OUTBOUND
       listener:
-        portNumber: 8081 # port number of ping
+        portNumber: 8081
         filterChain:
           filter:
-            name: envoy.filters.network.http_connection_manager
+            name: "envoy.filters.network.http_connection_manager"
             subFilter:
-              name: envoy.filters.http.router
+              name: "envoy.filters.http.router"
     patch:
       operation: INSERT_BEFORE
       value: 
@@ -24,12 +24,12 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: acl-block-client
-            root_id: acl-block-client
+            name: fault-client
+            root_id: fault-client
             vm_config:
-              vm_id: vm.sentinel.acl-block-server
+              vm_id: vm.sentinel.fault-client
               runtime: envoy.wasm.runtime.v8
               code:
                 local:
-                  filename: /etc/acl.wasm
+                  filename: /etc/fault.wasm
               allow_precompiled: false

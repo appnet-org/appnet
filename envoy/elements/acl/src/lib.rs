@@ -13,14 +13,13 @@ static GLOBAL_COUNTER: AtomicUsize = AtomicUsize::new(0);
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(AccessControl { context_id, abort_count: 0 })
+        Box::new(AccessControl { context_id })
     });
 }
 
 struct AccessControl {
     #[allow(unused)]
     context_id: u32,
-    abort_count: u32,
 }
 
 impl Context for AccessControl {}
