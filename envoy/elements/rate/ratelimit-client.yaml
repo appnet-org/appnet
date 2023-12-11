@@ -1,15 +1,15 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: ratelimit
+  name: ratelimit-client
 spec:
   workloadSelector:
     labels:
-      app: ping
+      app: frontend
   configPatches:
   - applyTo: HTTP_FILTER
     match:
-      context: SIDECAR_INBOUND
+      context: SIDECAR_OUTBOUND
       listener:
         portNumber: 8081
         filterChain:
@@ -24,10 +24,10 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: ratelimit
-            root_id: ratelimit
+            name: ratelimit-client
+            root_id: ratelimit-client
             vm_config:
-              vm_id: vm.sentinel.ratelimit
+              vm_id: vm.sentinel.ratelimit-client
               runtime: envoy.wasm.runtime.v8
               code:
                 local:

@@ -1,7 +1,7 @@
 use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
 use std::sync::atomic::{AtomicUsize, Ordering};
-// use std::cmp;
+use std::cmp;
 // use std::sync::Mutex;
 // use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -22,13 +22,14 @@ static TOKEN: AtomicUsize = AtomicUsize::new(100);
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(Ratelimit { context_id, limit : 100, per_sec: 1 })
+        Box::new(Ratelimit { context_id, last_ts: self.get_current_time().into().timestamp() as f64, limit : 100, per_sec: 1 })
     });
 }
 
 struct Ratelimit {
     #[allow(unused)]
     context_id: u32,
+    last_ts: f64,
     limit: u32,
     per_sec: u32,
 }
@@ -53,7 +54,11 @@ impl HttpContext for Ratelimit {
         }
         
         // TODO: Add logic to caculate the current timestamp
-        let curr_token = 1;
+        self.num_tokens = cmp::min(self.limit, self.num_tokens
+        + (self.get_current_time().into().timestamp() as f64 - self.last_ts)
+            * self.per_sec as f64);
+        self.last_ts = self.get_current_time().into().timestamp() as f64;
+
 
         if curr_token < 1 {
             self.send_http_response(
