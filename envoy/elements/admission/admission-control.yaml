@@ -31,5 +31,5 @@ spec:
               runtime: envoy.wasm.runtime.v8
               code:
                 local:
-                  filename: /etc/admissionControl.wasm
+                  filename: /etc/admission_control.wasm
               allow_precompiled: false

@@ -172,7 +172,7 @@ spec:
           name: fault-wasm
         - mountPath: /etc/metrics.wasm
           name: metrics-wasm
-        - mountPath: /etc/admissionControl.wasm
+        - mountPath: /etc/admission_control.wasm
           name: admission-control-wasm
         - mountPath: /etc/ratelimit.wasm
           name: ratelimit-wasm
@@ -238,7 +238,7 @@ spec:
           type: File
       - name: admission-control-wasm
         hostPath:
-          path: /tmp/admissionControl.wasm
+          path: /tmp/admission_control.wasm
           type: File
       - name: metrics-wasm
         hostPath:
@@ -463,7 +463,7 @@ spec:
           name: fault-wasm
         - mountPath: /etc/metrics.wasm
           name: metrics-wasm
-        - mountPath: /etc/admissionControl.wasm
+        - mountPath: /etc/admission_control.wasm
           name: admission-control-wasm
         - mountPath: /etc/ratelimit.wasm
           name: ratelimit-wasm
@@ -529,7 +529,7 @@ spec:
           type: File
       - name: admission-control-wasm
         hostPath:
-          path: /tmp/admissionControl.wasm
+          path: /tmp/admission_control.wasm
           type: File
       - name: metrics-wasm
         hostPath:
