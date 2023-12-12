@@ -2,6 +2,7 @@ use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
 use proxy_wasm::traits::RootContext;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use chrono::{DateTime, Utc};
 // use std::cmp;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
@@ -38,7 +39,8 @@ impl Context for Ratelimit {}
 impl RootContext for Ratelimit {
     fn on_configure(&mut self, _: usize) -> bool {
         let mut last_ts = LAST_TS.lock().unwrap();
-        *last_ts = self.get_current_time().into().timestamp() as f64;
+        let now: DateTime<Utc> = self.get_current_time().into();
+        *last_ts = now.timestamp() as f64;
         true
     }
 }
@@ -61,11 +63,14 @@ impl HttpContext for Ratelimit {
         }
         
         // TODO: Add logic to caculate the current timestamp
+        let now: DateTime<Utc> = self.get_current_time().into();
         let mut last_ts = LAST_TS.lock().unwrap();
-        let token_to_add = ((self.get_current_time().into().timestamp() as f64 - *last_ts) * self.per_sec as f64).floor() as usize;
+        let token_to_add = ((now.timestamp() as f64 - *last_ts) * self.per_sec as f64).floor() as usize;
         log::warn!("Current token value: {}", token_to_add);
-        TOKEN.fetch_add(token_to_add, Ordering::SeqCst)
-        *last_ts = self.get_current_time().into().timestamp() as f64;
+        TOKEN.fetch_add(token_to_add, Ordering::SeqCst);
+
+        let mut last_ts = LAST_TS.lock().unwrap();
+        *last_ts = now.timestamp() as f64;
 
 
         if TOKEN.load(Ordering::SeqCst) >= 1 {

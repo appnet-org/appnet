@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  clusterIP: 10.96.88.88
+  ports:
+  - name: tcp-frontend
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: frontend
+      labels:
+        app: frontend
+    spec:
+      nodeName: h2.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
+      containers:
+      - name: frontend
+        image: xzhu0027/ping_pong_app
+        command: ["/app/ping-pong"]  # Command to run within the container
+        args: ["frontend"] 
+  selector:
+    matchLabels:
+      app: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ping
+spec:
+  # clusterIP: 10.96.77.76
+  ports:
+  - name: ping
+    port: 8081
+    targetPort: 8081
+  selector:
+    app: ping
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ping
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: ping
+      labels:
+        app: ping
+    spec:
+      nodeName: h3.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
+      containers:
+      - name: ping
+        image: xzhu0027/ping_pong_app
+        command: ["/app/ping-pong"]  # Command to run within the container
+        args: ["ping"] 
+  selector:
+    matchLabels:
+      app: ping
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pong
+spec:
+  # clusterIP: 10.96.77.77
+  ports:
+  - name: pong
+    port: 8082
+    targetPort: 8082
+  selector:
+    app: pong
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pong
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: pong
+      labels:
+        app: pong
+    spec:
+      nodeName: h3.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
+      containers:
+      - name: pong
+        image: xzhu0027/ping_pong_app
+        command: ["/app/ping-pong"]  # Command to run within the container
+        args: ["pong"] 
+  selector:
+    matchLabels:
+      app: pong

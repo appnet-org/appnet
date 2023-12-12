@@ -19,3 +19,4 @@ Cargo.lock
 *.pdb
 
 wrk/
+wrk2/

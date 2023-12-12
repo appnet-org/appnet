@@ -52,7 +52,7 @@ impl HttpContext for AccessControl {
                     // log::warn!("body.len(): {}", req.body.len());
                     // log::warn!("body : {}", req.body);
                     if req.body == "test" {
-                        self.abort_count += 1; // Increment the counter
+                        // self.abort_count += 1; // Increment the counter
                         // log::warn!("Aborting a request!!!! Abort Count: {}", self.abort_count);
                         let counter_val = GLOBAL_COUNTER.fetch_add(1, Ordering::SeqCst) + 1;
                         log::warn!("Global counter value: {}", counter_val);
