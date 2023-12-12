@@ -1,15 +1,15 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: metrics
+  name: metrics-client
 spec:
   workloadSelector:
     labels:
-      app: ping
+      app: frontend
   configPatches:
   - applyTo: HTTP_FILTER
     match:
-      context: SIDECAR_INBOUND
+      context: SIDECAR_OUTBOUND
       listener:
         portNumber: 8081
         filterChain:
@@ -24,10 +24,10 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: metrics
-            root_id: metrics
+            name: metrics-client
+            root_id: metrics-client
             vm_config:
-              vm_id: vm.sentinel.metrics
+              vm_id: vm.sentinel.metrics-client
               runtime: envoy.wasm.runtime.v8
               code:
                 local:

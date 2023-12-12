@@ -9,11 +9,11 @@ RUN go mod download
 COPY . .
 # Build the Go application with optimized flags
 RUN go build -ldflags="-s -w" -o /app/ping-pong ./cmd/...
-# # Use a minimal base image for the final container
-# FROM alpine:latest
-# # Set the working directory inside the container
-# WORKDIR /app
-# # Copy the built binary from the builder stage
-# COPY --from=builder /app/ping-pong .
-# # Set the entrypoint command to run the binary
-# CMD ["./ping-pong"]
+# Use a minimal base image for the final container
+FROM alpine:latest
+# Set the working directory inside the container
+WORKDIR /app
+# Copy the built binary from the builder stage
+COPY --from=builder /app/ping-pong .
+# Set the entrypoint command to run the binary
+CMD ["./ping-pong"]

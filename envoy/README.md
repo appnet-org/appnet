@@ -18,7 +18,7 @@ This is a simple ping pong service built using Go and gRPC.
 ## Send queries
 
 -`curl http://10.96.88.88:8080/pong-echo?body=hello`
--`wrk`
+-`./wrk/wrk -d 10s -c 1 -t 1 http://10.96.88.88:8080/ping-echo -s ./envoy/wrk_scripts/echo.lua -L`
 
 
 ## How to build and run wasm filter 
@@ -46,5 +46,12 @@ Note:
 ## Supported Filters
 
 - ACL
+- Admission Control
+- Cache
+- Compression
+- Encryption
+- Fault Injection
 - Logging
+- Metrics
 - Mutation
+- Rate Limiting

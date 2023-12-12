@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	// "time"
 
 	ping "github.com/UWNetworksLab/adn-controller/envoy/ping_pb"
 	pong "github.com/UWNetworksLab/adn-controller/envoy/pong_pb"
@@ -60,6 +61,7 @@ func (s *Ping) PingEcho(ctx context.Context, req *ping.PingEchoRequest) (*ping.P
 
 	body := req.GetBody()
 	pingEchoResponse := &ping.PingEchoResponse{Body: body}
+	// time.Sleep(300 * time.Microsecond)
 
 	return pingEchoResponse, nil
 }
