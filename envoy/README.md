@@ -17,7 +17,7 @@ This is a simple ping pong service built using Go and gRPC.
 
 ## Send queries
 
-- `curl http://10.96.88.88:8080/pong-echo?body=hello`
+- `curl http://10.96.88.88:8080/ping-echo?body=hello`
 - `./wrk/wrk -d 10s -c 1 -t 1 http://10.96.88.88:8080/ping-echo -s ./envoy/wrk_scripts/echo.lua -L`
 
 
@@ -55,3 +55,8 @@ Note:
 - Metrics
 - Mutation
 - Rate Limiting
+
+
+## Common Issues
+
+Outdated istio yaml files/Incorrect curl commands

@@ -69,7 +69,7 @@ impl HttpContext for Ratelimit {
         log::warn!("Current token value: {}", token_to_add);
         TOKEN.fetch_add(token_to_add, Ordering::SeqCst);
 
-        let mut last_ts = LAST_TS.lock().unwrap();
+        // let mut last_ts = LAST_TS.lock().unwrap();
         *last_ts = now.timestamp() as f64;
 
 
