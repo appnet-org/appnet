@@ -21,3 +21,6 @@ To run the server as a Docker container, follow these steps:
 - `docker tag echo-server xzhu0027/echo-server-grpc`
 - `docker push xzhu0027/echo-server-grpc`
 
+## Note
+Work in progress. Potential issues:
+- Shared state in client interceptors. Each request will go through a fresh instance of the interceptor. It's hard to maintain a shared variable. I had to use a global variable with mutex (this might have performance penalty. To be tested). Server-side does not have this problem.

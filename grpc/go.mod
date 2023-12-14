@@ -1,4 +1,4 @@
-module github.com/UWNetworksLab/meshinsight/meshinsight/profiler/benchmark/echo_server_grpc
+module github.com/UWNetworksLab/adn-controller/grpc
 
 go 1.18
 

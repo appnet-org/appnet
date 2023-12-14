@@ -7,6 +7,9 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/UWNetworksLab/adn-controller/grpc/interceptors/null"
+	"github.com/UWNetworksLab/adn-controller/grpc/interceptors/acl"
+
 	echo "github.com/UWNetworksLab/adn-controller/grpc/pb"
 	"google.golang.org/grpc"
 )
@@ -30,7 +33,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+
+	nullOpts := []null.CallOption{null.WithMessage("Null"),}
+	aclOpts := []acl.CallOption{acl.WithContent("server"),}
+
+	s := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			null.NullServer(nullOpts...),
+			acl.ACLServer(aclOpts...),
+		),
+	)
 	fmt.Printf("Starting server at port 9000\n")
 
 	echo.RegisterEchoServiceServer(s, &server{})
