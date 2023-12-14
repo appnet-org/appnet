@@ -3,7 +3,7 @@
 WORKDIR=`dirname $(realpath $0)`
 cd $WORKDIR
 
-cargo build --target=wasm32-unknown-unknown --release
+cargo build --target=wasm32-wasi --release
 # TODO: Change null to your wasm filter name
-cp target/wasm32-unknown-unknown/release/null.wasm /tmp
+cp target/wasm32-wasi/release/null.wasm /tmp
 
