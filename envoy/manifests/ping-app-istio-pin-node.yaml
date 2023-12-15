@@ -17,7 +17,7 @@ metadata:
   creationTimestamp: null
   name: frontend
 spec:
-  replicas: 1 # Change replica count if needed
+  replicas: 15 # Change replica count if needed
   selector:
     matchLabels:
       app: frontend
@@ -40,7 +40,7 @@ spec:
         service.istio.io/canonical-revision: latest
       name: frontend
     spec:
-      nodeName: h3.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
+      nodeName: h2.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
       containers:
       - args:
         - frontend
@@ -309,7 +309,7 @@ metadata:
   creationTimestamp: null
   name: ping
 spec:
-  replicas: 1 # Change replica count if needed
+  replicas: 15 # Change replica count if needed
   selector:
     matchLabels:
       app: ping

@@ -57,9 +57,9 @@ impl HttpContext for AccessControl {
                         let counter_val = GLOBAL_COUNTER.fetch_add(1, Ordering::SeqCst) + 1;
                         log::warn!("Global counter value: {}", counter_val);
                         self.send_http_response(
-                            200,
+                            403,
                             vec![
-                                ("grpc-status", "1"),
+                                ("grpc-status", "7"),
                                 // ("grpc-message", "Access forbidden.\n"),
                             ],
                             None,
