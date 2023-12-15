@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: cache-server
+spec:
+  workloadSelector:
+    labels:
+      app: ping
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        portNumber: 8081
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value: 
+        name: envoy.filters.http.wasm
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+          config:
+            name: cache-server
+            root_id: cache-server
+            vm_config:
+              vm_id: vm.sentinel.cache-server
+              runtime: envoy.wasm.runtime.v8
+              code:
+                local:
+                  filename: /etc/cache.wasm
+              allow_precompiled: false

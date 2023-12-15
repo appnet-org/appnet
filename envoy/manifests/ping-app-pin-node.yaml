@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
-  replicas: 1
+  replicas: 15
   template:
     metadata:
       name: frontend
@@ -51,7 +51,7 @@ kind: Deployment
 metadata:
   name: ping
 spec:
-  replicas: 1
+  replicas: 15
   template:
     metadata:
       name: ping

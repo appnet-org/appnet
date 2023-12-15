@@ -1,17 +1,17 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: encryption
+  name: loadbalance-server # TODO: change your filter name here
 spec:
   workloadSelector:
     labels:
-      app: ping
+      app: ping # TODO: Change your app label here
   configPatches:
   - applyTo: HTTP_FILTER
     match:
-      context: SIDECAR_INBOUND
+      context: SIDECAR_INBOUND # TODO: Change 
       listener:
-        portNumber: 8081
+        portNumber: 8081 # TODO
         filterChain:
           filter:
             name: "envoy.filters.network.http_connection_manager"
@@ -24,12 +24,12 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: encryption
-            root_id: encryption
+            name: loadbalance-server # TODO
+            root_id: loadbalance-server # TODO
             vm_config:
-              vm_id: vm.sentinel.encryption
+              vm_id: vm.sentinel.loadbalance-server # TODO
               runtime: envoy.wasm.runtime.v8
               code:
                 local:
-                  filename: /etc/encryption.wasm
+                  filename: /etc/loadbalance.wasm # TODO
               allow_precompiled: false

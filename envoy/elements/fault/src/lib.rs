@@ -61,7 +61,7 @@ impl HttpContext for Fault {
                             // log::warn!("Generated random number: {}", rand_num);
                             self.send_http_response(
                                 // 200,
-                                200, // 403 
+                                403, // 403 
                                 vec![
                                     ("grpc-status", "1"), // 1 = CANCELLED
                                     // ("grpc-message", "Access forbidden.\n"),

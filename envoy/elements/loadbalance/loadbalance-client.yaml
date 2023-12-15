@@ -1,17 +1,17 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: compression
+  name: loadbalance-client # TODO: change your filter name here
 spec:
   workloadSelector:
     labels:
-      app: ping
+      app: frontend # TODO: Change your app label here
   configPatches:
   - applyTo: HTTP_FILTER
     match:
-      context: SIDECAR_INBOUND
+      context: SIDECAR_OUTBOUND # TODO: Change 
       listener:
-        portNumber: 8081
+        portNumber: 8081 # TODO
         filterChain:
           filter:
             name: "envoy.filters.network.http_connection_manager"
@@ -24,12 +24,12 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: compression
-            root_id: compression
+            name: loadbalance-client # TODO
+            root_id: loadbalance-client # TODO
             vm_config:
-              vm_id: vm.sentinel.encrycompressiontion
+              vm_id: vm.sentinel.loadbalance-client # TODO
               runtime: envoy.wasm.runtime.v8
               code:
                 local:
-                  filename: /etc/compression.wasm
+                  filename: /etc/loadbalance.wasm # TODO
               allow_precompiled: false
