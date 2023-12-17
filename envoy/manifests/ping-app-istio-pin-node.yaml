@@ -17,7 +17,7 @@ metadata:
   creationTimestamp: null
   name: frontend
 spec:
-  replicas: 15 # Change replica count if needed
+  replicas: 1 # Change replica count if needed
   selector:
     matchLabels:
       app: frontend
@@ -181,6 +181,8 @@ spec:
           name: cache-wasm
         - mountPath: /etc/compression.wasm
           name: compression-wasm
+        - mountPath: /etc/loadbalance.wasm
+          name: loadbalance-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -225,6 +227,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: loadbalance-wasm
+        hostPath:
+          path: /tmp/loadbalance.wasm
+          type: File
       - name: compression-wasm
         hostPath:
           path: /tmp/compression.wasm
@@ -309,7 +315,7 @@ metadata:
   creationTimestamp: null
   name: ping
 spec:
-  replicas: 15 # Change replica count if needed
+  replicas: 1 # Change replica count if needed
   selector:
     matchLabels:
       app: ping
@@ -473,6 +479,8 @@ spec:
           name: cache-wasm
         - mountPath: /etc/compression.wasm
           name: compression-wasm
+        - mountPath: /etc/loadbalance.wasm
+          name: loadbalance-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -517,6 +525,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: loadbalance-wasm
+        hostPath:
+          path: /tmp/loadbalance.wasm
+          type: File
       - name: compression-wasm
         hostPath:
           path: /tmp/compression.wasm

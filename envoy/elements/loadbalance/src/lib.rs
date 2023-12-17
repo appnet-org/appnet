@@ -64,9 +64,12 @@ impl HttpContext for LoadBalanceBody {
                     let mut map = LB_TABLE.lock().unwrap();
                     
                     if map.contains_key(&req.body) {
-                        self.set_http_request_header("destination", None);
+                        log::warn!("LB Table hit!!");
+                        // self.set_http_request_header("destination", None);
                     } else {
-                        self.set_http_request_header("destination", None);
+                        // log::warn!("executing on_http_request_body");
+                        log::warn!("LB Table miss!!");
+                        // self.set_http_request_header("destination", None);
                         map.insert(req.body, 1);
                     }
                 }
