@@ -19,6 +19,14 @@ struct Encryption {
     context_id: u32,
 }
 
+fn encrypt(req: &[u8], value: &[u8]) -> Vec<u8> {
+    let mut ret = Vec::new();
+    assert!(req.len() <= value.len());
+    for i in 0..req.len() {
+        ret.push(value[i] ^ req[i]);
+    }
+    ret
+}
 impl Context for Encryption {}
 
 impl HttpContext for Encryption {
@@ -43,10 +51,10 @@ impl HttpContext for Encryption {
             if body.len() > 5 {
                 if let Ok(mut req) = ping::PingEchoRequest::decode(&body[5..]) {
                     // TODO: Encrypt the body here
-                    req.body = req.body.replace("secret", "modified");
+                    //req.body = req.body.replace("secret", "modified");
 
+                    let mut new_body = encrypt(req.body.as_bytes(), b"password");
                     // Re-encode the modified message
-                    let mut new_body = Vec::new();
                     req.encode(&mut new_body).expect("Failed to encode");
 
                     // log::warn!("Modified body size: {}", new_body.len());
