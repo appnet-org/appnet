@@ -19,14 +19,6 @@ struct Encryption {
     context_id: u32,
 }
 
-fn encrypt(req: &[u8], value: &[u8]) -> Vec<u8> {
-    let mut ret = Vec::new();
-    assert!(req.len() <= value.len());
-    for i in 0..req.len() {
-        ret.push(value[i] ^ req[i]);
-    }
-    ret
-}
 impl Context for Encryption {}
 
 impl HttpContext for Encryption {
@@ -53,7 +45,13 @@ impl HttpContext for Encryption {
                     // TODO: Encrypt the body here
                     //req.body = req.body.replace("secret", "modified");
 
-                    let mut new_body = encrypt(req.body.as_bytes(), b"password");
+                    let mut new_body = Vec::new();
+                    let req_body = req.body.as_bytes();
+                    let password = b"password";
+                    assert!(req_body.len() <= password.len());
+                    for i in 0..req_body.len() {
+                        new_body.push(req_body[i] ^ password[i]);
+                    }
                     // Re-encode the modified message
                     req.encode(&mut new_body).expect("Failed to encode");
 
