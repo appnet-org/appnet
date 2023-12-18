@@ -43,10 +43,16 @@ impl HttpContext for Encryption {
             if body.len() > 5 {
                 if let Ok(mut req) = ping::PingEchoRequest::decode(&body[5..]) {
                     // TODO: Encrypt the body here
-                    req.body = req.body.replace("secret", "modified");
+                    //req.body = req.body.replace("secret", "modified");
 
-                    // Re-encode the modified message
                     let mut new_body = Vec::new();
+                    let req_body = req.body.as_bytes();
+                    let password = b"password";
+                    assert!(req_body.len() <= password.len());
+                    for i in 0..req_body.len() {
+                        new_body.push(req_body[i] ^ password[i]);
+                    }
+                    // Re-encode the modified message
                     req.encode(&mut new_body).expect("Failed to encode");
 
                     // log::warn!("Modified body size: {}", new_body.len());

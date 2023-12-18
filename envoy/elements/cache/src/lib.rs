@@ -1,9 +1,8 @@
+use lazy_static::lazy_static;
 use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
 use std::collections::HashMap;
 use std::sync::Mutex;
-use lazy_static::lazy_static;
-
 
 use prost::Message;
 pub mod ping {
@@ -18,7 +17,7 @@ lazy_static! {
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(Cache { context_id } )
+        Box::new(Cache { context_id })
     });
 }
 
@@ -57,7 +56,7 @@ impl HttpContext for Cache {
                     // log::warn!("body.len(): {}", req.body.len());
                     // log::warn!("body : {}", req.body);
                     let mut map = REQUEST_BODIES.lock().unwrap();
-                    
+
                     if map.contains_key(&req.body) {
                         self.send_http_response(
                             200,
@@ -69,7 +68,7 @@ impl HttpContext for Cache {
                         );
                         return Action::Pause;
                     } else {
-                        map.insert(req.body, 1);
+                        return Action::Continue;
                     }
                 }
                 Err(e) => log::warn!("decode error: {}", e),
@@ -88,12 +87,25 @@ impl HttpContext for Cache {
         Action::Continue
     }
 
-    fn on_http_response_body(&mut self, _body_size: usize, end_of_stream: bool) -> Action {
+    fn on_http_response_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
         log::warn!("executing on_http_response_body");
         if !end_of_stream {
             return Action::Pause;
         }
-
+        if let Some(body) = self.get_http_request_body(0, body_size) {
+            // log::warn!("body: {:?}", body);
+            // Parse grpc payload, skip the first 5 bytes
+            match ping::PingEchoRequest::decode(&body[5..]) {
+                Ok(req) => {
+                    // log::info!("req: {:?}", req);
+                    // log::warn!("body.len(): {}", req.body.len());
+                    // log::warn!("body : {}", req.body);
+                    let mut map = REQUEST_BODIES.lock().unwrap();
+                    map.insert(req.body, 1);
+                }
+                Err(e) => log::warn!("decode error: {}", e),
+            }
+        }
         Action::Continue
     }
 }

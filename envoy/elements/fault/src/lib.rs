@@ -11,14 +11,17 @@ pub mod ping {
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(Fault { context_id, abort_probability : 0.1 })
+        Box::new(Fault {
+            context_id,
+            abort_probability: 0.1,
+        })
     });
 }
 
 struct Fault {
     #[allow(unused)]
     context_id: u32,
-    abort_probability: f32
+    abort_probability: f32,
 }
 
 impl Context for Fault {}
@@ -39,7 +42,7 @@ impl HttpContext for Fault {
         if !end_of_stream {
             return Action::Pause;
         }
-        
+
         if let Some(body) = self.get_http_request_body(0, body_size) {
             // log::warn!("body: {:?}", body);
             // Parse grpc payload, skip the first 5 bytes
@@ -48,29 +51,28 @@ impl HttpContext for Fault {
                     // log::warn!("req: {:?}", req);
                     // log::warn!("body.len(): {}", req.body.len());
                     // log::warn!("body : {}", req.body);
-                    if req.body == "fault" {
-                        // Status code: https://chromium.googlesource.com/external/github.com/grpc/grpc/+/refs/tags/v1.21.4-pre1/doc/statuscodes.md
 
-                        let mut rng = rand::thread_rng();
-                        // let rand_num = rng.gen_range(0.0..1.0); // Generate a random number between 0 and 1
-                        let rand_num = rng.gen_range(0.0, 1.0); // Generate a random number between 0 and 1
+                    // Status code: https://chromium.googlesource.com/external/github.com/grpc/grpc/+/refs/tags/v1.21.4-pre1/doc/statuscodes.md
 
+                    let mut rng = rand::thread_rng();
+                    // let rand_num = rng.gen_range(0.0..1.0); // Generate a random number between 0 and 1
+                    let rand_num = rng.gen_range(0.0, 1.0); // Generate a random number between 0 and 1
+
+                    // log::warn!("Generated random number: {}", rand_num);
+
+                    if rand_num < self.abort_probability {
                         // log::warn!("Generated random number: {}", rand_num);
-
-                        if rand_num < self.abort_probability {
-                            // log::warn!("Generated random number: {}", rand_num);
-                            self.send_http_response(
-                                // 200,
-                                403, // 403 
-                                vec![
-                                    ("grpc-status", "1"), // 1 = CANCELLED
-                                    // ("grpc-message", "Access forbidden.\n"),
-                                ],
-                                None,
-                            );
-                        }
-                    // return Action::Pause;
+                        self.send_http_response(
+                            // 200,
+                            403, // 403
+                            vec![
+                                ("grpc-status", "1"), // 1 = CANCELLED
+                                                      // ("grpc-message", "Access forbidden.\n"),
+                            ],
+                            None,
+                        );
                     }
+                    // return Action::Pause;
                 }
                 Err(e) => log::warn!("decode error: {}", e),
             }
@@ -78,7 +80,6 @@ impl HttpContext for Fault {
 
         Action::Continue
     }
-
 
     fn on_http_response_headers(&mut self, _num_headers: usize, end_of_stream: bool) -> Action {
         log::warn!("executing on_http_response_headers");
