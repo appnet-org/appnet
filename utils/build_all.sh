@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd ./envoy/elements
+
 # Iterate over each item in the current directory
 for folder in */ ; do
     # Check if it's a directory
