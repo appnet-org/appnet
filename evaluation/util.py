@@ -5,6 +5,7 @@ import re
 
 element_pool = ["fault", "cache", "ratelimit", "loadbalance", "logging", "mutation", 
                 "accesscontrol", "metrics", "admissioncontrol", "compression", "encryption"]
+# TODO: update the configuration dict. Add script to generate random configurations.
 element_configs = {
     "fault": "probability=0.2",
     "cache": None,
