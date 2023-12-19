@@ -2,6 +2,7 @@ import subprocess
 import random
 import statistics
 import re
+import yaml
 
 element_pool = ["fault", "cache", "ratelimit", "loadbalance", "logging", "mutation", 
                 "accesscontrol", "metrics", "admissioncontrol", "compression", "encryption"]
@@ -31,6 +32,16 @@ class Element:
     def add_config(self, config):
         """Adds or updates the configuration for the element."""
         self.config = config
+    
+    def to_dict(self):
+        """Convert the Element instance to a dictionary for YAML formatting."""
+        element_dict = {
+            "name": self.name,
+            "position": self.position
+        }
+        if self.config:
+            element_dict["config"] = self.config.split(', ')
+        return element_dict
         
     def __repr__(self):
         return f'Element(Name={self.name}, Position={self.position}, Configurations={self.config})'
@@ -38,8 +49,14 @@ class Element:
 def select_random_elements(number: int):
     """Selects a random number of elements with random positions."""
     # TODO(xz): also generate random configurations. They can be static for now.
-    return [Element(name, position=random.choice(position_pool), config=element_configs[name]) 
+    selected =  [Element(name, position=random.choice(position_pool), config=element_configs[name]) 
             for name in random.sample(element_pool, number)]
+    # Convert elements to YAML format
+    yaml_data = {"edge": {"client->server": [element.to_dict() for element in selected]}}
+
+    # Export to YAML format
+    yaml_str = yaml.dump(yaml_data, default_flow_style=False)
+    return yaml_str
 
 def clean_up():
     # Clean up kubernetes deployments and wrks
@@ -136,6 +153,6 @@ def run_wrk2_and_get_cpu(node_names, cores_per_node=64, mpstat_duration=30, wrk2
     
 
 selected_elements = select_random_elements(3)
-print(selected_elements)
-run_wrk_and_get_latency()
-run_wrk2_and_get_cpu(node_names=['h2', 'h3'])
+# print(selected_elements)
+# run_wrk_and_get_latency()
+# run_wrk2_and_get_cpu(node_names=['h2', 'h3'])
