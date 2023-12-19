@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: echo-frontend
 spec:
-  replicas: 1
+  replicas: 15
   template:
     metadata:
       annotations:
@@ -50,7 +50,7 @@ kind: Deployment
 metadata:
   name: echo-server
 spec:
-  replicas: 1
+  replicas: 15
   template:
     metadata:
       annotations:

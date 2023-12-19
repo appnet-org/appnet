@@ -30,18 +30,20 @@ func ACLClient(optFuncs ...CallOption) grpc.UnaryClientInterceptor {
 
 		log.Println("Hello from ACLUnaryClientInterceptor")
 		if m, ok := req.(*echo.Msg); ok {
+			
 			if m.GetBody() == callOpts.content {
 				// Xiangfeng: This does not work for client because there is a new connection everytime. However, it work for server
-				callOpts.blockedCount += 1
+				// callOpts.blockedCount += 1
 
 				// Xiangfeng: that's why we are using a mutex here, but the performance might hurt
+				// XZ: I did a quick test, performance seems to be fine
 				countMutex.Lock() // Lock the mutex before updating the counter
                 blockedCount++
                 count := blockedCount // Copy the value to avoid race condition in Printf
                 countMutex.Unlock() 
 
 				log.Printf("Request blocked by ACL. (%d Request Blocked)", count)
-				log.Printf("Request blocked by ACL. (%d Request Blocked)", callOpts.blockedCount)
+				// log.Printf("Request blocked by ACL. (%d Request Blocked)", callOpts.blockedCount)
 
 				return status.Error(codes.Aborted, "request blocked by ACL.")
 			}
@@ -59,8 +61,16 @@ func ACLServer(optFuncs ...CallOption) grpc.UnaryServerInterceptor {
 		log.Println("Running ACLUnaryServerInterceptor")
 		if m, ok := req.(*echo.Msg); ok {
 			if m.GetBody() == intOpts.content {
-				intOpts.blockedCount += 1
-				log.Printf("Request blocked by ACL. (%d Request Blocked)", intOpts.blockedCount)
+				// Xiangfeng: This does not work for client because there is a new connection everytime. However, it work for server
+				// callOpts.blockedCount += 1
+
+				// Xiangfeng: that's why we are using a mutex here, but the performance might hurt 
+				
+				countMutex.Lock() // Lock the mutex before updating the counter
+                blockedCount++
+                count := blockedCount // Copy the value to avoid race condition in Printf
+                countMutex.Unlock() 
+				log.Printf("Request blocked by ACL. (%d Request Blocked)", count)
 
 				return nil, status.Error(codes.Aborted, "request blocked by ACL.")
 			}

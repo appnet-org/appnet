@@ -18,4 +18,4 @@ def get_virtual_cores(node_names, core_count, duration):
 if __name__ == '__main__':
     node_names = ['h2', 'h3']
     print("Collecting CPU usage (vCores):")
-    print(get_virtual_cores(node_names, 64, 5))
+    print(get_virtual_cores(node_names, 64, 15))

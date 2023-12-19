@@ -7,7 +7,6 @@ import (
 var (
 	defaultOptions = &options{
 		content: "null", // disabled
-		blockedCount:     0,
 	}
 )
 
@@ -19,7 +18,6 @@ func WithContent(content string) CallOption {
 
 type options struct {
 	content string
-	blockedCount int32
 }
 
 type CallOption struct {
