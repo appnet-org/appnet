@@ -1,7 +1,7 @@
 use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::cmp;
+use rand::Rng;
 
 // use prost::Message;
 pub mod ping {
@@ -16,14 +16,14 @@ static SUCCESS_COUNT: AtomicUsize = AtomicUsize::new(0);
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(AdmissionControl { context_id, multiplier : 2 })
+        Box::new(AdmissionControl { context_id, multiplier : 0.5 })
     });
 }
 
 struct AdmissionControl {
     #[allow(unused)]
     context_id: u32,
-    multiplier: u32,
+    multiplier: f32,
 }
 
 impl Context for AdmissionControl {}
@@ -44,13 +44,24 @@ impl HttpContext for AdmissionControl {
         if !end_of_stream {
             return Action::Pause;
         }
+        let total = SEND_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
 
         // Caculate client request rejection probability
-        let rej_prob = cmp::max(0, (SEND_COUNT.load(Ordering::SeqCst) + 1) * self.multiplier as usize - SUCCESS_COUNT.load(Ordering::SeqCst));
-        log::warn!("Rejection probability: {}", rej_prob);
+        let acc_prob = (total as f32 - self.multiplier * (SUCCESS_COUNT.load(Ordering::SeqCst) as f32)) / ((total + 1) as f32);
+        log::warn!("Accept probability: {}", acc_prob);
 
+        let mut rng = rand::thread_rng();
+        let rand_num = rng.gen_range(0.0, 1.0);
 
-        let _ = SEND_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
+        if rand_num > acc_prob {
+            self.send_http_response(
+                403,
+                vec![
+                    ("grpc-status", "1"),
+                ],
+                None,
+            );
+        }
 
         Action::Continue
     }
