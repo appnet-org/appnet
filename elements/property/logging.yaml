@@ -1,7 +1,0 @@
-request:
-    record:
-    - "event_type"
-    - "src"
-    - "dst"
-    - "rpc"
-response:

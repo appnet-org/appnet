@@ -183,6 +183,10 @@ spec:
           name: compression-wasm
         - mountPath: /etc/loadbalance.wasm
           name: loadbalance-wasm
+        - mountPath: /etc/auth.wasm
+          name: auth-wasm
+        - mountPath: /etc/redis.wasm
+          name: redis-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -227,6 +231,14 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: redis-wasm
+        hostPath:
+          path: /tmp/redis.wasm
+          type: File
+      - name: auth-wasm
+        hostPath:
+          path: /tmp/auth.wasm
+          type: File
       - name: loadbalance-wasm
         hostPath:
           path: /tmp/loadbalance.wasm
@@ -481,6 +493,10 @@ spec:
           name: compression-wasm
         - mountPath: /etc/loadbalance.wasm
           name: loadbalance-wasm
+        - mountPath: /etc/auth.wasm
+          name: auth-wasm
+        - mountPath: /etc/redis.wasm
+          name: redis-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -525,6 +541,14 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: redis-wasm
+        hostPath:
+          path: /tmp/redis.wasm
+          type: File
+      - name: auth-wasm
+        hostPath:
+          path: /tmp/auth.wasm
+          type: File
       - name: loadbalance-wasm
         hostPath:
           path: /tmp/loadbalance.wasm

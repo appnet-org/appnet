@@ -1,5 +1,0 @@
-request:
-    drop: True
-    read:
-    - "name"
-response:

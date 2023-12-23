@@ -1,6 +1,0 @@
-request:
-    read:
-    - "flow_id"
-    write:
-    - "flow_id"
-reponse:

@@ -1,4 +1,0 @@
-request:
-    read:
-    - "header_value"
-response:

@@ -4,5 +4,5 @@ WORKDIR=`dirname $(realpath $0)`
 cd $WORKDIR
 
 cargo build --target=wasm32-wasi --release
-cp target/wasm32-unknown-unknown/release/encryption.wasm /tmp
+cp target/wasm32-wasi/release/encryption.wasm /tmp
 

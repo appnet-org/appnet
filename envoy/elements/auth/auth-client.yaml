@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: acl-client
+  name: auth-client
 spec:
   workloadSelector:
     labels:
@@ -24,12 +24,32 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
           config:
-            name: acl-block-client
-            root_id: acl-block-client
+            name: auth-block-client
+            root_id: auth-block-client
             vm_config:
-              vm_id: vm.sentinel.acl-block-client
+              vm_id: vm.sentinel.auth-client
               runtime: envoy.wasm.runtime.v8
               code:
                 local:
-                  filename: /etc/acl.wasm
+                  filename: /etc/auth.wasm
               allow_precompiled: false
+  - applyTo: CLUSTER
+    match:
+      cluster:
+        service: httpbin.org
+    patch:
+      operation: ADD
+      value:
+        name: httpbin
+        connect_timeout: 5s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: httpbin
+          endpoints:
+            - lb_endpoints:
+                - endpoint:
+                    address:
+                      socket_address:
+                        address: httpbin.org
+                        port_value: 80
