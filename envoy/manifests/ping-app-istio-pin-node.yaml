@@ -187,6 +187,8 @@ spec:
           name: auth-wasm
         - mountPath: /etc/redis.wasm
           name: redis-wasm
+        - mountPath: /etc/cache_global_strong.wasm
+          name: cache-global-strong-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -231,6 +233,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: cache-global-strong-wasm
+        hostPath:
+          path: /tmp/cache_global_strong.wasm
+          type: File
       - name: redis-wasm
         hostPath:
           path: /tmp/redis.wasm
@@ -497,6 +503,8 @@ spec:
           name: auth-wasm
         - mountPath: /etc/redis.wasm
           name: redis-wasm
+        - mountPath: /etc/cache_global_strong.wasm
+          name: cache-global-strong-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -541,6 +549,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: cache-global-strong-wasm
+        hostPath:
+          path: /tmp/cache_global_strong.wasm
+          type: File
       - name: redis-wasm
         hostPath:
           path: /tmp/redis.wasm

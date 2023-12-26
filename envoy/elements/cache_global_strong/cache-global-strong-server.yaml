@@ -1,0 +1,54 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: cache-global-strong-server
+spec:
+  workloadSelector:
+    labels:
+      app: ping
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        portNumber: 8081
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value: 
+        name: envoy.filters.http.wasm
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+          config:
+            name: cache-global-strong-server
+            root_id: cache-global-strong-server
+            vm_config:
+              vm_id: vm.sentinel.cache-strong-global-server
+              runtime: envoy.wasm.runtime.v8
+              code:
+                local:
+                  filename: /etc/cache_global_strong.wasm
+              allow_precompiled: false
+  - applyTo: CLUSTER
+    match:
+        context: SIDECAR_OUTBOUND
+    patch:
+      operation: ADD
+      value:
+        name: "webdis-service"
+        connect_timeout: 5s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: webdis-service
+          endpoints:
+            - lb_endpoints:
+                - endpoint:
+                    address:
+                      socket_address:
+                        address: webdis-service  # Assuming this is the address of your webdis-service
+                        port_value: 7379      # The port defined in your service

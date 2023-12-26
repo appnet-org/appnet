@@ -54,10 +54,11 @@ impl HttpContext for Cache {
                 Ok(req) => {
                     // log::info!("req: {:?}", req);
                     // log::warn!("body.len(): {}", req.body.len());
-                    // log::warn!("body : {}", req.body);
-                    let mut map = REQUEST_BODIES.lock().unwrap();
+                    log::warn!("body : {}", req.body);
+                    let map = REQUEST_BODIES.lock().unwrap();
 
                     if map.contains_key(&req.body) {
+                        log::warn!("Cache hit!!! body: {:?}", req.body);
                         self.send_http_response(
                             200,
                             vec![
@@ -68,6 +69,7 @@ impl HttpContext for Cache {
                         );
                         return Action::Pause;
                     } else {
+                        log::warn!("Cache miss!!! body: {:?}", req.body);
                         return Action::Continue;
                     }
                 }
@@ -88,18 +90,19 @@ impl HttpContext for Cache {
     }
 
     fn on_http_response_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
-        log::warn!("executing on_http_response_body");
-        if !end_of_stream {
-            return Action::Pause;
-        }
-        if let Some(body) = self.get_http_request_body(0, body_size) {
+        log::warn!("executing on_http_response_body!");
+        // if !end_of_stream {
+        //     return Action::Pause;
+        // }
+        if let Some(body) = self.get_http_response_body(0, body_size) {
             // log::warn!("body: {:?}", body);
             // Parse grpc payload, skip the first 5 bytes
-            match ping::PingEchoRequest::decode(&body[5..]) {
+            match ping::PingEchoResponse::decode(&body[5..]) {
                 Ok(req) => {
                     // log::info!("req: {:?}", req);
+                    // log::info!("req: {:?}", req);
                     // log::warn!("body.len(): {}", req.body.len());
-                    // log::warn!("body : {}", req.body);
+                    log::warn!("Inserting request to cache. Body : {}", req.body);
                     let mut map = REQUEST_BODIES.lock().unwrap();
                     map.insert(req.body, 1);
                 }
@@ -107,5 +110,5 @@ impl HttpContext for Cache {
             }
         }
         Action::Continue
-    }
+   }
 }
