@@ -41,7 +41,11 @@ impl HttpContext for Mutation {
         if let Some(body) = self.get_http_request_body(0, body_size) {
             // log::warn!("Original body size: {}", body.len());
             if body.len() > 5 {
-                if let Ok(mut req) = ping::PingEchoRequest::decode(&body[5..]) {
+                // The gRPC message may be changed/compressed - better use the new length. 
+                // This step is required as the body_size will be inaccurate.
+                let message_length = u32::from_be_bytes([body[1], body[2], body[3], body[4]]) as usize + 5;
+                log::warn!("gRPC message length: {}", message_length);
+                if let Ok(mut req) = ping::PingEchoRequest::decode(&body[5..message_length]) {
                     // Modify the body here
                     req.body = req.body.replace("secret", "modified");
 

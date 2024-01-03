@@ -179,6 +179,8 @@ spec:
           name: ratelimit-wasm
         - mountPath: /etc/cache.wasm
           name: cache-wasm
+        - mountPath: /etc/decompression.wasm
+          name: decompression-wasm
         - mountPath: /etc/compression.wasm
           name: compression-wasm
         - mountPath: /etc/loadbalance.wasm
@@ -248,6 +250,10 @@ spec:
       - name: loadbalance-wasm
         hostPath:
           path: /tmp/loadbalance.wasm
+          type: File
+      - name: decompression-wasm
+        hostPath:
+          path: /tmp/decompression.wasm
           type: File
       - name: compression-wasm
         hostPath:
@@ -495,6 +501,8 @@ spec:
           name: ratelimit-wasm
         - mountPath: /etc/cache.wasm
           name: cache-wasm
+        - mountPath: /etc/decompression.wasm
+          name: decompression-wasm
         - mountPath: /etc/compression.wasm
           name: compression-wasm
         - mountPath: /etc/loadbalance.wasm
@@ -564,6 +572,10 @@ spec:
       - name: loadbalance-wasm
         hostPath:
           path: /tmp/loadbalance.wasm
+          type: File
+      - name: decompression-wasm
+        hostPath:
+          path: /tmp/decompression.wasm
           type: File
       - name: compression-wasm
         hostPath:

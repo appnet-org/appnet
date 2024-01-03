@@ -1,8 +1,7 @@
 use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
-use flate2::{write::GzEncoder};
-use flate2::Compression as Compressor;
-use std::io::{Write};
+use flate2::{read::GzDecoder};
+use std::io::{Read};
 use base64::{engine::general_purpose, Engine as _};
 
 use prost::Message;
@@ -14,18 +13,18 @@ pub mod ping {
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(Compression { context_id })
+        Box::new(Decompression { context_id })
     });
 }
 
-struct Compression {
+struct Decompression {
     #[allow(unused)]
     context_id: u32,
 }
 
-impl Context for Compression {}
+impl Context for Decompression {}
 
-impl HttpContext for Compression {
+impl HttpContext for Decompression {
     fn on_http_request_headers(&mut self, _num_of_headers: usize, end_of_stream: bool) -> Action {
         log::warn!("executing on_http_request_headers");
         if !end_of_stream {
@@ -43,41 +42,38 @@ impl HttpContext for Compression {
         }
 
         if let Some(body) = self.get_http_request_body(0, body_size) {
-            log::warn!("body size: {}", body.len());
+            log::warn!("Body size: {}", body.len());
+            log::warn!("body: {:?}", body);
             if body.len() > 5 {
                 // The gRPC message may be changed/compressed - better use the new length. 
                 // This step is required as the body_size will be inaccurate.
                 let message_length = u32::from_be_bytes([body[1], body[2], body[3], body[4]]) as usize + 5;
                 log::warn!("gRPC message length: {}", message_length);
                 if let Ok(mut req) = ping::PingEchoRequest::decode(&body[5..message_length]) {
-                    log::warn!("Original length: {}", req.body.len());
+                    // Decompress and re-encode
+                    
+                    let decoded_data = general_purpose::STANDARD.decode(&req.body).expect("Failed to decode Base64 string");
+                    let mut decoder = GzDecoder::new(&decoded_data[..]);
+                    let mut decompressed_data = String::new();
+                    decoder.read_to_string(&mut decompressed_data).unwrap();
 
-                    // Compress the body and encode it.
+                    req.body = decompressed_data;
                     let mut new_body = Vec::new();
-                    let mut encoder = GzEncoder::new(Vec::new(), Compressor::default());
-                    encoder.write_all(req.body.as_bytes()).unwrap();
-
-                    let compressed_data = encoder.finish().unwrap();
-                    req.body = general_purpose::STANDARD.encode(&compressed_data);
-                    log::warn!("Compressed data: {:?}", req.body);
-                    log::warn!("Compressed length: {}", req.body.len());
                     req.encode(&mut new_body).expect("Failed to encode");
 
                     // Construct the gRPC header
                     let new_body_length = new_body.len() as u32;
-                    log::warn!("new body length: {}", new_body_length);
                     let mut grpc_header = Vec::new();
                     grpc_header.push(0); // Compression flag
                     grpc_header.extend_from_slice(&new_body_length.to_be_bytes());
 
-                    log::warn!("Header size: {}", grpc_header.len());
+                    // log::warn!("Header size: {}", grpc_header.len());
 
                     // Combine header and body
                     grpc_header.append(&mut new_body);
 
                     // Replace the request body
                     self.set_http_request_body(0, grpc_header.len(), &grpc_header);
-                    // self.set_http_request_body(grpc_header.len(), new_body_length.try_into().unwrap(), &new_body);
                 } else {
                     log::warn!("Failed to decode the request body");
                 }

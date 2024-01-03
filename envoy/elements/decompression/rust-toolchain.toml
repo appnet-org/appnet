@@ -1,0 +1,4 @@
+[toolchain]
+components = [ "rustfmt", "rustc-dev" ]
+targets = [ "wasm32-wasi" ]
+profile = "minimal"
