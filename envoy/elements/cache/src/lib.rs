@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::RwLock;
 
 use prost::Message;
 pub mod ping {
@@ -10,7 +10,7 @@ pub mod ping {
 }
 
 lazy_static! {
-    static ref REQUEST_BODIES: Mutex<HashMap<String, i32>> = Mutex::new(HashMap::new());
+    static ref REQUEST_BODIES: RwLock<HashMap<String, i32>> = RwLock::new(HashMap::new());
 }
 
 #[no_mangle]
@@ -55,7 +55,7 @@ impl HttpContext for Cache {
                     // log::info!("req: {:?}", req);
                     // log::warn!("body.len(): {}", req.body.len());
                     log::warn!("body : {}", req.body);
-                    let map = REQUEST_BODIES.lock().unwrap();
+                    let map = REQUEST_BODIES.read().unwrap();
 
                     if map.contains_key(&req.body) {
                         log::warn!("Cache hit!!! body: {:?}", req.body);
@@ -103,7 +103,7 @@ impl HttpContext for Cache {
                     // log::info!("req: {:?}", req);
                     // log::warn!("body.len(): {}", req.body.len());
                     log::warn!("Inserting request to cache. Body : {}", req.body);
-                    let mut map = REQUEST_BODIES.lock().unwrap();
+                    let mut map = REQUEST_BODIES.write().unwrap();
                     map.insert(req.body, 1);
                 }
                 Err(e) => log::warn!("decode error: {}", e),

@@ -178,6 +178,10 @@ spec:
           name: ratelimit-wasm
         - mountPath: /etc/cache.wasm
           name: cache-wasm
+        - mountPath: /etc/cache_global_weak.wasm
+          name: cache-global-weak-wasm
+        - mountPath: /etc/cache_global_strong.wasm
+          name: cache-global-strong-wasm
         - mountPath: /etc/decompression.wasm
           name: decompression-wasm
         - mountPath: /etc/compression.wasm
@@ -253,6 +257,14 @@ spec:
       - name: compression-wasm
         hostPath:
           path: /tmp/compression.wasm
+          type: File
+      - name: cache-global-weak-wasm
+        hostPath:
+          path: /tmp/cache_global_weak.wasm
+          type: File
+      - name: cache-global-strong-wasm
+        hostPath:
+          path: /tmp/cache_global_strong.wasm
           type: File
       - name: cache-wasm
         hostPath:
@@ -501,6 +513,10 @@ spec:
           name: ratelimit-wasm
         - mountPath: /etc/cache.wasm
           name: cache-wasm
+        - mountPath: /etc/cache_global_weak.wasm
+          name: cache-global-weak-wasm
+        - mountPath: /etc/cache_global_strong.wasm
+          name: cache-global-strong-wasm
         - mountPath: /etc/decompression.wasm
           name: decompression-wasm
         - mountPath: /etc/compression.wasm
@@ -574,6 +590,14 @@ spec:
       - name: compression-wasm
         hostPath:
           path: /tmp/compression.wasm
+          type: File
+      - name: cache-global-weak-wasm
+        hostPath:
+          path: /tmp/cache_global_weak.wasm
+          type: File
+      - name: cache-global-strong-wasm
+        hostPath:
+          path: /tmp/cache_global_strong.wasm
           type: File
       - name: cache-wasm
         hostPath:

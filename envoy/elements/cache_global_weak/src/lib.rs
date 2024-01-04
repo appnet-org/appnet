@@ -1,27 +1,67 @@
 use proxy_wasm::traits::{Context, HttpContext};
 use proxy_wasm::types::{Action, LogLevel};
 use serde_json::Value; 
+use proxy_wasm::traits::RootContext;
 use std::time::Duration;
+use std::collections::HashMap;
+use lazy_static::lazy_static;
+use std::sync::RwLock;
 
 use prost::Message;
 pub mod ping {
     include!(concat!(env!("OUT_DIR"), "/ping_pb.rs"));
 }
 
+// A local cache 
+lazy_static! {
+    static ref REQUEST_CACHE: RwLock<HashMap<String, i32>> = RwLock::new(HashMap::new());
+}
+
 #[no_mangle]
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
+    proxy_wasm::set_root_context(|_| -> Box<dyn RootContext> { Box::new(CacheGlobalWeakRoot) });
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(CacheGlobalStrong { context_id })
+        Box::new(CacheGlobalWeak { context_id })
     });
 }
 
-struct CacheGlobalStrong {
+struct CacheGlobalWeak {
     #[allow(unused)]
     context_id: u32,
 }
 
-impl Context for CacheGlobalStrong {
+struct CacheGlobalWeakRoot;
+
+impl Context for CacheGlobalWeakRoot {}
+
+impl RootContext for CacheGlobalWeakRoot {
+    fn on_vm_start(&mut self, _: usize) -> bool {
+        log::warn!("executing on_vm_start");
+        self.set_tick_period(Duration::from_secs(5));
+        true
+    }
+
+    fn on_tick(&mut self) {
+        log::warn!("executing on_tick");
+        // TODO(XZ): add logic to synchronize state here.
+        self.dispatch_http_call(
+            "webdis-service", // or your service name
+            vec![
+                (":method", "GET"),
+                (":path", &format!("/SET/redis/cached")),
+                // (":path", "/SET/redis/hello"),
+                (":authority", "webdis-service"), // Replace with the appropriate authority if needed
+            ],
+            None,
+            vec![],
+            Duration::from_secs(5),
+        )
+        .unwrap();
+    }
+}
+
+impl Context for CacheGlobalWeak {
     fn on_http_call_response(&mut self, _: u32, _: usize, body_size: usize, _: usize) {
         log::warn!("Got a response from Redis service.");
         if let Some(body) = self.get_http_call_response_body(0, body_size) {
@@ -57,7 +97,7 @@ impl Context for CacheGlobalStrong {
     
 }
 
-impl HttpContext for CacheGlobalStrong {
+impl HttpContext for CacheGlobalWeak {
     fn on_http_request_headers(&mut self, _num_of_headers: usize, end_of_stream: bool) -> Action {
         log::warn!("executing on_http_request_headers");
         if !end_of_stream {
@@ -81,25 +121,24 @@ impl HttpContext for CacheGlobalStrong {
             // Parse grpc payload, skip the first 5 bytes
             match ping::PingEchoRequest::decode(&body[5..]) {
                 Ok(req) => {
-                    // log::info!("req: {:?}", req);
-                    // log::warn!("body.len(): {}", req.body.len());
-                    // log::warn!("body : {}", req.body);
-                    log::warn!("Dispatching a call to redis service!");
-                    let result = self.dispatch_http_call(
-                        "webdis-service", // or your service name
-                        vec![
-                            (":method", "GET"),
-                            (":path", &format!("/GET/{}", req.body)),
-                            // (":path", "/GET/hello"),
-                            (":authority", "webdis-service"), // Replace with the appropriate authority if needed
-                        ],
-                        None,
-                        vec![],
-                        Duration::from_secs(5),
-                    )
-                    .unwrap();
-                    log::warn!("result: {}", result);
-                    return Action::Pause;
+                    log::warn!("body : {}", req.body);
+                    let map = REQUEST_CACHE.read().unwrap();
+
+                    if map.contains_key(&req.body) {
+                        log::warn!("Cache hit!!! body: {:?}", req.body);
+                        self.send_http_response(
+                            200,
+                            vec![
+                                ("grpc-status", "1"),
+                                // ("grpc-message", "Access forbidden.\n"),
+                            ],
+                            None,
+                        );
+                        return Action::Pause;
+                    } else {
+                        log::warn!("Cache miss!!! body: {:?}", req.body);
+                        return Action::Continue;
+                    }
                 }
                 Err(e) => log::warn!("decode error: {}", e),
             }
@@ -118,7 +157,7 @@ impl HttpContext for CacheGlobalStrong {
     }
 
     fn on_http_response_body(&mut self, body_size: usize, _end_of_stream: bool) -> Action {
-        log::warn!("executing on_http_response_body");
+        log::warn!("executing on_http_response_body!");
         // if !end_of_stream {
         //     return Action::Pause;
         // }
@@ -127,28 +166,13 @@ impl HttpContext for CacheGlobalStrong {
             // Parse grpc payload, skip the first 5 bytes
             match ping::PingEchoResponse::decode(&body[5..]) {
                 Ok(req) => {
-                    // Send an async request to redis to popular the cache.
-                    // Xiangfeng: This really should be a synchronous request but I wasn't sure how to do it. 
-                    log::warn!("Dispatching a call to Redis to save the response!");
-                    let result = self.dispatch_http_call(
-                        "webdis-service", // or your service name
-                        vec![
-                            (":method", "GET"),
-                            (":path", &format!("/SET/{}/cached", req.body)),
-                            // (":path", "/SET/redis/hello"),
-                            (":authority", "webdis-service"), // Replace with the appropriate authority if needed
-                        ],
-                        None,
-                        vec![],
-                        Duration::from_secs(5),
-                    )
-                    .unwrap();
-                    log::warn!("result: {}", result);
-                    return Action::Pause
+                    log::warn!("Inserting request to local cache. Body : {}", req.body);
+                    let mut map = REQUEST_CACHE.write().unwrap();
+                    map.insert(req.body, 1);
                 }
                 Err(e) => log::warn!("decode error: {}", e),
             }
         }
         Action::Continue
-    }
+   }
 }
