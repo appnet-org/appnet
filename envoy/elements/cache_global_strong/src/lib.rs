@@ -29,23 +29,25 @@ impl Context for CacheGlobalStrong {
                 log::warn!("Redis Response body: {}", body_str);
     
                 // Parse the JSON response
-                if let Ok(json) = serde_json::from_str::<Value>(body_str) {
-                    // Check if the GET field is not null
-                    if json.get("GET").is_some() && !json["GET"].is_null() {
-                        log::warn!("Cache hit!!!");
-                        // Run this code if the GET result is not null
-                        self.send_http_response(
-                            200,
-                            vec![
-                                ("grpc-status", "1"),
-                            ],
-                            None,
-                        );
-                    } else {
-                        log::warn!("Cache miss!!!");
-                    }
-                } else {
-                    log::warn!("Response body: [Invalid JSON data]");
+                match serde_json::from_str::<Value>(body_str) {
+                    Ok(json) => {
+                        // Check if the GET field is not null
+                        match json.get("GET") {
+                            Some(get) if !get.is_null() => {
+                                log::warn!("Cache hit!!!");
+                                // Run this code if the GET result is not null
+                                self.send_http_response(
+                                    200,
+                                    vec![
+                                        ("grpc-status", "1"),
+                                    ],
+                                    None,
+                                );
+                            },
+                            _ => log::warn!("Cache miss!!!"),
+                        }
+                    },
+                    Err(_) => log::warn!("Response body: [Invalid JSON data]"),
                 }
             } else {
                 log::warn!("Response body: [Non-UTF8 data]");
@@ -54,7 +56,7 @@ impl Context for CacheGlobalStrong {
             self.resume_http_request();
         }
     }
-    
+
 }
 
 impl HttpContext for CacheGlobalStrong {

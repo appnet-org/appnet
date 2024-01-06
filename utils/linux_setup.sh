@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Install necessary commands
+sudo apt-get update
+sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
+
 # Disable TurboBoost
 # cat /sys/devices/system/cpu/intel_pstate/no_turbo
 echo "1" | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo
