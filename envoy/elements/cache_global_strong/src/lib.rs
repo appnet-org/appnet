@@ -35,14 +35,22 @@ impl Context for CacheGlobalStrong {
                         match json.get("GET") {
                             Some(get) if !get.is_null() => {
                                 log::warn!("Cache hit!!!");
-                                // Run this code if the GET result is not null
-                                self.send_http_response(
-                                    200,
-                                    vec![
-                                        ("grpc-status", "1"),
-                                    ],
-                                    None,
-                                );
+                                match get.as_str() {
+                                    Some("cached") => {                                                                       
+                                        // Run this code if the GET result is not null
+                                        self.send_http_response(
+                                            200,
+                                            vec![
+                                                ("grpc-status", "1"),
+                                            ],
+                                            None,
+                                        );
+                                    },
+                                    Some(_) => log::warn!("Cache hit but not cached"),
+                                    None => log::warn!("Cache hit but GET value is not a string"),
+                                }
+                                
+
                             },
                             _ => log::warn!("Cache miss!!!"),
                         }
@@ -56,7 +64,6 @@ impl Context for CacheGlobalStrong {
             self.resume_http_request();
         }
     }
-
 }
 
 impl HttpContext for CacheGlobalStrong {
@@ -105,8 +112,7 @@ impl HttpContext for CacheGlobalStrong {
                 }
                 Err(e) => log::warn!("decode error: {}", e),
             }
-        }
-
+        }   
         Action::Continue
     }
 
