@@ -10,33 +10,48 @@ pub mod ping {
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
     proxy_wasm::set_http_context(|context_id, _| -> Box<dyn HttpContext> {
-        Box::new(Logging { context_id })
+        Box::new(Logging { context_id, method: "".to_string()})
     });
 }
 
 struct Logging {
     #[allow(unused)]
     context_id: u32,
+    method: String,
 }
 
 impl Context for Logging {}
 
 impl HttpContext for Logging {
-    fn on_http_request_headers(&mut self, _num_of_headers: usize, end_of_stream: bool) -> Action {
-        log::warn!("executing on_http_request_headers");
-        if !end_of_stream {
-            return Action::Continue;
+    fn on_http_request_headers(&mut self, num_of_headers: usize, end_of_stream: bool) -> Action {
+        log::warn!("executing on_http_request_headers!!!");
+        // log::warn!("Got {} HTTP headers in #{}.", num_of_headers, self.context_id);
+        // if !end_of_stream {
+        //     return Action::Continue;
+        // }
+
+        
+        // for (name, value) in &self.get_http_request_headers() {
+        //     log::warn!("#{} -> {}: {}", self.context_id, name, value);
+        // }
+
+        match self.get_http_request_header(":path") {
+            Some(path)  => {
+                self.method = path.rsplit('/').next().unwrap_or("").to_string();
+            }
+            _ => log::warn!("No path header found!"), 
         }
 
-        self.set_http_response_header("content-length", None);
+        self.set_http_request_header("content-length", None);
         Action::Continue
     }
 
     fn on_http_request_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
         log::warn!("executing on_http_request_body");
-        if !end_of_stream {
-            return Action::Pause;
-        }
+        log::warn!("Context id #{} and path is {}.", self.context_id, self.method);
+        // if !end_of_stream {
+        //     return Action::Pause;
+        // }
 
         // Replace the message body if it contains the text "secret".
         // Since we returned "Pause" previuously, this will return the whole body.
@@ -57,9 +72,13 @@ impl HttpContext for Logging {
 
     fn on_http_response_headers(&mut self, _num_headers: usize, end_of_stream: bool) -> Action {
         log::warn!("executing on_http_response_headers");
-        if !end_of_stream {
-            return Action::Continue;
-        }
+        // if !end_of_stream {
+        //     return Action::Continue;
+        // }
+
+        // for (name, value) in &self.get_http_response_headers() {
+        //     log::warn!("#{} -> {}: {}", self.context_id, name, value);
+        // }
 
         Action::Continue
     }
