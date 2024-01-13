@@ -18,6 +18,7 @@ type Ping struct {
 	port int
 	ping.PingServiceServer
 	pongClient      pong.PongServiceClient
+	request_count int
 }
 
 // NewPing returns a new server
@@ -60,6 +61,8 @@ func (s *Ping) Ping(ctx context.Context, req *ping.PingRequest) (*ping.PingRespo
 func (s *Ping) PingEcho(ctx context.Context, req *ping.PingEchoRequest) (*ping.PingEchoResponse, error) {
 
 	body := req.GetBody()
+	s.request_count += 1
+	log.Printf("PingEcho get a request (# %d) with body: %s", s.request_count, body)
 	pingEchoResponse := &ping.PingEchoResponse{Body: body}
 	// time.Sleep(300 * time.Microsecond)
 

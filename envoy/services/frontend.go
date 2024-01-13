@@ -64,6 +64,7 @@ func (s *Frontend) pingEchoHandler(w http.ResponseWriter, r *http.Request) {
 	reply, err := s.pingClient.PingEcho(ctx, req)
 
 	if err != nil {
+		log.Printf("pingEchoHandler got an error in response: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
