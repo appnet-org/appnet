@@ -14,7 +14,7 @@ pub mod ping {
 
 // A local cache 
 lazy_static! {
-    static ref REQUEST_CACHE: RwLock<HashMap<String, i32>> = RwLock::new(HashMap::new());
+    static ref REQUEST_CACHE: RwLock<HashMap<String, String>> = RwLock::new(HashMap::new());
 }
 
 #[no_mangle]
@@ -43,14 +43,50 @@ impl RootContext for CacheGlobalWeakRoot {
     }
 
     fn on_tick(&mut self) {
-        log::warn!("executing on_tick");
-        // TODO(XZ): add logic to synchronize state here.
+        log::warn!("executing on_tick!");
+
+        // Acquiring a read lock
+        let read_guard = REQUEST_CACHE.read().unwrap();
+
+        // Start building the MSET path
+        let mut mset_path = String::from("/MSET/");
+        
+        // Concatenate all key-value pairs into the MSET path
+        for (key, value) in read_guard.iter() {
+            log::warn!("Adding Key: {}, Value: {} to MSET call", key, value);
+            mset_path.push_str(&format!("{}/{}/", key, value));
+        }
+        // Trim the trailing slash
+        let mset_path = mset_path.trim_end_matches('/');
+        
         self.dispatch_http_call(
             "webdis-service", // or your service name
             vec![
                 (":method", "GET"),
-                (":path", &format!("/SET/redis/cached")),
-                // (":path", "/SET/redis/hello"),
+                (":path", &mset_path),
+                (":authority", "webdis-service"), // Replace with the appropriate authority if needed
+            ],
+            None,
+            vec![],
+            Duration::from_secs(5),
+        )
+        .unwrap();
+
+        let mut mget_path = String::from("/MGET/");
+        
+        // Concatenate all key-value pairs into the MSET path
+        for (key, _value) in read_guard.iter() {
+            log::warn!("Adding Key: {} to MGET call", key);
+            mget_path.push_str(&format!("{}/", key));
+        }
+        // Trim the trailing slash
+        let mget_path = mget_path.trim_end_matches('/');
+        
+        self.dispatch_http_call(
+            "webdis-service", // or your service name
+            vec![
+                (":method", "GET"),
+                (":path", &mget_path),
                 (":authority", "webdis-service"), // Replace with the appropriate authority if needed
             ],
             None,
@@ -73,14 +109,8 @@ impl Context for CacheGlobalWeak {
                     // Check if the GET field is not null
                     if json.get("GET").is_some() && !json["GET"].is_null() {
                         log::warn!("Cache hit!!!");
-                        // Run this code if the GET result is not null
-                        self.send_http_response(
-                            200,
-                            vec![
-                                ("grpc-status", "1"),
-                            ],
-                            None,
-                        );
+                        let mut map = REQUEST_CACHE.write().unwrap();
+                        map.insert("testing".to_string(), "cached".to_string());
                     } else {
                         log::warn!("Cache miss!!!");
                     }
@@ -94,7 +124,6 @@ impl Context for CacheGlobalWeak {
             self.resume_http_request();
         }
     }
-    
 }
 
 impl HttpContext for CacheGlobalWeak {
@@ -168,7 +197,7 @@ impl HttpContext for CacheGlobalWeak {
                 Ok(req) => {
                     log::warn!("Inserting request to local cache. Body : {}", req.body);
                     let mut map = REQUEST_CACHE.write().unwrap();
-                    map.insert(req.body, 1);
+                    map.insert(req.body, "cached".to_string());
                 }
                 Err(e) => log::warn!("decode error: {}", e),
             }

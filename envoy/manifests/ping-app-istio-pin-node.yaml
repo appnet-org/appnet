@@ -40,7 +40,7 @@ spec:
         service.istio.io/canonical-revision: latest
       name: frontend
     spec:
-      nodeName: h2.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
+      nodeName: h2.hotel.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
       containers:
       - args:
         - frontend
@@ -191,6 +191,8 @@ spec:
           name: redis-wasm
         - mountPath: /etc/cache_global_strong.wasm
           name: cache-global-strong-wasm
+        - mountPath: /etc/cache_global_weak.wasm
+          name: cache-global-weak-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -235,6 +237,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: cache-global-weak-wasm
+        hostPath:
+          path: /tmp/cache_global_weak.wasm
+          type: File
       - name: cache-global-strong-wasm
         hostPath:
           path: /tmp/cache_global_strong.wasm
@@ -362,7 +368,7 @@ spec:
         service.istio.io/canonical-revision: latest
       name: ping
     spec:
-      nodeName: h3.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
+      nodeName: h2.hotel.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
       containers:
       - args:
         - ping
@@ -513,6 +519,8 @@ spec:
           name: redis-wasm
         - mountPath: /etc/cache_global_strong.wasm
           name: cache-global-strong-wasm
+        - mountPath: /etc/cache_global_weak.wasm
+          name: cache-global-weak-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -557,6 +565,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: cache-global-weak-wasm
+        hostPath:
+          path: /tmp/cache_global_weak.wasm
+          type: File
       - name: cache-global-strong-wasm
         hostPath:
           path: /tmp/cache_global_strong.wasm
@@ -684,7 +696,7 @@ spec:
         service.istio.io/canonical-revision: latest
       name: pong
     spec:
-      nodeName: h3.xzhu.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
+      nodeName: h2.hotel.meshbench-pg0.clemson.cloudlab.us # Change Placement if needed
       containers:
       - args:
         - pong
@@ -806,6 +818,36 @@ spec:
           name: istio-token
         - mountPath: /etc/istio/pod
           name: istio-podinfo
+        - mountPath: /etc/acl.wasm
+          name: acl-wasm
+        - mountPath: /etc/logging.wasm
+          name: logging-wasm
+        - mountPath: /etc/mutation.wasm
+          name: mutation-wasm
+        - mountPath: /etc/fault.wasm
+          name: fault-wasm
+        - mountPath: /etc/metrics.wasm
+          name: metrics-wasm
+        - mountPath: /etc/admission_control.wasm
+          name: admission-control-wasm
+        - mountPath: /etc/ratelimit.wasm
+          name: ratelimit-wasm
+        - mountPath: /etc/cache.wasm
+          name: cache-wasm
+        - mountPath: /etc/decompression.wasm
+          name: decompression-wasm
+        - mountPath: /etc/compression.wasm
+          name: compression-wasm
+        - mountPath: /etc/loadbalance.wasm
+          name: loadbalance-wasm
+        - mountPath: /etc/auth.wasm
+          name: auth-wasm
+        - mountPath: /etc/redis.wasm
+          name: redis-wasm
+        - mountPath: /etc/cache_global_strong.wasm
+          name: cache-global-strong-wasm
+        - mountPath: /etc/cache_global_weak.wasm
+          name: cache-global-weak-wasm
       initContainers:
       - args:
         - istio-iptables
@@ -849,6 +891,66 @@ spec:
           runAsNonRoot: false
           runAsUser: 0
       volumes:
+      - name: cache-global-weak-wasm
+        hostPath:
+          path: /tmp/cache_global_weak.wasm
+          type: File
+      - name: cache-global-strong-wasm
+        hostPath:
+          path: /tmp/cache_global_strong.wasm
+          type: File
+      - name: redis-wasm
+        hostPath:
+          path: /tmp/redis.wasm
+          type: File
+      - name: auth-wasm
+        hostPath:
+          path: /tmp/auth.wasm
+          type: File
+      - name: loadbalance-wasm
+        hostPath:
+          path: /tmp/loadbalance.wasm
+          type: File
+      - name: decompression-wasm
+        hostPath:
+          path: /tmp/decompression.wasm
+          type: File
+      - name: compression-wasm
+        hostPath:
+          path: /tmp/compression.wasm
+          type: File
+      - name: cache-wasm
+        hostPath:
+          path: /tmp/cache.wasm
+          type: File
+      - name: ratelimit-wasm
+        hostPath:
+          path: /tmp/ratelimit.wasm
+          type: File
+      - name: admission-control-wasm
+        hostPath:
+          path: /tmp/admission_control.wasm
+          type: File
+      - name: metrics-wasm
+        hostPath:
+          path: /tmp/metrics.wasm
+          type: File
+      - name: fault-wasm
+        hostPath:
+          path: /tmp/fault.wasm
+          type: File
+      - name: acl-wasm
+        hostPath:
+          path: /tmp/acl.wasm
+          type: File
+      - name: logging-wasm
+        hostPath:
+          path: /tmp/logging.wasm
+          type: File
+      - name: mutation-wasm
+        hostPath:
+          path: /tmp/mutation.wasm
+          type: File
       - name: workload-socket
       - name: credential-socket
       - name: workload-certs
