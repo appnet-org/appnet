@@ -31,11 +31,14 @@ type AdnconfigSpec struct {
 	// Foo is an example field of Adnconfig. Edit adnconfig_types.go to remove/update
 	// Type       string `json:"type"`
 	// +kubebuilder:default:=true
-	Safe              bool   `json:"safe,omitempty" default:"true"`
-	UpstreamService   string `json:"upstreamService"`
-	UpstreamChain     string `json:"upstreamChain"`
-	DownstreamService string `json:"downstreamService"`
-	DownstreamChain   string `json:"downstreamChain"`
+	Safe          bool   `json:"safe,omitempty" default:"true"`
+	ClientService string `json:"clientService"`
+	ServerService string `json:"serverService"`
+	ClientChain   string `json:"clientChain"`
+	ServerChain   string `json:"serverChain"`
+	AnyChain      string `json:"anyChain"`
+	PairChain     string `json:"pairChain"`
+	Method        string `json:"method"`
 }
 
 // AdnconfigStatus defines the observed state of Adnconfig

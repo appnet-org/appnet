@@ -1,0 +1,12 @@
+apiVersion: api.core.adn.io/v1
+kind: Adnconfig
+metadata:
+  name: adnconfig-sample1
+spec:
+  clientService: "rpc_echo_client"
+  serverService: "rpc_echo_server"
+  method: "PingEcho"
+  clientChain: "fault_injection()->logging()"
+  serverChain: "acl()"
+  anyChain: "metrics()"
+  pairChain: "encrypt()->decrypt()"
