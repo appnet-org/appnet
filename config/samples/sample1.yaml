@@ -10,3 +10,4 @@ spec:
   serverChain: "acl()"
   anyChain: "metrics()"
   pairChain: "encrypt()->decrypt()"
+  proto: "ping.proto"

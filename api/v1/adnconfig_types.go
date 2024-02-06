@@ -39,6 +39,7 @@ type AdnconfigSpec struct {
 	AnyChain      string `json:"anyChain"`
 	PairChain     string `json:"pairChain"`
 	Method        string `json:"method"`
+	Proto         string `json:"proto"`
 }
 
 // AdnconfigStatus defines the observed state of Adnconfig

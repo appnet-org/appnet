@@ -18,20 +18,14 @@ package controllers
 
 import (
 	"context"
-	// "os"
 	"os/exec"
 	"strconv"
 	"strings"
-	// "fmt"
-	// "time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	// dockerTypes "github.com/docker/docker/api/types"
-	// dockerClient "github.com/docker/docker/client"
 
 	apiv1 "github.com/UWNetworksLab/app-defined-networks/api/v1"
 )
@@ -115,6 +109,7 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	any_elements := strings.Split(config.Spec.AnyChain, "->")
 	pair_elements := strings.Split(config.Spec.PairChain, "->")
 	method := config.Spec.Method
+	// proto := config.Spec.Proto
 
 	safe := config.Spec.Safe
 

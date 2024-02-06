@@ -45,6 +45,8 @@ spec:
                 type: string
               pairChain:
                 type: string
+              proto:
+                type: string
               safe:
                 default: true
                 description: Foo is an example field of Adnconfig. Edit adnconfig_types.go
@@ -60,6 +62,7 @@ spec:
             - clientService
             - method
             - pairChain
+            - proto
             - serverChain
             - serverService
             type: object
