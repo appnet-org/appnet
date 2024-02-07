@@ -32,12 +32,13 @@ type AdnconfigSpec struct {
 	// Type       string `json:"type"`
 	// +kubebuilder:default:=true
 	Safe          bool   `json:"safe,omitempty" default:"true"`
+	AppName       string `json:"appName"`
 	ClientService string `json:"clientService"`
 	ServerService string `json:"serverService"`
-	ClientChain   string `json:"clientChain"`
-	ServerChain   string `json:"serverChain"`
-	AnyChain      string `json:"anyChain"`
-	PairChain     string `json:"pairChain"`
+	ClientChain   string `json:"clientChain,omitempty"`
+	ServerChain   string `json:"serverChain,omitempty"`
+	AnyChain      string `json:"anyChain,omitempty"`
+	PairChain     string `json:"pairChain,omitempty"`
 	Method        string `json:"method"`
 	Proto         string `json:"proto"`
 }

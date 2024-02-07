@@ -1,7 +1,7 @@
 apiVersion: api.core.adn.io/v1
 kind: Adnconfig
 metadata:
-  name: adnconfig-sample1
+  name: adnconfig-sample2
 spec:
   appName: ping-pong-app
   clientService: frontend
@@ -10,5 +10,5 @@ spec:
   clientChain: fault_injection()->logging()
   serverChain: acl()
   anyChain: metrics()
-  pairChain: encrypt()->decrypt()
-  proto: ping.proto
+  # pairChain: encrypt()->decrypt()
+  proto: /users/xzhu/adn-compiler/examples/proto/ping.proto

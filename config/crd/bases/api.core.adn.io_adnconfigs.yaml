@@ -37,6 +37,8 @@ spec:
             properties:
               anyChain:
                 type: string
+              appName:
+                type: string
               clientChain:
                 type: string
               clientService:
@@ -57,13 +59,10 @@ spec:
               serverService:
                 type: string
             required:
-            - anyChain
-            - clientChain
+            - appName
             - clientService
             - method
-            - pairChain
             - proto
-            - serverChain
             - serverService
             type: object
           status:

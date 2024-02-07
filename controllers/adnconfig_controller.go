@@ -95,21 +95,19 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err != nil {
 		// This is for adn resource deletion
 		// l.Error(err, "unable to fetch Adnconfig")
-		// l.Info("calling remove_all_engines")
-		// l.Info("Reconciling Adnconfig")
-		// remove_all_engines(ctx, controlPlaneID)
-		// l.Info("Reconciliation finished!")
+		// TODO
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	client_service := config.Spec.ClientService
 	server_service := config.Spec.ServerService
-	client_elements := strings.Split(config.Spec.ClientChain, "->")
-	server_elements := strings.Split(config.Spec.ServerChain, "->")
-	any_elements := strings.Split(config.Spec.AnyChain, "->")
-	pair_elements := strings.Split(config.Spec.PairChain, "->")
+	client_elements := config.Spec.ClientChain
+	server_elements := config.Spec.ServerChain
+	any_elements := config.Spec.AnyChain
+	pair_elements := config.Spec.PairChain
 	method := config.Spec.Method
-	// proto := config.Spec.Proto
+	proto := config.Spec.Proto
+	app_name := config.Spec.AppName
 
 	safe := config.Spec.Safe
 
@@ -117,6 +115,10 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	l.Info("Reconciling Adnconfig", "Safe", safe, "Name", config.Name, "Namespace", config.Namespace, "RPC Method", method,
 		"Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
 		"server-side Elements", server_elements, "unconstraint Elements", any_elements, "pair Elements", pair_elements)
+
+	ConvertToADNSpec(app_name, client_service, server_service, client_elements, server_elements,
+		any_elements, pair_elements, method, proto, "config.yaml")
+
 	// l.Info("Length of upstream_elements is", len(upstream_elements))
 	// if len(upstream_elements) == 2 {
 	// 	// l.Info("calling mrpc_init_setup")

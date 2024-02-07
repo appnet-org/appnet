@@ -35,15 +35,11 @@ func removeParentheses(s string) string {
 	return s
 }
 
-func GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serverChain, anyChain, pairChain, name, method, proto, fileName string) error {
+func ConvertToADNSpec(appName, clientService, serverService, clientChain, serverChain, anyChain, pairChain, method, proto, fileName string) error {
 	clientServerTag := fmt.Sprintf("%s->%s", clientService, serverService)
-	client_elements := strings.Split(clientChain, "->")
-	server_elements := strings.Split(serverChain, "->")
-	any_elements := strings.Split(anyChain, "->")
-	pair_elements := strings.Split(pairChain, "->")
 
 	appManifest := AppManifest{
-		AppName: serverService,
+		AppName: appName,
 		AppStructure: []string{
 			clientServerTag,
 		},
@@ -51,7 +47,8 @@ func GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serve
 		Link: make(map[string][]PairElementItem),
 	}
 
-	if len(client_elements) > 0 {
+	if len(clientChain) > 0 {
+		client_elements := strings.Split(clientChain, "->")
 		for _, element := range client_elements {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
@@ -62,7 +59,8 @@ func GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serve
 		}
 	}
 
-	if len(server_elements) > 0 {
+	if len(serverChain) > 0 {
+		server_elements := strings.Split(serverChain, "->")
 		for _, element := range server_elements {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
@@ -73,7 +71,8 @@ func GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serve
 		}
 	}
 
-	if len(any_elements) > 0 {
+	if len(anyChain) > 0 {
+		any_elements := strings.Split(anyChain, "->")
 		for _, element := range any_elements {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
@@ -84,7 +83,9 @@ func GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serve
 		}
 	}
 
-	if len(pair_elements) > 0 {
+	// TODO: Update pairChain parsing logic
+	if len(pairChain) > 0 {
+		pair_elements := strings.Split(pairChain, "->")
 		for _, element := range pair_elements {
 			// Modify as needed to specify different elements for Name1 and Name2
 			appManifest.Link[clientServerTag] = append(appManifest.Link[clientServerTag], PairElementItem{
@@ -95,7 +96,7 @@ func GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serve
 			})
 		}
 	}
-	// fmt.Printf("appManifest: %v\n", appManifest)
+
 	yamlBytes, err := yaml.Marshal(&appManifest)
 	if err != nil {
 		return err
@@ -107,7 +108,6 @@ func GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serve
 	}
 	defer file.Close()
 
-	fmt.Printf("yamlBytes: %s\n", yamlBytes)
 	_, err = file.Write(yamlBytes)
 	if err != nil {
 		return err
