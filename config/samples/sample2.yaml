@@ -7,7 +7,7 @@ spec:
   clientService: frontend
   serverService: ping
   method: PingEcho
-  clientChain: fault_injection()->logging()
+  clientChain: fault()->logging()
   serverChain: acl()
   anyChain: metrics()
   # pairChain: encrypt()->decrypt()

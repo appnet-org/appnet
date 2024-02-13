@@ -5,3 +5,9 @@
 ```bash
 make generate
 ```
+
+### Run locally
+
+```bash
+make run
+```

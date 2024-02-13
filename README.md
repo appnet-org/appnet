@@ -10,7 +10,8 @@ Details are available in our [HotNets paper](https://xzhu27.me/papers/adn-hotnet
 - Kubernetes and Docker
   - Run `. ./utils/k8s_setup.sh` to install Kubernetes via kubeadm. (Note - this script is only tested on Ubuntu 20.04.)
   - You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing
-- Go (Ideally 1.19+)
+- Go (1.19+)
+- Python (3.10+)
 
 ### Install the CLI
 
