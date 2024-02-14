@@ -1,7 +1,7 @@
 #!/bin/bash
 # Move all locally build images to other nodes
 
-nodes=("h2" "h3")
+nodes=("h2")
 
 # Iterate over each node in the array
 for n in "${nodes[@]}"; do

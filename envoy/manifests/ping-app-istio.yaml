@@ -162,6 +162,8 @@ spec:
         - mountPath: /etc/istio/pod
           name: istio-podinfo
         # Add here
+        - mountPath: /etc/helloworld_go.wasm
+          name: helloworld-go-wasm
         - mountPath: /etc/acl.wasm
           name: acl-wasm
         - mountPath: /etc/logging.wasm
@@ -238,6 +240,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: helloworld-go-wasm
+        hostPath:
+          path: /tmp/helloworld_go.wasm
+          type: File
       - name: redis-wasm
         hostPath:
           path: /tmp/redis.wasm
@@ -495,6 +501,8 @@ spec:
         - mountPath: /etc/istio/pod
           name: istio-podinfo
         # Add here
+        - mountPath: /etc/helloworld_go.wasm
+          name: helloworld-go-wasm
         - mountPath: /etc/encryption.wasm
           name: encryption-wasm
         - mountPath: /etc/acl.wasm
@@ -571,6 +579,10 @@ spec:
           runAsUser: 0
       volumes:
       # Add here
+      - name: helloworld-go-wasm
+        hostPath:
+          path: /tmp/helloworld_go.wasm
+          type: File
       - name: redis-wasm
         hostPath:
           path: /tmp/redis.wasm
