@@ -1,5 +1,6 @@
-# Installing ADN
+# ADN Installation Guide
 
+Welcome to the ADN installation guide. This document provides step-by-step instructions on how to set up ADN and its dependencies.
 
 Requirements:
  - [Kubernetes](#kubernetes) (v1.28+) 
@@ -11,41 +12,55 @@ Requirements:
 
 
 ## Kubernetes
-There are multiple options to install a Kubernetes cluster, we recommend using kubeadm.
+To install a Kubernetes cluster, we recommend using kubeadm. Follow the steps below:
+
+1. Install the Control Plane:
 ```bash
-# Install the control plane
 . ./util/k8s_setup.sh
+```
 
-# Optionally, to set up the worker nodes, first run 
-. ./util/k8s_setup_worker.sh
+2. (Optional) Set Up Worker Nodes:
+ - First, prepare the worker nodes:
+ ```bash
+ . ./util/k8s_setup_worker.sh
+ ```
 
-# Then join the cluster via kubeadm join
-kubeadm join xxx # Run kubeadm token create --print-join-command on the control plane node.
+ - Then, join the cluster using kubeadm join. Run the following command on the control plane node to get the join command:
+ ```bash
+ kubeadm token create --print-join-command
+ ```
 
-# Finally, verify the installation
+3. Verify Installation:
+```bash
 kubectl version
 ```
 
-See this [page](https://kubernetes.io/docs/tasks/tools/) for other install tools (e.g., KIND or minikuube).
+For additional installation methods (e.g., KIND, Minikube), visit this [page](https://kubernetes.io/docs/tasks/tools/)
 
+We highly recommend installing [k9s](https://k9scli.io/topics/install/) for visualizing your clutser
 
 ## Istio
 
-There are two options to install istio: the sidecar mode and the ambient mode:
+Istio can be installed in either sidecar mode or ambient mode. Choose the one that best fits your requirements:
 
+- Sidecar Mode
 ```bash
-# Sidecar mode
 . ./util/istio_setup_sidecar.sh
+```
 
-# Ambient mode
+- Ambient Mode
+```bash
 . ./util/istio_setup_ambient.sh
 ```
 
+
 ## Python
 
-See this [page](https://www.python.org/downloads/) for installation instructions.
+See this [page] for installation instructions.
+To install Python, refer to the official [Python Downloads Page]((https://www.python.org/downloads/)).
 
-For convenience to install Python 3.10 on Ubuntu, run:
+
+For Ubuntu users, Python 3.10 can be installed conveniently using the following command:
 ```bash
 . ./util/python310.sh
 ```
@@ -55,13 +70,13 @@ For convenience to install Python 3.10 on Ubuntu, run:
 See this [page](https://go.dev/doc/install) for installation instructions.
 
 ## Rust
-
+Install Rust by running the following command:
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ## Protoc
-
+Install the Protocol Buffers Compiler and the necessary Go plugins with these commands:
 ```bash
 sudo apt -y install protobuf-compiler
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
