@@ -6,12 +6,8 @@ Control plane for Application Defined Networks (ADN).
 
 Details are available in our [HotNets paper](https://xzhu27.me/papers/adn-hotnets2023.pdf) and [talk](https://www.youtube.com/watch?v=hJobLIq1Bmk)
 
-## Requirements
-- Kubernetes and Docker
-  - Run `. ./utils/k8s_setup.sh` to install Kubernetes via kubeadm. (Note - this script is only tested on Ubuntu 20.04.)
-  - You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing
-- Go (1.19+)
-- Python (3.10+)
+## Preparation
+See INSTALL.md for installation preparations.
 
 ### Install the CLI
 

@@ -9,6 +9,7 @@ then
 
     echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
     source ~/.bashrc
+    rm go1.20.linux-amd64.tar.gz
 fi
 
 set -e
@@ -36,30 +37,12 @@ echo "adnctl was successfully installed 🎉🎉🎉"
 echo ""
 
 
-echo "Installing protoc"
-sudo apt -y install protobuf-compiler
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+# echo "Installing protoc"
+# sudo apt -y install protobuf-compiler
+# go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+# go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
-echo "Installing Rust"
-curl https://sh.rustup.rs -sSf | sh -s -- -y
-
-# Install wrk and wrk2
-cd $ADN_DIR
-sudo apt-get install luarocks -y
-sudo luarocks install luasocket
-
-git clone https://github.com/wg/wrk.git
-cd wrk
-make -j $(nproc)
-
-
-cd $ADN_DIR
-sudo apt-get install libssl-dev
-sudo apt-get install libz-dev
-
-git clone https://github.com/giltene/wrk2.git
-cd wrk2
-make -j $(nproc)
+# echo "Installing Rust"
+# curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 set +e

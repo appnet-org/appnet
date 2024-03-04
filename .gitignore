@@ -20,6 +20,6 @@ Cargo.lock
 
 wrk/
 wrk2/
-istio-1.20.1/
+istio*/
 
 config.yaml
