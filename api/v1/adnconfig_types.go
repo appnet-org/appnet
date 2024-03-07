@@ -20,8 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+type ChainElement struct {
+	Name       string            `json:"name"`
+	File       string            `json:"file"`
+	Parameters map[string]string `json:"parameters,omitempty"`
+}
 
 // AdnconfigSpec defines the desired state of Adnconfig
 type AdnconfigSpec struct {
@@ -31,16 +36,17 @@ type AdnconfigSpec struct {
 	// Foo is an example field of Adnconfig. Edit adnconfig_types.go to remove/update
 	// Type       string `json:"type"`
 	// +kubebuilder:default:=true
-	Safe          bool   `json:"safe,omitempty" default:"true"`
-	AppName       string `json:"appName"`
-	ClientService string `json:"clientService"`
-	ServerService string `json:"serverService"`
-	ClientChain   string `json:"clientChain,omitempty"`
-	ServerChain   string `json:"serverChain,omitempty"`
-	AnyChain      string `json:"anyChain,omitempty"`
-	PairChain     string `json:"pairChain,omitempty"`
-	Method        string `json:"method"`
-	Proto         string `json:"proto"`
+	Safe            bool           `json:"safe,omitempty" default:"true"`
+	AppName         string         `json:"appName"`
+	AppManifestFile string         `json:"appManifestFile"`
+	ClientService   string         `json:"clientService"`
+	ServerService   string         `json:"serverService"`
+	ClientChain     []ChainElement `json:"clientChain,omitempty"`
+	ServerChain     []ChainElement `json:"serverChain,omitempty"`
+	AnyChain        []ChainElement `json:"anyChain,omitempty"`
+	PairChain       []ChainElement `json:"pairChain,omitempty"`
+	Method          string         `json:"method"`
+	Proto           string         `json:"proto"`
 }
 
 // AdnconfigStatus defines the observed state of Adnconfig

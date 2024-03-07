@@ -1,0 +1,13 @@
+apiVersion: api.core.adn.io/v1
+kind: Adnconfig
+metadata:
+  name: adnconfig-hotel
+spec:
+  appName: hotel
+  clientService: frontend
+  serverService: reservation
+  method: MakeReservation
+  clientChain: fault()->logging()
+  serverChain: acl()
+  anyChain: metrics()
+  proto: /users/xzhu/adn-compiler/examples/proto/reservation.proto

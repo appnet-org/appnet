@@ -112,6 +112,7 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	method := config.Spec.Method
 	proto := config.Spec.Proto
 	app_name := config.Spec.AppName
+	app_manifest_file := config.Spec.AppManifestFile
 
 	safe := config.Spec.Safe
 
@@ -120,8 +121,8 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		"Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
 		"server-side Elements", server_elements, "unconstraint Elements", any_elements, "pair Elements", pair_elements)
 
-	ConvertToADNSpec(app_name, client_service, server_service, client_elements, server_elements,
-		any_elements, pair_elements, method, proto, "config.yaml")
+	ConvertToADNSpec(app_name, app_manifest_file, client_service, server_service, method, proto, "config.yaml", client_elements, server_elements,
+		any_elements, pair_elements)
 
 	usr, err := user.Current()
 	if err != nil {
@@ -130,7 +131,7 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 	compilerDir := filepath.Join(usr.HomeDir, "adn-compiler/compiler")
 
-	compile_cmd := exec.Command("python3.10", filepath.Join(compilerDir, "main.py"), "--spec", "config.yaml", "--backend", "envoy", "--opt_level", "weak")
+	compile_cmd := exec.Command("python3.10", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")
 	compile_output, compile_err := compile_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
@@ -141,7 +142,7 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	l.Info("All elements compiled successfully - deploying to envoy")
 
-	kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP_deploy"), "APP", app_name))
+	kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
 	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
 
 	// Check if there was an error running the command

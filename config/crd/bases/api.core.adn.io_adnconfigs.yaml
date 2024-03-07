@@ -36,17 +36,61 @@ spec:
             description: AdnconfigSpec defines the desired state of Adnconfig
             properties:
               anyChain:
+                items:
+                  properties:
+                    file:
+                      type: string
+                    name:
+                      type: string
+                    parameters:
+                      additionalProperties:
+                        type: string
+                      type: object
+                  required:
+                  - file
+                  - name
+                  type: object
+                type: array
+              appManifestFile:
                 type: string
               appName:
                 type: string
               clientChain:
-                type: string
+                items:
+                  properties:
+                    file:
+                      type: string
+                    name:
+                      type: string
+                    parameters:
+                      additionalProperties:
+                        type: string
+                      type: object
+                  required:
+                  - file
+                  - name
+                  type: object
+                type: array
               clientService:
                 type: string
               method:
                 type: string
               pairChain:
-                type: string
+                items:
+                  properties:
+                    file:
+                      type: string
+                    name:
+                      type: string
+                    parameters:
+                      additionalProperties:
+                        type: string
+                      type: object
+                  required:
+                  - file
+                  - name
+                  type: object
+                type: array
               proto:
                 type: string
               safe:
@@ -55,10 +99,25 @@ spec:
                   to remove/update Type       string `json:"type"`
                 type: boolean
               serverChain:
-                type: string
+                items:
+                  properties:
+                    file:
+                      type: string
+                    name:
+                      type: string
+                    parameters:
+                      additionalProperties:
+                        type: string
+                      type: object
+                  required:
+                  - file
+                  - name
+                  type: object
+                type: array
               serverService:
                 type: string
             required:
+            - appManifestFile
             - appName
             - clientService
             - method

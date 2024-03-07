@@ -2,21 +2,24 @@ package controllers
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"os"
-	"strings"
+
+	apiv1 "github.com/UWNetworksLab/app-defined-networks/api/v1"
+	"gopkg.in/yaml.v2"
 )
 
 type AppManifest struct {
-	AppName      string                       `yaml:"app_name"`
-	AppStructure []string                     `yaml:"app_structure"`
-	Edge         map[string][]EdgeElementItem `yaml:"edge"`
-	Link         map[string][]PairElementItem `yaml:"link"`
+	AppName         string                       `yaml:"app_name"`
+	AppManifestFile string                       `yaml:"app_manifest"`
+	AppStructure    []string                     `yaml:"app_structure"`
+	Edge            map[string][]EdgeElementItem `yaml:"edge"`
+	Link            map[string][]PairElementItem `yaml:"link"`
 }
 
 type EdgeElementItem struct {
 	Method   string `yaml:"method"`
 	Name     string `yaml:"name"`
+	Path     string `yaml:"path"`
 	Position string `yaml:"position"`
 	Proto    string `yaml:"proto"`
 }
@@ -29,17 +32,12 @@ type PairElementItem struct {
 	Proto    string `yaml:"proto"`
 }
 
-func removeParentheses(s string) string {
-	s = strings.Replace(s, "(", "", -1)
-	s = strings.Replace(s, ")", "", -1)
-	return s
-}
-
-func ConvertToADNSpec(appName, clientService, serverService, clientChain, serverChain, anyChain, pairChain, method, proto, fileName string) error {
+func ConvertToADNSpec(appName, appManifestFile, clientService, serverService, method, proto, fileName string, clientChain, serverChain, anyChain, pairChain []apiv1.ChainElement) error {
 	clientServerTag := fmt.Sprintf("%s->%s", clientService, serverService)
 
 	appManifest := AppManifest{
-		AppName: appName,
+		AppName:         appName,
+		AppManifestFile: appManifestFile,
 		AppStructure: []string{
 			clientServerTag,
 		},
@@ -48,54 +46,54 @@ func ConvertToADNSpec(appName, clientService, serverService, clientChain, server
 	}
 
 	if len(clientChain) > 0 {
-		client_elements := strings.Split(clientChain, "->")
-		for _, element := range client_elements {
+		for _, element := range clientChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
-				Name:     removeParentheses(element),
+				Name:     element.Name,
 				Position: "C",
 				Proto:    proto,
+				Path:     element.File,
 			})
 		}
 	}
 
 	if len(serverChain) > 0 {
-		server_elements := strings.Split(serverChain, "->")
-		for _, element := range server_elements {
+		for _, element := range serverChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
-				Name:     removeParentheses(element),
+				Name:     element.Name,
 				Position: "S",
 				Proto:    proto,
+				Path:     element.File,
 			})
 		}
 	}
 
 	if len(anyChain) > 0 {
-		any_elements := strings.Split(anyChain, "->")
-		for _, element := range any_elements {
+		for _, element := range anyChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
-				Name:     removeParentheses(element),
+				Name:     element.Name,
 				Position: "C/S",
 				Proto:    proto,
+				Path:     element.File,
 			})
 		}
 	}
 
-	// TODO: Update pairChain parsing logic
-	if len(pairChain) > 0 {
-		pair_elements := strings.Split(pairChain, "->")
-		for _, element := range pair_elements {
-			// Modify as needed to specify different elements for Name1 and Name2
-			appManifest.Link[clientServerTag] = append(appManifest.Link[clientServerTag], PairElementItem{
-				Method: method,
-				Name1:  removeParentheses(element),
-				Name2:  removeParentheses(element), // Modify as needed
-				Proto:  proto,
-			})
-		}
-	}
+	// // TODO: Update pairChain parsing logic
+	// if len(pairChain) > 0 {
+	// 	pair_elements := strings.Split(pairChain, "->")
+	// 	for _, element := range pair_elements {
+	// 		// Modify as needed to specify different elements for Name1 and Name2
+	// 		appManifest.Link[clientServerTag] = append(appManifest.Link[clientServerTag], PairElementItem{
+	// 			Method: method,
+	// 			Name1:  removeParentheses(element),
+	// 			Name2:  removeParentheses(element), // Modify as needed
+	// 			Proto:  proto,
+	// 		})
+	// 	}
+	// }
 
 	yamlBytes, err := yaml.Marshal(&appManifest)
 	if err != nil {
