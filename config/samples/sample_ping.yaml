@@ -4,23 +4,23 @@ metadata:
   name: adnconfig-sample-ping
 spec:
   appName: ping-pong-app
-  appManifestFile: /users/xzhu/adn-compiler/examples/applications/ping-pong-app/ping-pong-app.yaml
+  appManifestFile: /users/xzhu/adn-controller/compiler/examples/applications/ping-pong-app/ping-pong-app.yaml
   clientService: frontend
   serverService: ping
   method: PingEcho
   clientChain:
     - name: fault
-      file: /users/xzhu/adn-compiler/examples/elements/ping_elements/fault.adn
+      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/fault.adn
       parameters:
         probability: "0.02"
     - name: logging
-      file: /users/xzhu/adn-compiler/examples/elements/ping_elements/logging.adn
+      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/logging.adn
   serverChain:
     - name: acl
-      file: /users/xzhu/adn-compiler/examples/elements/ping_elements/acl.adn
+      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/acl.adn
       parameters:
         body: apple
   anyChain:
     - name: metrics
-      file: /users/xzhu/adn-compiler/examples/elements/ping_elements/metrics.adn
-  proto: /users/xzhu/adn-compiler/examples/proto/ping.proto
+      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/metrics.adn
+  proto: /users/xzhu/adn-controller/compiler/examples/proto/ping.proto

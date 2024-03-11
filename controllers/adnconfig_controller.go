@@ -18,7 +18,9 @@ package controllers
 
 import (
 	"context"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -127,27 +129,27 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// 	l.Info("Reconciling Adnconfig", "Error getting current user:", err)
 	// 	return ctrl.Result{}, client.IgnoreNotFound(err)
 	// }
-	// compilerDir := filepath.Join(usr.HomeDir, "adn-compiler/compiler")
+	compilerDir := filepath.Join(os.Getenv("ADN_DIR"), "compiler/compiler")
 
-	// compile_cmd := exec.Command("python3.10", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")
-	// compile_output, compile_err := compile_cmd.CombinedOutput()
+	compile_cmd := exec.Command("python3.10", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")
+	compile_output, compile_err := compile_cmd.CombinedOutput()
 
-	// // Check if there was an error running the command
-	// if compile_err != nil {
-	// 	l.Info("Reconciling Adnconfig", "Error running compiler: %s\nOutput:\n%s\n", compile_err, string(compile_output))
-	// 	return ctrl.Result{}, client.IgnoreNotFound(err)
-	// }
+	// Check if there was an error running the command
+	if compile_err != nil {
+		l.Info("Reconciling Adnconfig", "Error running compiler: %s\nOutput:\n%s\n", compile_err, string(compile_output))
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-	// l.Info("All elements compiled successfully - deploying to envoy")
+	l.Info("All elements compiled successfully - deploying to envoy")
 
-	// kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
-	// kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
+	kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
+	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
 
-	// // Check if there was an error running the command
-	// if kubectl_err != nil {
-	// 	l.Info("Reconciling Adnconfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
-	// 	return ctrl.Result{}, client.IgnoreNotFound(err)
-	// }
+	// Check if there was an error running the command
+	if kubectl_err != nil {
+		l.Info("Reconciling Adnconfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
 	l.Info("All elemenets deployed - Reconciliation finished!")
 	return ctrl.Result{}, nil
