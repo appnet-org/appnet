@@ -1,0 +1,32 @@
+internal
+{
+	acl: Map<string, string>
+}
+
+fn init() {
+	acl.set('test', 'No');
+}
+
+fn req(rpc_req) {
+	match (acl.get(rpc_req.get('body'))) {
+		Some(permission) => {
+			match (permission) {
+				'Yes' => {
+					send(rpc_req, NET);
+				}
+				'No' => {
+					send(err('acl'), APP);
+				}
+				_ => {
+				}
+			};
+		}
+		None => {
+			send(rpc_req, NET);
+		}
+	};
+}
+
+fn resp(rpc_resp) {
+    send(rpc_resp, APP);
+}

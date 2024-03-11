@@ -1,0 +1,18 @@
+internal
+{
+	record_req: Vec<string>
+	record_resp: Vec<string>
+}
+
+fn init() {
+}
+
+fn req(rpc_req) {
+	record_req.set(record_req.size(), rpc_req.get('body'));
+	send(rpc_req, NET);
+}
+
+fn resp(rpc_resp) {
+	record_resp.set(record_resp.size(), rpc_resp.get('body'));
+	send(rpc_resp, APP);
+}

@@ -1,0 +1,21 @@
+internal {
+	prob: float
+}
+fn init(prob) {
+	prob := 0.95;
+}
+
+fn req(rpc_req) {
+	match(randomf(0,1) < prob) {
+		true => {
+			send(rpc_req, NET);
+		}
+		false => {
+			send(err('fault_injected'), APP);
+		}
+	};
+}
+
+fn resp(rpc_resp) {
+    send(rpc_resp, APP);
+}
