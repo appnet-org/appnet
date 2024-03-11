@@ -1,4 +1,4 @@
-# ADN Installation Guide
+# Installation Guide
 
 Welcome to the ADN installation guide. This document provides step-by-step instructions on how to set up ADN and its dependencies.
 
@@ -59,6 +59,8 @@ To install a Kubernetes cluster, we recommend using kubeadm. Follow the steps be
  kubeadm token create --print-join-command
  ```
 
+Note: if you plan to use a multi-node cluster, make sure you can ssh other nodes from the control plane node.
+
 3. Verify Installation:
 ```bash
 kubectl version
@@ -66,7 +68,7 @@ kubectl version
 
 For additional installation methods (e.g., KIND, Minikube), visit this [page](https://kubernetes.io/docs/tasks/tools/)
 
-We highly recommend installing [k9s](https://k9scli.io/topics/install/) for visualizing your clutser
+(Optional) We highly recommend installing [k9s](https://k9scli.io/topics/install/) for visualizing your clutser
 
 ### Istio
 
