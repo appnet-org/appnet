@@ -36,6 +36,8 @@ cd $ADN_DIR
 echo "adnctl was successfully installed 🎉🎉🎉"
 echo ""
 
+echo "Installing Rust Dependencies"
+cargo install cargo-wasi
 
 # echo "Installing protoc"
 # sudo apt -y install protobuf-compiler

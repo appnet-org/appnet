@@ -7,7 +7,20 @@ spec:
   clientService: frontend
   serverService: reservation
   method: MakeReservation
-  clientChain: fault()->logging()
-  serverChain: acl()
-  anyChain: metrics()
+  appManifestFile: /users/xzhu/adn-compiler/examples/applications/hotel_reservation/hotel_reservation.yaml
+  clientChain:
+    - name: fault
+      file: /users/xzhu/adn-compiler/examples/elements/reservation_elements/fault.adn
+      parameters:
+        probability: "0.02"
+    - name: logging
+      file: /users/xzhu/adn-compiler/examples/elements/reservation_elements/logging.adn
+  serverChain:
+    - name: acl
+      file: /users/xzhu/adn-compiler/examples/elements/reservation_elements/acl.adn
+      parameters:
+        body: apple
+  anyChain:
+    - name: metrics
+      file: /users/xzhu/adn-compiler/examples/elements/reservation_elements/metrics.adn
   proto: /users/xzhu/adn-compiler/examples/proto/reservation.proto
