@@ -124,11 +124,6 @@ func (r *AdnconfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	ConvertToADNSpec(app_name, app_manifest_file, client_service, server_service, method, proto, "config.yaml", client_elements, server_elements,
 		any_elements, pair_elements)
 
-	// usr, err := user.Current()
-	// if err != nil {
-	// 	l.Info("Reconciling Adnconfig", "Error getting current user:", err)
-	// 	return ctrl.Result{}, client.IgnoreNotFound(err)
-	// }
 	compilerDir := filepath.Join(os.Getenv("ADN_DIR"), "compiler/compiler")
 
 	compile_cmd := exec.Command("python3.10", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")

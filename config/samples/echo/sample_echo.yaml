@@ -1,26 +1,26 @@
 apiVersion: api.core.adn.io/v1
 kind: Adnconfig
 metadata:
-  name: adnconfig-hotel
+  name: sample-echo
 spec:
-  appName: hotel
+  appName: echo
   clientService: frontend
-  serverService: reservation
-  method: MakeReservation
-  appManifestFile: /users/xzhu/adn-controller/compiler/examples/applications/hotel_reservation/hotel_reservation.yaml
+  serverService: server
+  method: echo
+  appManifestFile: /users/xzhu/adn-controller/config/samples/echo/echo.yaml
   clientChain:
     - name: fault
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/fault.adn
+      file: /users/xzhu/adn-controller/config/samples/echo/fault.adn
       parameters:
         probability: "0.02"
     - name: logging
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/logging.adn
+      file: /users/xzhu/adn-controller/config/samples/echo/logging.adn
   serverChain:
     - name: acl
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/acl.adn
+      file: /users/xzhu/adn-controller/config/samples/echo/acl.adn
       parameters:
         body: apple
   anyChain:
     - name: metrics
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/metrics.adn
-  proto: /users/xzhu/adn-controller/compiler/examples/proto/reservation.proto
+      file: /users/xzhu/adn-controller/config/samples/echo/metrics.adn
+  proto: /users/xzhu/adn-controller/config/samples/echo/echo.proto

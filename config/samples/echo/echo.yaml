@@ -1,63 +1,67 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-frontend
+  name: frontend
+  labels:
+    app: frontend
 spec:
   clusterIP: 10.96.88.88
   ports:
-  - name: echo-frontend
+  - name: frontend
     port: 80
     targetPort: 8080
   selector:
-    app: echo-frontend
+    app: frontend
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: echo-frontend
+  name: frontend
 spec:
   replicas: 1
   template:
     metadata:
-      name: echo-frontend
+      name: frontend
       labels:
-        app: echo-frontend
+        app: frontend
     spec:
       containers:
       - image: xzhu0027/echo-frontend-grpc
-        name: echo-frontend-grpc
+        name: frontend-grpc
   selector:
     matchLabels:
-      app: echo-frontend
+      app: frontend
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-server
+  name: server
+  labels:
+    app: server
 spec:
   clusterIP: 10.96.77.76
   ports:
-  - name: echo-server
+  - name: server
     port: 9000
     targetPort: 9000
   selector:
-    app: echo-server
+    app: server
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: echo-server
+  name: server
 spec:
   replicas: 1
   template:
     metadata:
-      name: echo-server
+      name: server
       labels:
-        app: echo-server
+        app: server
     spec:
       containers:
       - image: xzhu0027/echo-server-grpc
-        name: echo-server-grpc
+        name: server-grpc
   selector:
     matchLabels:
-      app: echo-server
+      app: server

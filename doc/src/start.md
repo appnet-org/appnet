@@ -56,5 +56,13 @@ Finally, you can see elements are running:
 # TODO
 ```
 
+# Clean Up
+```bash
+kubectl delete all,pvc,pv,envoyfilters,adnconfigs --all
+```
+
 # Next Steps
 [TODO]
+
+Learn the ADN grammar.
+How does ADN optimize chain.
