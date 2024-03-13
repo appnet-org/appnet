@@ -15,7 +15,7 @@ fn req(rpc_req) {
 					send(rpc_req, NET);
 				}
 				'No' => {
-					send(err('firewall'), APP);
+					send(err('blocked by firewall'), APP);
 				}
 				_ => {
 				}

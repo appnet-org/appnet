@@ -11,7 +11,7 @@ fn req(rpc_req) {
 			send(rpc_req, NET);
 		}
 		false => {
-			send(err('fault_injected'), APP);
+			send(err('fault injected'), APP);
 		}
 	};
 }
