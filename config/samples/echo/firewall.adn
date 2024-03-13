@@ -1,21 +1,21 @@
 internal
 {
-	acl: Map<string, string>
+	firewall: Map<string, string>
 }
 
 fn init() {
-	acl.set('test', 'No');
+	firewall.set('test', 'No');
 }
 
 fn req(rpc_req) {
-	match (acl.get(rpc_req.get('body'))) {
+	match (firewall.get(rpc_req.get('body'))) {
 		Some(permission) => {
 			match (permission) {
 				'Yes' => {
 					send(rpc_req, NET);
 				}
 				'No' => {
-					send(err('acl'), APP);
+					send(err('firewall'), APP);
 				}
 				_ => {
 				}

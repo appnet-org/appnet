@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc"
 
 	// "github.com/UWNetworksLab/adn-controller/grpc/interceptors/null"
-	"github.com/UWNetworksLab/adn-controller/grpc/interceptors/acl"
 
 	echo "github.com/UWNetworksLab/adn-controller/grpc/pb"
 )
@@ -23,17 +22,16 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	// conn, err := grpc.Dial("echo-server:9000", grpc.WithInsecure())
 
 	// nullOpts := []null.CallOption{null.WithMessage("Null"),}
-	aclOpts := []acl.CallOption{acl.WithContent("client"),}
-
+	// aclOpts := []acl.CallOption{acl.WithContent("client")}
 
 	conn, err := grpc.Dial(
-			"echo-server:9000", 
-			grpc.WithInsecure(),
-			grpc.WithChainUnaryInterceptor(
-				// null.NullClient(nullOpts...),
-				acl.ACLClient(aclOpts...),
-			),
-			)	
+		"server:9000",
+		grpc.WithInsecure(),
+	// grpc.WithChainUnaryInterceptor(
+	// 	// null.NullClient(nullOpts...),
+	// 	acl.ACLClient(aclOpts...),
+	// ),
+	)
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
 	}
