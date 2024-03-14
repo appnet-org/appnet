@@ -11,15 +11,11 @@ spec:
   clientChain:
     - name: fault # Name of the first element in the client chain
       file: /users/xzhu/adn-controller/config/samples/echo/fault.adn # Path to the fault injection element file
-      parameters:
-        probability: "0.02" # Probability of fault injection
     - name: logging # Name of the second element in the client chain
       file: /users/xzhu/adn-controller/config/samples/echo/logging.adn # Path to the logging element file
   serverChain:
     - name: firwall # Name of the first element in the server chain
       file: /users/xzhu/adn-controller/config/samples/echo/firewall.adn # Path to the firewall element file
-      parameters:
-        body: test # Key and value to be used in the firewall element
   anyChain:
     - name: metrics # Name of the first element in the any(unconstraint) chain
       file: /users/xzhu/adn-controller/config/samples/echo/metrics.adn # Path to the metrics element file

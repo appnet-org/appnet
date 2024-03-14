@@ -1,7 +1,7 @@
 internal {
 	prob: float
 }
-fn init(prob) {
+fn init() {
 	prob := 0.5;
 }
 

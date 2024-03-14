@@ -6,3 +6,5 @@
 - [ADN Tutorials](tutorials/outline.md)
     - [Chain](tutorials/chain.md)
     - [Element](tutorials/element.md)
+- [Developer's Guide](developer.md)
+- [FAQ](faq.md)
