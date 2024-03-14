@@ -1,11 +1,5 @@
 # Controller for Application Defined Networks
 
-# Overview
-
-Control plane for Application Defined Networks (ADN).
-
-Details are available in our [HotNets paper](https://xzhu27.me/papers/adn-hotnets2023.pdf) and [talk](https://www.youtube.com/watch?v=hJobLIq1Bmk)
-
 ## Preparation
 See INSTALL.md for installation preparations.
 
