@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	// "github.com/UWNetworksLab/adn-controller/grpc/interceptors/null"
 
@@ -15,22 +15,15 @@ import (
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
-	request_body := strings.Replace(request.URL.String(), "/", "", -1)
-	fmt.Printf("Got request with body: %s\n", request_body)
+	// requestBody := strings.Replace(request.URL.String(), "/", "", -1)
+	requestBody := request.URL.Query().Get("key")
+	fmt.Printf("Got request with key: %s\n", requestBody)
 
 	var conn *grpc.ClientConn
-	// conn, err := grpc.Dial("echo-server:9000", grpc.WithInsecure())
-
-	// nullOpts := []null.CallOption{null.WithMessage("Null"),}
-	// aclOpts := []acl.CallOption{acl.WithContent("client")}
 
 	conn, err := grpc.Dial(
 		"server:9000",
 		grpc.WithInsecure(),
-	// grpc.WithChainUnaryInterceptor(
-	// 	// null.NullClient(nullOpts...),
-	// 	acl.ACLClient(aclOpts...),
-	// ),
 	)
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
@@ -39,16 +32,23 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 
 	c := echo.NewEchoServiceClient(conn)
 
+	// Create and attach metadata with the custom header
+	md := metadata.New(map[string]string{
+		"key": requestBody, // Here we're setting the custom header "key" to the requestBody
+	})
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
+
 	message := echo.Msg{
-		Body: request_body,
+		Body: requestBody,
 	}
 
-	response, err := c.Echo(context.Background(), &message)
+	// Make sure to pass the context (ctx) which includes the metadata
+	response, err := c.Echo(ctx, &message)
 	if err != nil {
 		fmt.Fprintf(writer, "Echo server returns an error.\n")
 		log.Printf("Error when calling echo: %s", err)
 	} else {
-		fmt.Fprintf(writer, "Echo request finished! Length of the request is %d\n", len(response.Body))
+		fmt.Fprintf(writer, "%s", response.Body)
 		log.Printf("Response from server: %s", response.Body)
 	}
 }

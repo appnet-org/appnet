@@ -1,0 +1,30 @@
+state {
+	firewall: Map<string, string>
+}
+
+fn init() {
+}
+
+fn req(rpc) {
+	match (firewall.get(rpc.get('body'))) {
+		Some(permission) => {
+			match (permission) {
+				'Yes' => {
+					send(rpc);
+				}
+				'No' => {
+					send(err('blocked by firewall'));
+				}
+				_ => {
+				}
+			};
+		}
+		None => {
+			send(rpc);
+		}
+	};
+}
+
+fn resp(rpc) {
+    send(rpc);
+}

@@ -1,0 +1,22 @@
+apiVersion: api.core.adn.io/v1
+kind: Adnconfig
+metadata:
+  name: sample-echo # Name of the Adnconfig
+spec:
+  appName: echo # Name of the application
+  clientService: frontend # Name of the client service (must be a valid service in the same namespace as the Adnconfig)
+  serverService: server # Name of the server service (must be a valid service in the same namespace as the Adnconfig)
+  method: echo # Name of the RPC method (defined in the proto file)
+  appManifestFile: /users/xzhu/adn-controller/config/samples/echo/echo.yaml # Path to the application manifest file
+  clientChain:
+    - name: routing # Name of the first element in the client chain
+      file: /users/xzhu/adn-controller/config/samples/echo/routing.adn # Path to the routing element file
+    - name: logging # Name of the second element in the client chain
+      file: /users/xzhu/adn-controller/config/samples/echo/logging.adn # Path to the logging element file
+  serverChain:
+    - name: firwall # Name of the first element in the server chain
+      file: /users/xzhu/adn-controller/config/samples/echo/firewall.adn # Path to the firewall element file
+  anyChain:
+    - name: metrics # Name of the first element in the any(unconstraint) chain
+      file: /users/xzhu/adn-controller/config/samples/echo/metrics.adn # Path to the metrics element file
+  proto: /users/xzhu/adn-controller/config/samples/echo/echo.proto # Path to the protobuf definition of client service to server service communication

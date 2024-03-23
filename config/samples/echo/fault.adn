@@ -2,7 +2,7 @@ internal {
 	prob: float
 }
 fn init() {
-	prob := 0.5;
+	prob := 0.99;
 }
 
 fn req(rpc_req) {

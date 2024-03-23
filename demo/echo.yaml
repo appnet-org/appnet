@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  clusterIP: 10.96.88.88
+  ports:
+  - name: frontend
+    port: 80
+    targetPort: 8080
+  selector:
+    app: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: frontend
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - image: xzhu0027/echo-frontend-grpc
+        name: frontend-grpc
+  selector:
+    matchLabels:
+      app: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+  labels:
+    app: server
+spec:
+  ports:
+  - name: server
+    port: 9000
+    targetPort: 9000
+  selector:
+    app: server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-0
+  labels:
+    app: server
+    version: v0
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: server
+      labels:
+        app: server
+        version: v0
+    spec:
+      containers:
+      - image: xzhu0027/echo-server-grpc
+        name: server-grpc
+  selector:
+    matchLabels:
+      app: server
+      version: v0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-1
+  labels:
+    app: server
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: server
+      labels:
+        app: server
+        version: v1
+    spec:
+      containers:
+      - image: xzhu0027/echo-server-grpc
+        name: server-grpc
+  selector:
+    matchLabels:
+      app: server
+      version: v1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-2
+  labels:
+    app: server
+    version: v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: server
+      labels:
+        app: server
+        version: v2
+    spec:
+      containers:
+      - image: xzhu0027/echo-server-grpc
+        name: server-grpc
+  selector:
+    matchLabels:
+      app: server
+      version: v2

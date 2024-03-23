@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"golang.org/x/net/context"
 
@@ -21,7 +22,8 @@ type server struct {
 func (s *server) Echo(ctx context.Context, x *echo.Msg) (*echo.Msg, error) {
 	log.Printf("got: [%s]", x.GetBody())
 
-	appendedBody := x.GetBody() + "1"
+	hostname, _ := os.Hostname()
+	appendedBody := fmt.Sprintf("You've hit %s\n", hostname)
 	msg := &echo.Msg{
 		Body: appendedBody,
 	}
@@ -38,10 +40,10 @@ func main() {
 	// aclOpts := []acl.CallOption{acl.WithContent("server"),}
 
 	s := grpc.NewServer(
-		// grpc.ChainUnaryInterceptor(
-		// 	null.NullServer(nullOpts...),
-		// 	acl.ACLServer(aclOpts...),
-		// ),
+	// grpc.ChainUnaryInterceptor(
+	// 	null.NullServer(nullOpts...),
+	// 	acl.ACLServer(aclOpts...),
+	// ),
 	)
 	fmt.Printf("Starting server pod at port 9000\n")
 

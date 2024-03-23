@@ -1,0 +1,26 @@
+state {
+    shard_map: Map<string, string>
+}
+
+fn init() {
+}
+
+fn req(rpc) {
+    req_key = rpc.get('key')
+    match (shard_map.get(req_key)) {
+		Some(server_name) => {
+                  rpc.set('x-server-name', server_name)
+		}
+		None => {
+                  server_name = get_shard_server(req_key)
+                  rpc.set('x-server-name', server_name)
+                  shard_map.set(req_key, server_name)
+		}
+	}
+
+	send(rpc)
+}
+
+fn resp(rpc) {
+	send(rpc)
+}

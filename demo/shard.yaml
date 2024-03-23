@@ -1,0 +1,20 @@
+Sharded-service:
+  server replicas:
+    - Name: server-0
+      shards:
+        - id: shard0
+          range: [0, 100]
+        - id: shard3
+          range: [300, 400]
+    - Name: server-1
+      shards:
+        - id: shard2
+          range: [200, 300]
+        - id: shard4
+          range: [400, 500]
+    - Name: server-2
+      shards:
+        - id: shard1
+          range: [100, 200]
+
+

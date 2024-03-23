@@ -1,0 +1,73 @@
+
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: echo-lua-extension
+spec:
+  workloadSelector:
+    labels:
+      app: frontend
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_OUTBOUND
+      listener:
+        portNumber: 9000
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value: 
+       name: envoy.lua
+       typed_config:
+          "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
+          inlineCode: |
+            function envoy_on_request(handle)
+            handle:logWarn(" ============= envoy_on_request ============= ")
+            local key = handle:headers():get("key")
+            if key then
+                local server_name
+
+                -- Assuming 'key' can be converted to a number and determining the server name based on key ranges
+                key = tonumber(key)
+    
+                if key >= 0 and key <= 100 then
+                server_name = "server-0"
+                end
+            
+                if key >= 300 and key <= 400 then
+                server_name = "server-0"
+                end
+            
+                if key >= 200 and key <= 300 then
+                server_name = "server-1"
+                end
+            
+                if key >= 400 and key <= 500 then
+                server_name = "server-1"
+                end
+            
+                if key >= 100 and key <= 200 then
+                server_name = "server-2"
+                end
+            
+                -- Inject a header with the server name into the request
+                handle:headers():add("x-server-name", server_name)
+
+                -- Log the server name that was added to the headers
+                handle:logWarn("Server name added to header: " .. server_name)
+            else
+                handle:logWarn("Key not found in request")
+            end
+
+            handle:logWarn(" ============================================= ")
+            end
+
+            function envoy_on_response(handle)
+            handle:logWarn(" ============= envoy_on_response ============= ")
+            handle:logWarn(" ============================================= ")
+            end
+    
