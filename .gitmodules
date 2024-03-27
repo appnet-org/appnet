@@ -1,0 +1,3 @@
+[submodule "compiler"]
+	path = compiler
+	url = https://github.com/appnet-org/compiler
