@@ -45,13 +45,13 @@ To install a Kubernetes cluster, we recommend using kubeadm. Follow the steps be
 
 1. Install the Control Plane:
 ```bash
-. ./util/k8s_setup.sh
+. ./utils/k8s_setup.sh
 ```
 
 2. (Optional) Set Up Worker Nodes:
  - First, prepare the worker nodes:
  ```bash
- . ./util/k8s_setup_worker.sh
+ . ./utils/k8s_setup_worker.sh
  ```
 
  - Then, join the cluster using kubeadm join. Run the following command on the control plane node to get the join command:
@@ -76,12 +76,12 @@ Istio can be installed in either sidecar mode or ambient mode. Choose the one th
 
 - Sidecar Mode
 ```bash
-. ./util/istio_setup_sidecar.sh
+. ./utils/istio_setup_sidecar.sh
 ```
 
 - Ambient Mode
 ```bash
-. ./util/istio_setup_ambient.sh
+. ./utils/istio_setup_ambient.sh
 ```
 
 
@@ -92,7 +92,7 @@ To install Python, refer to the official [Python Downloads Page]((https://www.py
 
 For Ubuntu users, Python 3.10 can be installed conveniently using the following command:
 ```bash
-. ./util/python310.sh
+. ./utils/python310.sh
 ```
 
 ### Go
