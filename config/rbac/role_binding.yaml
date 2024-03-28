@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/name: clusterrolebinding
     app.kubernetes.io/instance: manager-rolebinding
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: app-defined-networks
-    app.kubernetes.io/part-of: app-defined-networks
+    app.kubernetes.io/created-by: appnet
+    app.kubernetes.io/part-of: appnet
     app.kubernetes.io/managed-by: kustomize
   name: manager-rolebinding
 roleRef:

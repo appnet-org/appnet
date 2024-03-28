@@ -2,13 +2,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: manager-role
 rules:
 - apiGroups:
-  - api.core.adn.io
+  - api.core.appnet.io
   resources:
-  - adnconfigs
+  - appnetconfigs
   verbs:
   - create
   - delete
@@ -18,15 +17,15 @@ rules:
   - update
   - watch
 - apiGroups:
-  - api.core.adn.io
+  - api.core.appnet.io
   resources:
-  - adnconfigs/finalizers
+  - appnetconfigs/finalizers
   verbs:
   - update
 - apiGroups:
-  - api.core.adn.io
+  - api.core.appnet.io
   resources:
-  - adnconfigs/status
+  - appnetconfigs/status
   verbs:
   - get
   - patch

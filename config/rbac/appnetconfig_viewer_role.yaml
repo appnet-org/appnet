@@ -1,0 +1,27 @@
+# permissions for end users to view appnetconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: appnetconfig-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: appnet
+    app.kubernetes.io/part-of: appnet
+    app.kubernetes.io/managed-by: kustomize
+  name: appnetconfig-viewer-role
+rules:
+- apiGroups:
+  - api.core.appnet.io
+  resources:
+  - appnetconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - api.core.appnet.io
+  resources:
+  - appnetconfigs/status
+  verbs:
+  - get
