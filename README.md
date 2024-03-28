@@ -4,6 +4,11 @@
 
 See our documentation on [appnet.wiki](appnet.wiki).
 
+
+## To start developing AppNet
+
+See our developer's guide on [appnet.wiki/developer](https://appnet.wiki/developer.html)
+
 <!-- 
 ## Description
 // TODO(user): An in-depth paragraph about your project and overview of use
@@ -100,7 +105,7 @@ kubectl apply -f https://raw.githubusercontent.com/<org>/appnet/<tag or branch>/
 
 More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html) -->
 
-# Reference
+## Reference
 Please consider citing our paper if you find AppNet related to your research.
 ```bibtex
 @inproceedings{applicationdefinednetworks,
@@ -112,7 +117,7 @@ Please consider citing our paper if you find AppNet related to your research.
 }
 ```
 
-# Contact
+## Contact
 
 If you have any questions or comments, please get in touch with Xiangfeng Zhu (xfzhu@cs.washington.edu).
 
