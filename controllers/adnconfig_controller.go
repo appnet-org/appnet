@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	apiv1 "github.com/UWNetworksLab/app-defined-networks/api/v1"
+	apiv1 "github.com/appnet-org/appnet/api/v1"
 )
 
 // AdnconfigReconciler reconciles a Adnconfig object

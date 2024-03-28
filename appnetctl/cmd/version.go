@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 UWNetworks
+Copyright © 2023 AppNet
 */
 package cmd
 
@@ -12,7 +12,7 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Get adnctl version",
+	Short: "Get appnetctl version",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Placeholder
 		fmt.Println("Version: Experimental")

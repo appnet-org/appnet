@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	apiv1 "github.com/UWNetworksLab/app-defined-networks/api/v1"
+	apiv1 "github.com/appnet-org/appnet/api/v1"
 	"gopkg.in/yaml.v2"
 )
 

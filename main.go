@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	apiv1 "github.com/UWNetworksLab/app-defined-networks/api/v1"
-	"github.com/UWNetworksLab/app-defined-networks/controllers"
+	apiv1 "github.com/appnet-org/appnet/api/v1"
+	"github.com/appnet-org/appnet/controllers"
 	//+kubebuilder:scaffold:imports
 )
 

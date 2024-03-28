@@ -14,9 +14,9 @@ fi
 
 set -e
 
-if [ -z "${ADN_DIR}" ]; then
-  echo "Setting ADN_DIR to current directory"
-  echo "export ADN_DIR=$PWD" >> ~/.bashrc
+if [ -z "${APPNET_DIR}" ]; then
+  echo "Setting APPNET_DIR to current directory"
+  echo "export APPNET_DIR=$PWD" >> ~/.bashrc
   . ~/.bashrc
 fi
 
@@ -27,24 +27,16 @@ echo "export PATH=$PATH:$GO_BIN_DIR" >> ~/.bashrc
 echo "export GOPATH=$GO_PATH" >> ~/.bashrc
 . ~/.bashrc
 
-echo "Building adnctl..."
-cd $ADN_DIR/adnctl
+echo "Building appnetctl..."
+cd $APPNET_DIR/appnetctl
 go install
 
-cd $ADN_DIR
+cd $APPNET_DIR
 
-echo "adnctl was successfully installed 🎉🎉🎉"
+echo "appnetctl was successfully installed 🎉🎉🎉"
 echo ""
 
 echo "Installing Rust Dependencies"
 cargo install cargo-wasi
-
-# echo "Installing protoc"
-# sudo apt -y install protobuf-compiler
-# go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-# go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-
-# echo "Installing Rust"
-# curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 set +e
