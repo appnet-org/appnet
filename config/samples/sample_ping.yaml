@@ -1,26 +1,26 @@
-apiVersion: api.core.adn.io/v1
-kind: Adnconfig
+apiVersion: api.core.appnet.io/v1
+kind: AppNetConfig
 metadata:
-  name: adnconfig-sample-ping
+  name: sample-ping
 spec:
   appName: ping-pong-app
-  appManifestFile: /users/xzhu/adn-controller/compiler/examples/applications/ping-pong-app/ping-pong-app.yaml
+  appManifestFile: <APPNET_DIR_PATH>/compiler/examples/applications/ping-pong-app/ping-pong-app.yaml
   clientService: frontend
   serverService: ping
   method: PingEcho
   clientChain:
     - name: fault
-      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/fault.adn
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/ping_elements/fault.adn
       parameters:
         probability: "0.02"
     - name: logging
-      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/logging.adn
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/ping_elements/logging.adn
   serverChain:
     - name: acl
-      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/acl.adn
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/ping_elements/acl.adn
       parameters:
         body: apple
   anyChain:
     - name: metrics
-      file: /users/xzhu/adn-controller/compiler/examples/elements/ping_elements/metrics.adn
-  proto: /users/xzhu/adn-controller/compiler/examples/proto/ping.proto
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/ping_elements/metrics.adn
+  proto: <APPNET_DIR_PATH>/compiler/examples/proto/ping.proto

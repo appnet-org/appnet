@@ -1,26 +1,26 @@
-apiVersion: api.core.adn.io/v1
-kind: Adnconfig
+apiVersion: api.core.appnet.io/v1
+kind: AppNetConfig
 metadata:
-  name: adnconfig-hotel
+  name: sample-hotel
 spec:
   appName: hotel
   clientService: frontend
   serverService: reservation
   method: MakeReservation
-  appManifestFile: /users/xzhu/adn-controller/compiler/examples/applications/hotel_reservation/hotel_reservation.yaml
+  appManifestFile: <APPNET_DIR_PATH>/compiler/examples/applications/hotel_reservation/hotel_reservation.yaml
   clientChain:
     - name: fault
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/fault.adn
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/reservation_elements/fault.adn
       parameters:
         probability: "0.02"
     - name: logging
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/logging.adn
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/reservation_elements/logging.adn
   serverChain:
     - name: acl
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/acl.adn
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/reservation_elements/acl.adn
       parameters:
         body: apple
   anyChain:
     - name: metrics
-      file: /users/xzhu/adn-controller/compiler/examples/elements/reservation_elements/metrics.adn
-  proto: /users/xzhu/adn-controller/compiler/examples/proto/reservation.proto
+      file: <APPNET_DIR_PATH>/compiler/examples/elements/reservation_elements/metrics.adn
+  proto: <APPNET_DIR_PATH>/compiler/examples/proto/reservation.proto

@@ -1,0 +1,4 @@
+[submodule "compiler"]
+	path = compiler
+	url = git@github.com:appnet-org/compiler.git
+	branch = main

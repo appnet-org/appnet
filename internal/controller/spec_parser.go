@@ -123,7 +123,7 @@ func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService,
 // 	serverChain := "admission()->loadbalance()"
 // 	anyChain := "metrics()->tracing()"
 // 	pairChain := "encrypt()->decrypt()"
-// 	proto := "/users/xzhu/adn-compiler/examples/proto/ping.proto"
+// 	proto := "examples/proto/ping.proto"
 // 	fileName := "output.yaml"
 
 // 	err := GenerateAndWriteYAMLToFile(clientService, serverService, clientChain, serverChain, anyChain, pairChain, name, method, proto, fileName)

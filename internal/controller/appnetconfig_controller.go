@@ -59,10 +59,10 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	config := &apiv1.AppNetConfig{}
 	err := r.Get(ctx, req.NamespacedName, config)
 	if err != nil {
-		// For adn resource deletion
-		l.Info("Deleting Adnconfig")
+		// For AppNet resource deletion
+		l.Info("Deleting AppNetConfig...")
 
-		// TODO: Only delete the envoy filters that are associated with this adnconfig
+		// TODO: Only delete the envoy filters that are associated with this AppNetConfig
 		exec.Command("kubectl", "delete", "envoyfilters", "--all").CombinedOutput()
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -81,21 +81,21 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	safe := config.Spec.Safe
 
 	// Call addonctl
-	l.Info("Reconciling Adnconfig", "Safe", safe, "Name", config.Name, "Namespace", config.Namespace, "RPC Method", method,
+	l.Info("Reconciling AppNetConfig", "Safe", safe, "Name", config.Name, "Namespace", config.Namespace, "RPC Method", method,
 		"Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
 		"server-side Elements", server_elements, "unconstraint Elements", any_elements, "pair Elements", pair_elements)
 
 	ConvertToAppNetSpec(app_name, app_manifest_file, client_service, server_service, method, proto, "config.yaml", client_elements, server_elements,
 		any_elements, pair_elements)
 
-	compilerDir := filepath.Join(os.Getenv("ADN_DIR"), "compiler/compiler")
+	compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
 
 	compile_cmd := exec.Command("python3.10", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")
 	compile_output, compile_err := compile_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
 	if compile_err != nil {
-		l.Info("Reconciling Adnconfig", "Error running compiler: %s\nOutput:\n%s\n", compile_err, string(compile_output))
+		l.Info("Reconciling AppNetConfig", "Error running compiler: %s\nOutput:\n%s\n", compile_err, string(compile_output))
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -106,7 +106,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	// Check if there was an error running the command
 	if kubectl_err != nil {
-		l.Info("Reconciling Adnconfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
+		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
