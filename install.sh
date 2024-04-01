@@ -38,5 +38,6 @@ echo ""
 
 echo "Installing Rust Dependencies"
 cargo install cargo-wasi
+rustup target add wasm32-wasi
 
 set +e
