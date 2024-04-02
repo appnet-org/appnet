@@ -90,7 +90,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
 
-	compile_cmd := exec.Command("python3.10", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")
+	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")
 	compile_output, compile_err := compile_cmd.CombinedOutput()
 
 	// Check if there was an error running the command

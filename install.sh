@@ -40,4 +40,7 @@ echo "Installing Rust Dependencies"
 cargo install cargo-wasi
 rustup target add wasm32-wasi
 
+# Python dependencies
+pip install lark pre-commit tomli tomli_w colorlog rich kubernetes pyyaml
+
 set +e
