@@ -1,21 +1,22 @@
-internal {
+state {
 	prob: float
 }
+
 fn init() {
 	prob := 0.99;
 }
 
-fn req(rpc_req) {
+fn req(rpc) {
 	match(randomf(0,1) < prob) {
 		true => {
-			send(rpc_req, NET);
+			send(err('fault injected'), Down);
 		}
 		false => {
-			send(err('fault injected'), APP);
+			send(err('fault injected'), Up);
 		}
 	};
 }
 
-fn resp(rpc_resp) {
-    send(rpc_resp, APP);
+fn resp(rpc) {
+    send(rpc, Up);
 }

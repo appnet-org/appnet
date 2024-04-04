@@ -1,4 +1,4 @@
-internal
+state
 {
 	firewall: Map<string, string>
 }
@@ -7,26 +7,26 @@ fn init() {
 	firewall.set('test', 'No');
 }
 
-fn req(rpc_req) {
-	match (firewall.get(rpc_req.get('body'))) {
+fn req(rpc) {
+	match (firewall.get(rpc.get('body'))) {
 		Some(permission) => {
 			match (permission) {
 				'Yes' => {
-					send(rpc_req, NET);
+					send(rpc, Down);
 				}
 				'No' => {
-					send(err('blocked by firewall'), APP);
+					send(err('blocked by firewall'), Up);
 				}
 				_ => {
 				}
 			};
 		}
 		None => {
-			send(rpc_req, NET);
+			send(rpc, Down);
 		}
 	};
 }
 
-fn resp(rpc_resp) {
-    send(rpc_resp, APP);
+fn resp(rpc) {
+    send(rpc, Up);
 }

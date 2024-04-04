@@ -1,4 +1,4 @@
-internal
+state
 {
 	record: Map<uint, Instant>
   latency: Vec<float>
@@ -7,12 +7,12 @@ internal
 fn init() {
 }
 
-fn req(rpc_req) {
+fn req(rpc) {
 	record.set(rpc_id(), current_time());
-	send(rpc_req, NET);
+	send(rpc, Down);
 }
 
-fn resp(rpc_resp) {
+fn resp(rpc) {
   match(record.get(rpc_id())) {
     Some(t) => {
       lat := time_diff(current_time(), t);
@@ -21,5 +21,5 @@ fn resp(rpc_resp) {
     None => {
     }
   };
-  send(rpc_resp, APP);
+  send(rpc, Up);
 }
