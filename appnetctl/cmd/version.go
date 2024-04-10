@@ -14,8 +14,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Get appnetctl version",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Placeholder
-		fmt.Println("Version: Experimental")
+		fmt.Println("Version: v0.1.0")
 	},
 }
 
