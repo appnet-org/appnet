@@ -124,4 +124,7 @@ sudo apt-get update
 sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
 sudo apt-get install -y sysstat
 
+# Create a directory for AppNet plugins
+mkdir -p /tmp/appnet
+
 set +ex

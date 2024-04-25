@@ -1,4 +1,11 @@
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: frontend
+  name: echo-frontend
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: frontend
@@ -28,9 +35,17 @@ spec:
       containers:
       - image: xzhu0027/echo-frontend-grpc
         name: frontend-grpc
+      serviceAccountName: echo-frontend
   selector:
     matchLabels:
       app: frontend
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: server
+  name: echo-server
 ---
 apiVersion: v1
 kind: Service
@@ -62,6 +77,7 @@ spec:
       containers:
       - image: xzhu0027/echo-server-grpc
         name: server-grpc
+      serviceAccountName: echo-server
   selector:
     matchLabels:
       app: server

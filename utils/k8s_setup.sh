@@ -151,4 +151,7 @@ echo "alias k='kubectl'" >> ~/.bashrc
 # kubectl taint nodes --all node-role.kubernetes.io/master-
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
+# Create a directory for AppNet plugins
+mkdir -p /tmp/appnet
+
 set +ex
