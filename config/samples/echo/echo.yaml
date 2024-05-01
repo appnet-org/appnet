@@ -59,6 +59,7 @@ spec:
   - name: server
     port: 9000
     targetPort: 9000
+    appProtocol: grpc
   selector:
     app: server
 ---
