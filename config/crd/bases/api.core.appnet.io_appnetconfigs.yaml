@@ -62,6 +62,8 @@ spec:
                 type: string
               appName:
                 type: string
+              backend:
+                type: string
               clientChain:
                 items:
                   description: |-
@@ -132,6 +134,7 @@ spec:
             required:
             - appManifestFile
             - appName
+            - backend
             - clientService
             - method
             - proto

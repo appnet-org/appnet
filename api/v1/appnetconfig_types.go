@@ -34,6 +34,7 @@ type AppNetConfigSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	Safe            bool           `json:"safe,omitempty" default:"true"`
+	Backend         string         `json:"backend"`
 	AppName         string         `json:"appName"`
 	AppManifestFile string         `json:"appManifestFile"`
 	ClientService   string         `json:"clientService"`

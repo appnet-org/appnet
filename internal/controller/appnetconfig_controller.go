@@ -67,6 +67,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	backend := config.Spec.Backend
 	client_service := config.Spec.ClientService
 	server_service := config.Spec.ServerService
 	client_elements := config.Spec.ClientChain
@@ -82,7 +83,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	// Call addonctl
 	l.Info("Reconciling AppNetConfig", "Safe", safe, "Name", config.Name, "Namespace", config.Namespace, "RPC Method", method,
-		"Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
+		"Backend:", backend, "Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
 		"server-side Elements", server_elements, "unconstraint Elements", any_elements, "pair Elements", pair_elements)
 
 	ConvertToAppNetSpec(app_name, app_manifest_file, client_service, server_service, method, proto, "config.yaml", client_elements, server_elements,
@@ -90,7 +91,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
 
-	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", "envoy")
+	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", backend)
 	compile_output, compile_err := compile_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
