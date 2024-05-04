@@ -68,6 +68,12 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	backend := config.Spec.Backend
+
+	// temporary fix for sidecar backend
+	if backend == "sidecar" {
+		backend = "envoy"
+	}
+
 	client_service := config.Spec.ClientService
 	server_service := config.Spec.ServerService
 	client_elements := config.Spec.ClientChain
@@ -86,7 +92,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		"Backend:", backend, "Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
 		"server-side Elements", server_elements, "unconstraint Elements", any_elements, "pair Elements", pair_elements)
 
-	ConvertToAppNetSpec(app_name, app_manifest_file, client_service, server_service, method, proto, "config.yaml", client_elements, server_elements,
+	ConvertToAppNetSpec(app_name, backend, app_manifest_file, client_service, server_service, method, proto, "config.yaml", client_elements, server_elements,
 		any_elements, pair_elements)
 
 	compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
@@ -109,6 +115,23 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	if kubectl_err != nil {
 		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// Deploy waypoint proxies
+	if backend == "ambient" {
+		waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+		waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
+
+		// Check if there was an error running the command
+		if waypoint_err != nil {
+			l.Info("Reconciling AppNetConfig", "Error running istioctl waypoint: %s\nOutput:\n%s\n", waypoint_err, string(waypoint_output))
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
+
+		// Attach volume to waypoint
+		service_account := find_service_account(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+		l.Info("Reconciling AppNetConfig", server_service, service_account)
+		attach_volume_to_waypoint(server_service, service_account)
 	}
 
 	l.Info("All elemenets deployed - Reconciliation finished!")

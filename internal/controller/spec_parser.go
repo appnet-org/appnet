@@ -32,7 +32,7 @@ type PairElementItem struct {
 	Proto    string `yaml:"proto"`
 }
 
-func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService, method, proto, fileName string, clientChain, serverChain, anyChain, pairChain []apiv1.ChainElement) error {
+func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serverService, method, proto, fileName string, clientChain, serverChain, anyChain, pairChain []apiv1.ChainElement) error {
 	clientServerTag := fmt.Sprintf("%s->%s", clientService, serverService)
 
 	appManifest := AppManifest{
@@ -45,12 +45,17 @@ func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService,
 		Link: make(map[string][]PairElementItem),
 	}
 
+	position := ""
 	if len(clientChain) > 0 {
+		// All ambinet elements are considered to be on the server-side
+		if backend == "ambient" {
+			position = "S"
+		}
 		for _, element := range clientChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
 				Name:     element.Name,
-				Position: "C",
+				Position: position,
 				Proto:    proto,
 				Path:     element.File,
 			})
@@ -70,11 +75,15 @@ func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService,
 	}
 
 	if len(anyChain) > 0 {
+		// All ambinet elements are considered to be on the server-side
+		if backend == "ambient" {
+			position = "S"
+		}
 		for _, element := range anyChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:   method,
 				Name:     element.Name,
-				Position: "C/S",
+				Position: position,
 				Proto:    proto,
 				Path:     element.File,
 			})
