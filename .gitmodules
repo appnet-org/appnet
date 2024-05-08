@@ -2,3 +2,6 @@
 	path = compiler
 	url = git@github.com:appnet-org/compiler.git
 	branch = main
+[submodule "go-lib"]
+	path = go-lib
+	url = https://github.com/appnet-org/go-lib.git
