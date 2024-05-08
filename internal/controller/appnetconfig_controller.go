@@ -64,6 +64,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 		// TODO: Only delete the envoy filters that are associated with this AppNetConfig
 		exec.Command("kubectl", "delete", "envoyfilters", "--all").CombinedOutput()
+		exec.Command("istioctl", "experimental", "waypoint", "delete", "--all").CombinedOutput()
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
