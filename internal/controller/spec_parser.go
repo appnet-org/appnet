@@ -50,6 +50,8 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 		// All ambinet elements are considered to be on the server-side
 		if backend == "ambient" {
 			position = "S"
+		} else {
+			position = "C"
 		}
 		for _, element := range clientChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
@@ -78,6 +80,8 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 		// All ambinet elements are considered to be on the server-side
 		if backend == "ambient" {
 			position = "S"
+		} else {
+			position = "C/S"
 		}
 		for _, element := range anyChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
