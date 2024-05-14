@@ -108,6 +108,10 @@ spec:
                 type: array
               proto:
                 type: string
+              protoModLocation:
+                type: string
+              protoModName:
+                type: string
               safe:
                 type: boolean
               serverChain:

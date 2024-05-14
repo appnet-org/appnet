@@ -17,11 +17,13 @@ type AppManifest struct {
 }
 
 type EdgeElementItem struct {
-	Method   string `yaml:"method"`
-	Name     string `yaml:"name"`
-	Path     string `yaml:"path"`
-	Position string `yaml:"position"`
-	Proto    string `yaml:"proto"`
+	Method           string `yaml:"method"`
+	Name             string `yaml:"name"`
+	Path             string `yaml:"path"`
+	Position         string `yaml:"position"`
+	Proto            string `yaml:"proto"`
+	ProtoModName     string `yaml:"proto_mod_name"`
+	ProtoModLocation string `yaml:"proto_mod_location"`
 }
 
 type PairElementItem struct {
@@ -32,7 +34,7 @@ type PairElementItem struct {
 	Proto    string `yaml:"proto"`
 }
 
-func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serverService, method, proto, fileName string, clientChain, serverChain, anyChain, pairChain []apiv1.ChainElement) error {
+func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serverService, method, proto, fileName, protoModName, protoModLocation string, clientChain, serverChain, anyChain, pairChain []apiv1.ChainElement) error {
 	clientServerTag := fmt.Sprintf("%s->%s", clientService, serverService)
 
 	appManifest := AppManifest{
@@ -55,11 +57,13 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 		}
 		for _, element := range clientChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
-				Method:   method,
-				Name:     element.Name,
-				Position: position,
-				Proto:    proto,
-				Path:     element.File,
+				Method:           method,
+				Name:             element.Name,
+				Position:         position,
+				Proto:            proto,
+				Path:             element.File,
+				ProtoModName:     protoModName,
+				ProtoModLocation: protoModLocation,
 			})
 		}
 	}
@@ -67,11 +71,13 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 	if len(serverChain) > 0 {
 		for _, element := range serverChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
-				Method:   method,
-				Name:     element.Name,
-				Position: "S",
-				Proto:    proto,
-				Path:     element.File,
+				Method:           method,
+				Name:             element.Name,
+				Position:         "S",
+				Proto:            proto,
+				Path:             element.File,
+				ProtoModName:     protoModName,
+				ProtoModLocation: protoModLocation,
 			})
 		}
 	}
@@ -85,11 +91,13 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 		}
 		for _, element := range anyChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
-				Method:   method,
-				Name:     element.Name,
-				Position: position,
-				Proto:    proto,
-				Path:     element.File,
+				Method:           method,
+				Name:             element.Name,
+				Position:         position,
+				Proto:            proto,
+				Path:             element.File,
+				ProtoModName:     protoModName,
+				ProtoModLocation: protoModLocation,
 			})
 		}
 	}

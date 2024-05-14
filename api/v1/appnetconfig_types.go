@@ -33,18 +33,20 @@ type AppNetConfigSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Safe            bool           `json:"safe,omitempty" default:"true"`
-	Backend         string         `json:"backend"`
-	AppName         string         `json:"appName"`
-	AppManifestFile string         `json:"appManifestFile"`
-	ClientService   string         `json:"clientService"`
-	ServerService   string         `json:"serverService"`
-	ClientChain     []ChainElement `json:"clientChain,omitempty"`
-	ServerChain     []ChainElement `json:"serverChain,omitempty"`
-	AnyChain        []ChainElement `json:"anyChain,omitempty"`
-	PairChain       []ChainElement `json:"pairChain,omitempty"`
-	Method          string         `json:"method"`
-	Proto           string         `json:"proto"`
+	Safe             bool           `json:"safe,omitempty" default:"true"`
+	Backend          string         `json:"backend"`
+	AppName          string         `json:"appName"`
+	AppManifestFile  string         `json:"appManifestFile"`
+	ClientService    string         `json:"clientService"`
+	ServerService    string         `json:"serverService"`
+	ClientChain      []ChainElement `json:"clientChain,omitempty"`
+	ServerChain      []ChainElement `json:"serverChain,omitempty"`
+	AnyChain         []ChainElement `json:"anyChain,omitempty"`
+	PairChain        []ChainElement `json:"pairChain,omitempty"`
+	Method           string         `json:"method"`
+	Proto            string         `json:"proto"`
+	ProtoModName     string         `json:"protoModName,omitempty"`
+	ProtoModLocation string         `json:"protoModLocation,omitempty"`
 }
 
 // AppNetConfigStatus defines the observed state of AppNetConfig

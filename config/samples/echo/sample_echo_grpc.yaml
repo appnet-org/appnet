@@ -1,0 +1,22 @@
+apiVersion: api.core.appnet.io/v1
+kind: AppNetConfig
+metadata:
+  name: sample-echo-grpc # Name of the AppNetConfig
+spec:
+  backend: grpc # Name of the backend (sidecar/ambient/grpc)
+  appName: echo # Name of the application
+  clientService: frontend # Name of the client service (must be a valid service in the same namespace as the AppNetConfig)
+  serverService: server # Name of the server service (must be a valid service in the same namespace as the AppNetConfig)
+  method: echo # Name of the RPC method (defined in the proto file)
+  appManifestFile: <APPNET_DIR_PATH>/config/samples/echo/echo.yaml # Path to the application manifest file
+  clientChain:
+    - name: fault # Name of the first element in the client chain
+      file: <APPNET_DIR_PATH>/config/samples/echo/fault.appnet # Path to the fault injection element file
+    - name: logging # Name of the second element in the client chain
+      file: <APPNET_DIR_PATH>/config/samples/echo/logging.appnet # Path to the logging element file
+  serverChain:
+    - name: firwall # Name of the first element in the server chain
+      file: <APPNET_DIR_PATH>/config/samples/echo/firewall.appnet # Path to the firewall element file
+  proto: <APPNET_DIR_PATH>/config/samples/echo/echo.proto # Path to the protobuf definition of client service to server service communication
+  protoModName: github.com/appnet-org/golib/sample/echo-pb 
+  protoModLocation: <APPNET_DIR_PATH>/go-lib/sample/echo-pb
