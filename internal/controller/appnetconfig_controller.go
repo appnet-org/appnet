@@ -18,7 +18,10 @@ package controller
 
 import (
 	"context"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -98,44 +101,44 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	ConvertToAppNetSpec(app_name, backend, app_manifest_file, client_service, server_service, method, proto, "config.yaml",
 		proto_mod_name, proto_mod_location, client_elements, server_elements, any_elements, pair_elements)
 
-	// compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
+	compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
 
-	// compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", backend)
-	// compile_output, compile_err := compile_cmd.CombinedOutput()
+	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", backend)
+	compile_output, compile_err := compile_cmd.CombinedOutput()
 
-	// // Check if there was an error running the command
-	// if compile_err != nil {
-	// 	l.Info("Reconciling AppNetConfig", "Error running compiler: %s\nOutput:\n%s\n", compile_err, string(compile_output))
-	// 	return ctrl.Result{}, client.IgnoreNotFound(err)
-	// }
+	// Check if there was an error running the command
+	if compile_err != nil {
+		l.Info("Reconciling AppNetConfig", "Error running compiler: %s\nOutput:\n%s\n", compile_err, string(compile_output))
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-	// l.Info("All elements compiled successfully - deploying to envoy")
+	l.Info("All elements compiled successfully - deploying to envoy")
 
-	// kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
-	// kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
+	kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
+	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
 
-	// // Check if there was an error running the command
-	// if kubectl_err != nil {
-	// 	l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
-	// 	return ctrl.Result{}, client.IgnoreNotFound(err)
-	// }
+	// Check if there was an error running the command
+	if kubectl_err != nil {
+		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-	// // Deploy waypoint proxies
-	// if backend == "ambient" {
-	// 	waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
-	// 	waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
+	// Deploy waypoint proxies
+	if backend == "ambient" {
+		waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+		waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
 
-	// 	// Check if there was an error running the command
-	// 	if waypoint_err != nil {
-	// 		l.Info("Reconciling AppNetConfig", "Error running istioctl waypoint: %s\nOutput:\n%s\n", waypoint_err, string(waypoint_output))
-	// 		return ctrl.Result{}, client.IgnoreNotFound(err)
-	// 	}
+		// Check if there was an error running the command
+		if waypoint_err != nil {
+			l.Info("Reconciling AppNetConfig", "Error running istioctl waypoint: %s\nOutput:\n%s\n", waypoint_err, string(waypoint_output))
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
 
-	// 	// Attach volume to waypoint
-	// 	service_account := find_service_account(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
-	// 	l.Info("Reconciling AppNetConfig", server_service, service_account)
-	// 	attach_volume_to_waypoint(server_service, service_account)
-	// }
+		// Attach volume to waypoint
+		service_account := find_service_account(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+		l.Info("Reconciling AppNetConfig", server_service, service_account)
+		attach_volume_to_waypoint(server_service, service_account)
+	}
 
 	l.Info("All elemenets deployed - Reconciliation finished!")
 
