@@ -10,6 +10,6 @@ istioctl install --set profile=default -y
 popd
 
 # turn on auto-injection
-kubectl label namespace default istio-injection=enabled --overwrite
+# kubectl label namespace default istio-injection=enabled --overwrite
 
 set +ex

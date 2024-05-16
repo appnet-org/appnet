@@ -43,4 +43,7 @@ rustup target add wasm32-wasi
 # Python dependencies
 pip install lark pre-commit tomli tomli_w colorlog rich kubernetes pyyaml
 
+
+go install golang.org/x/tools/cmd/goimports@latest
+
 set +e
