@@ -33,7 +33,7 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-func find_service_account(file_name string) string {
+func find_waypoint_name(file_name string) string {
 	file, err := os.Open(file_name)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -42,7 +42,7 @@ func find_service_account(file_name string) string {
 	defer file.Close()
 
 	// Create a regular expression to match the service account
-	re := regexp.MustCompile(`--service-account\s+(\S+)`)
+	re := regexp.MustCompile(`--name\s+(\S+)`)
 
 	// Create a scanner to read the file line by line
 	scanner := bufio.NewScanner(file)
@@ -54,8 +54,8 @@ func find_service_account(file_name string) string {
 		match := re.FindStringSubmatch(line)
 		if len(match) > 1 {
 			// Extract the service account from the matched line
-			serviceAccount := match[1]
-			return serviceAccount
+			waypoint := match[1]
+			return waypoint
 		}
 	}
 
@@ -67,7 +67,7 @@ func find_service_account(file_name string) string {
 	return ""
 }
 
-func attach_volume_to_waypoint(service_name, service_account string) {
+func attach_volume_to_waypoint(service_name, waypoint_name string) {
 	// Set up kubeconfig path
 	var k8sconfig *string
 	if home := homedir.HomeDir(); home != "" {
@@ -91,7 +91,7 @@ func attach_volume_to_waypoint(service_name, service_account string) {
 
 	// Set deployment details
 	namespace := "default"
-	deploymentName := service_account + "-istio-waypoint"
+	deploymentName := waypoint_name
 	pvcName := service_name + "-pvc"
 	mountPath := "/data"
 

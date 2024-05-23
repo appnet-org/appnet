@@ -135,9 +135,9 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 
 		// Attach volume to waypoint
-		service_account := find_service_account(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
-		l.Info("Reconciling AppNetConfig", server_service, service_account)
-		attach_volume_to_waypoint(server_service, service_account)
+		waypoint_name := find_waypoint_name(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+		l.Info("Reconciling AppNetConfig", server_service, waypoint_name)
+		attach_volume_to_waypoint(server_service, waypoint_name)
 	}
 
 	l.Info("All elemenets deployed - Reconciliation finished!")
