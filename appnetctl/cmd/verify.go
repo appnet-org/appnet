@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -26,12 +27,7 @@ func execCommand(command string, args ...string) (string, error) {
 }
 
 func isVersionGreaterThan(version string, major, minor int) (bool, error) {
-	// Split version string on spaces (e.g., "Python 3.9.1") and then on dots
-	parts := strings.Split(version, " ")
-	if len(parts) < 2 {
-		return false, fmt.Errorf("unexpected version format")
-	}
-	versionParts := strings.Split(parts[1], ".")
+	versionParts := strings.Split(version, ".")
 	if len(versionParts) < 2 {
 		return false, fmt.Errorf("unexpected version format")
 	}
@@ -66,13 +62,19 @@ var verifyCmd = &cobra.Command{
 		// Check if Python version is greater than 3.10
 		pythonVersion, err := execCommand("python", "--version")
 		if err == nil {
-			isGreater, err := isVersionGreaterThan(pythonVersion, 3, 10)
+			// Parse Python Version
+			parts := strings.Split(pythonVersion, " ")
+			if len(parts) < 2 {
+				fmt.Println("unexpected Python version format")
+			}
+
+			isGreater, err := isVersionGreaterThan(parts[1], 3, 10)
 			if err != nil {
 				fmt.Printf("✘ Failed to parse Python version: %s\n", err)
 			} else if isGreater {
-				fmt.Printf("✔ Python installed.\n")
+				fmt.Println("✔ Python installed.")
 			} else {
-				fmt.Printf("✘ Python version is not greater than 3.10: %s\n", pythonVersion)
+				fmt.Printf("✘ Python version is not greater than 3.10: %s", pythonVersion)
 			}
 		} else {
 			fmt.Println("✘ Python is not installed.")
@@ -81,15 +83,32 @@ var verifyCmd = &cobra.Command{
 		// Verify Rust installation
 		_, err = execCommand("rustc", "--version")
 		if err == nil {
-			fmt.Printf("✔ Rust installed.\n")
+			fmt.Println("✔ Rust installed.")
 		} else {
 			fmt.Println("✘ Rust is not installed.")
 		}
 
 		// Verify Kubernetes installation
-		_, err = execCommand("kubectl", "version")
+		kubectlVersion, err := execCommand("kubectl", "version")
 		if err == nil {
-			fmt.Printf("✔ Kubernetes installed.\n")
+			// Parse kubectl Version
+			re := regexp.MustCompile(`Client Version: v(\d+\.\d+\.\d+)`)
+
+			// Find the version number in the output
+			matches := re.FindStringSubmatch(kubectlVersion)
+			if len(matches) < 2 {
+				fmt.Println("Version number not found")
+				return
+			}
+
+			isGreater, err := isVersionGreaterThan(matches[1], 1, 28)
+			if err != nil {
+				fmt.Printf("✘ Failed to parse kubectl version: %s\n", err)
+			} else if isGreater {
+				fmt.Println("✔ Kubernetes installed.")
+			} else {
+				fmt.Printf("✘ Kubernetes version is not greater than 1.28.0: %s", pythonVersion)
+			}
 		} else {
 			fmt.Println("✘ Kubernetes is not installed.")
 		}
@@ -97,17 +116,34 @@ var verifyCmd = &cobra.Command{
 		// Verify protoc installation
 		_, err = execCommand("protoc", "--version")
 		if err == nil {
-			fmt.Printf("✔ protoc installed.\n")
+			fmt.Println("✔ protoc installed.")
 		} else {
 			fmt.Println("✘ protoc is not installed.")
 		}
 
 		// Verify istio installation
-		_, err = execCommand("istioctl", "version")
+		istioctlVersion, err := execCommand("istioctl", "version")
 		if err == nil {
-			fmt.Printf("✔ istio installed.\n")
+			// Parse istioctl Version
+			re := regexp.MustCompile(`client version: (\d+\.\d+\.\d+)`)
+
+			// Find the version number in the output
+			matches := re.FindStringSubmatch(istioctlVersion)
+			if len(matches) < 2 {
+				fmt.Println("Version number not found")
+				return
+			}
+
+			isGreater, err := isVersionGreaterThan(matches[1], 1, 22)
+			if err != nil {
+				fmt.Printf("✘ Failed to parse istioctl version: %s\n", err)
+			} else if isGreater {
+				fmt.Println("✔ Istio installed.")
+			} else {
+				fmt.Printf("✘ Istio version is not greater than 1.22.0: %s", pythonVersion)
+			}
 		} else {
-			fmt.Println("✘ istio is not installed.")
+			fmt.Println("✘ Istio is not installed.")
 		}
 	},
 }
