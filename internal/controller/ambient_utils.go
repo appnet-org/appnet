@@ -126,6 +126,4 @@ func attach_volume_to_waypoint(service_name, waypoint_name string) {
 	if err != nil {
 		panic(err.Error())
 	}
-
-	// fmt.Printf("Deployment '%s' in namespace '%s' updated successfully.\n", deploymentName, namespace)
 }

@@ -101,6 +101,14 @@ var verifyCmd = &cobra.Command{
 		} else {
 			fmt.Println("✘ protoc is not installed.")
 		}
+
+		// Verify istio installation
+		_, err = execCommand("istioctl", "version")
+		if err == nil {
+			fmt.Printf("✔ istio installed.\n")
+		} else {
+			fmt.Println("✘ istio is not installed.")
+		}
 	},
 }
 
