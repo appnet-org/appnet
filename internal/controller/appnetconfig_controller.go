@@ -114,7 +114,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	l.Info("All elements compiled successfully - deploying to envoy")
 
-	kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
+	kubectl_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/install.yml"), "APP", app_name))
 	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
@@ -125,6 +125,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	// Deploy waypoint proxies
 	if backend == "ambient" {
+		// XZ: Temp hack to wait for all pods running
 		waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
 		waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
 
@@ -138,6 +139,15 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		waypoint_name := find_waypoint_name(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
 		l.Info("Reconciling AppNetConfig", server_service, waypoint_name)
 		attach_volume_to_waypoint(server_service, waypoint_name)
+	}
+
+	attach_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/attach_all_elements.yml"), "APP", app_name))
+	attach_output, attach_err := attach_cmd.CombinedOutput()
+
+	// Check if there was an error running the command
+	if attach_err != nil {
+		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(attach_output))
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	l.Info("All elemenets deployed - Reconciliation finished!")

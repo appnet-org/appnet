@@ -27,6 +27,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	// appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -95,35 +96,63 @@ func attach_volume_to_waypoint(service_name, waypoint_name string) {
 	pvcName := service_name + "-pvc"
 	mountPath := "/data"
 
-	// Get the specified deployment
-	deployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
+	// Retry on failure (sometimes deployment changes wjile updating)
+	for {
+		// Get the specified deployment
+		deployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
 
-	// Define the volume and volume mount
-	volume := corev1.Volume{
-		Name: service_name + "-storage",
-		VolumeSource: corev1.VolumeSource{
-			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-				ClaimName: pvcName,
+		// Define the volume and volume mount
+		volume := corev1.Volume{
+			Name: service_name + "-storage",
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: pvcName,
+				},
 			},
-		},
-	}
-	volumeMount := corev1.VolumeMount{
-		Name:      service_name + "-storage",
-		MountPath: mountPath,
-	}
+		}
+		volumeMount := corev1.VolumeMount{
+			Name:      service_name + "-storage",
+			MountPath: mountPath,
+		}
 
-	// Attach the volume to the deployment spec
-	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, volume)
-	for i := range deployment.Spec.Template.Spec.Containers {
-		deployment.Spec.Template.Spec.Containers[i].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[i].VolumeMounts, volumeMount)
-	}
+		// Check if the volume and volume mount already exist to avoid duplicates
+		volumeExists := false
+		for _, v := range deployment.Spec.Template.Spec.Volumes {
+			if v.Name == volume.Name {
+				volumeExists = true
+				break
+			}
+		}
+		if !volumeExists {
+			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, volume)
+		}
 
-	// Update the deployment
-	_, err = clientset.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
-	if err != nil {
-		panic(err.Error())
+		for i := range deployment.Spec.Template.Spec.Containers {
+			volumeMountExists := false
+			for _, vm := range deployment.Spec.Template.Spec.Containers[i].VolumeMounts {
+				if vm.Name == volumeMount.Name {
+					volumeMountExists = true
+					break
+				}
+			}
+			if !volumeMountExists {
+				deployment.Spec.Template.Spec.Containers[i].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[i].VolumeMounts, volumeMount)
+			}
+		}
+
+		// Update the deployment
+		_, err = clientset.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
+		if err != nil {
+			if errors.IsConflict(err) {
+				// If there's a conflict, retry the operation
+				continue
+			} else {
+				panic(err.Error())
+			}
+		}
+		break
 	}
 }
