@@ -45,5 +45,7 @@ pip install lark pre-commit tomli tomli_w colorlog rich kubernetes pyyaml
 
 
 go install golang.org/x/tools/cmd/goimports@latest
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 set +e
