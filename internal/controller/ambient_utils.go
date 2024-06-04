@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	// appsv1 "k8s.io/api/apps/v1"
@@ -96,12 +97,16 @@ func attach_volume_to_waypoint(service_name, waypoint_name string) {
 	pvcName := service_name + "-pvc"
 	mountPath := "/data"
 
+	maxAttempts := 20
+
 	// Retry on failure (sometimes deployment changes wjile updating)
-	for {
+	for attempts := 0; attempts < maxAttempts; attempts++ {
 		// Get the specified deployment
 		deployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		if err != nil {
-			panic(err.Error())
+			fmt.Printf("Attempt %d: failed to get deployment: %v\n", attempts+1, err)
+			time.Sleep(2 * time.Second) // Wait before retrying
+			continue
 		}
 
 		// Define the volume and volume mount

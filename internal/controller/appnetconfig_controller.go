@@ -141,13 +141,15 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		attach_volume_to_waypoint(server_service, waypoint_name)
 	}
 
-	attach_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/attach_all_elements.yml"), "APP", app_name))
-	attach_output, attach_err := attach_cmd.CombinedOutput()
+	if backend != "grpc" {
+		attach_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/attach_all_elements.yml"), "APP", app_name))
+		attach_output, attach_err := attach_cmd.CombinedOutput()
 
-	// Check if there was an error running the command
-	if attach_err != nil {
-		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(attach_output))
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+		// Check if there was an error running the command
+		if attach_err != nil {
+			l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(attach_output))
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
 	}
 
 	l.Info("All elemenets deployed - Reconciliation finished!")
