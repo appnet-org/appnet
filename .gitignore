@@ -26,3 +26,5 @@ config.yaml
 
 Python-*
 Miniconda.sh
+
+gurobi.lic
