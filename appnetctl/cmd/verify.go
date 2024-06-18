@@ -46,16 +46,34 @@ func isVersionGreaterThan(version string, major, minor int) (bool, error) {
 	return majorVersion > major || (majorVersion == major && minorVersion >= minor), nil
 }
 
+func isExactVersion(version string, major, minor, patch int) (bool, error) {
+	versionParts := strings.Split(version, ".")
+	if len(versionParts) < 3 {
+		return false, fmt.Errorf("unexpected version format")
+	}
+
+	// Convert version parts to integers
+	majorVersion, err := strconv.Atoi(versionParts[0])
+	if err != nil {
+		return false, err
+	}
+	minorVersion, err := strconv.Atoi(versionParts[1])
+	if err != nil {
+		return false, err
+	}
+	patchVersion, err := strconv.Atoi(versionParts[2])
+	if err != nil {
+		return false, err
+	}
+
+	// Check if version matches exactly
+	return majorVersion == major && minorVersion == minor && patchVersion == patch, nil
+}
+
 // verifyCmd represents the verify command
 var verifyCmd = &cobra.Command{
 	Use:   "verify",
 	Short: "Verifies AppNet Installation Status",
-	// 	Long: `A longer description that spans multiple lines and likely contains examples
-	// and usage of using your command. For example:
-
-	// Cobra is a CLI library for Go that empowers applications.
-	// This application is a tool to generate the needed files
-	// to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Verifying AppNet installation status...")
 
@@ -107,7 +125,7 @@ var verifyCmd = &cobra.Command{
 			} else if isGreater {
 				fmt.Println("✔ Kubernetes installed.")
 			} else {
-				fmt.Printf("✘ Kubernetes version is not greater than 1.28.0: %s", pythonVersion)
+				fmt.Printf("✘ Kubernetes version is not greater than 1.28.0: %s", kubectlVersion)
 			}
 		} else {
 			fmt.Println("✘ Kubernetes is not installed.")
@@ -140,10 +158,35 @@ var verifyCmd = &cobra.Command{
 			} else if isGreater {
 				fmt.Println("✔ Istio installed.")
 			} else {
-				fmt.Printf("✘ Istio version is not greater than 1.22.0: %s", pythonVersion)
+				fmt.Printf("✘ Istio version is not greater than 1.22.0: %s", istioctlVersion)
 			}
 		} else {
 			fmt.Println("✘ Istio is not installed.")
+		}
+
+		// Verify Go installation and version
+		goVersion, err := execCommand("go", "version")
+		if err == nil {
+			// Parse Go Version
+			re := regexp.MustCompile(`go version go(\d+\.\d+\.\d+)`)
+
+			// Find the version number in the output
+			matches := re.FindStringSubmatch(goVersion)
+			if len(matches) < 2 {
+				fmt.Println("Version number not found")
+				return
+			}
+
+			isExact, err := isExactVersion(matches[1], 1, 22, 1)
+			if err != nil {
+				fmt.Printf("✘ Failed to parse Go version: %s\n", err)
+			} else if isExact {
+				fmt.Println("✔ Go version 1.22.1 installed.")
+			} else {
+				fmt.Printf("✘ Go version is not 1.22.1: %s", goVersion)
+			}
+		} else {
+			fmt.Println("✘ Go is not installed.")
 		}
 	},
 }
