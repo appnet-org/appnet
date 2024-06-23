@@ -1,32 +1,20 @@
-state
-{
-	firewall: Map<string, string>
-}
+state:
+	acl: Map<string, string>
 
-fn init() {
-	firewall.set('test', 'No');
-}
+init():
+	set(acl, 'test', 'No')
 
-fn req(rpc) {
-	match (firewall.get(rpc.get('body'))) {
-		Some(permission) => {
-			match (permission) {
-				'Yes' => {
-					send(rpc, Down);
-				}
-				'No' => {
-					send(err('blocked by firewall'), Up);
-				}
-				_ => {
-				}
-			};
-		}
-		None => {
-			send(rpc, Down);
-		}
-	};
-}
+req(rpc):
+	match get(acl, get(rpc, 'body')):
+		Some(permission) =>
+			match permission:
+				'Yes' => 
+					send(rpc, Down)
+				'No' => 
+					send(err('acl'), Up)
+		None =>
+			send(rpc, Down)
 
-fn resp(rpc) {
-    send(rpc, Up);
-}
+resp(rpc):
+    send(rpc, Up)
+

@@ -1,22 +1,16 @@
-state {
+state:
 	prob: float
-}
 
-fn init() {
-	prob := 0.99;
-}
+init():
+	prob = 0.99
 
-fn req(rpc) {
-	match(randomf(0,1) < prob) {
-		true => {
-			send(err('fault injected'), Down);
-		}
-		false => {
-			send(err('fault injected'), Up);
-		}
-	};
-}
+req(rpc):
+	match randomf(0, 1) < prob:
+		true =>
+			send(rpc, Down)
+		false =>
+			send(err('fault_injected'), Up)
 
-fn resp(rpc) {
-    send(rpc, Up);
-}
+resp(rpc):
+    send(rpc, Up)
+
