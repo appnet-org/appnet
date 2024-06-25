@@ -1,18 +1,14 @@
-state
-{
+state:
 	record_req: Vec<string>
 	record_resp: Vec<string>
-}
 
-fn init() {
-}
+init():
+	pass
 
-fn req(rpc) {
-	record_req.set(record_req.size(), rpc.get('body'));
-	send(rpc, Down);
-}
+req(rpc):
+	set(record_req, size(record_req), get(rpc, 'body'))
+	send(rpc, Down)
 
-fn resp(rpc) {
-	record_resp.set(record_resp.size(), rpc.get('body'));
-	send(rpc, Up);
-}
+resp(rpc):
+	set(record_resp, size(record_resp), get(rpc, 'body'))
+	send(rpc, Up)

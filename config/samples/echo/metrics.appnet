@@ -1,25 +1,19 @@
-state
-{
-	record: Map<uint, Instant>
-  latency: Vec<float>
-}
+state:
+    record: Map<uint, Instant>
+    latency: Vec<float>
 
-fn init() {
-}
+init():
+    pass
 
-fn req(rpc) {
-	record.set(rpc_id(), current_time());
-	send(rpc, Down);
-}
+req(rpc):
+	set(record, rpc_id(), current_time())
+	send(rpc, Down)
 
-fn resp(rpc) {
-  match(record.get(rpc_id())) {
-    Some(t) => {
-      lat := time_diff(current_time(), t);
-      latency.set(latency.size(), lat);
-    }
-    None => {
-    }
-  };
-  send(rpc, Up);
-}
+resp(rpc):
+    match get(record, rpc_id()):
+        Some(t) =>
+            lat = time_diff(current_time(), t)
+            set(latency, size(latency), lat)
+        None =>
+            pass
+    send(rpc, Up)
