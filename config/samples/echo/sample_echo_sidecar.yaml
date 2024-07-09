@@ -15,7 +15,7 @@ spec:
     - name: logging # Name of the second element in the client chain
       file: <APPNET_DIR_PATH>/config/samples/echo/logging.appnet # Path to the logging element file
   serverChain:
-    - name: firwall # Name of the first element in the server chain
+    - name: firewall # Name of the first element in the server chain
       file: <APPNET_DIR_PATH>/config/samples/echo/firewall.appnet # Path to the firewall element file
   anyChain:
     - name: metrics # Name of the first element in the any(unconstraint) chain

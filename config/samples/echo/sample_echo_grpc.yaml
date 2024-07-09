@@ -15,7 +15,7 @@ spec:
     - name: logging # Name of the second element in the client chain
       file: <APPNET_DIR_PATH>/config/samples/echo/logging.appnet # Path to the logging element file
   serverChain:
-    - name: firwall # Name of the first element in the server chain
+    - name: firewall # Name of the first element in the server chain
       file: <APPNET_DIR_PATH>/config/samples/echo/firewall.appnet # Path to the firewall element file
   proto: <APPNET_DIR_PATH>/go-lib/sample/echo-pb/echo.proto # Path to the protobuf definition of client service to server service communication
   protoModName: github.com/appnet-org/golib/sample/echo-pb 
