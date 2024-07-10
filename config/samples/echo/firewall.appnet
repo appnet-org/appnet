@@ -11,7 +11,7 @@ req(rpc):
 				'Yes' => 
 					send(rpc, Down)
 				'No' => 
-					send(err('acl'), Up)
+					send(err('firewall'), Up)
 		None =>
 			send(rpc, Down)
 

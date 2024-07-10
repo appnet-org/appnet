@@ -21,7 +21,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"sync"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -34,7 +36,9 @@ import (
 // AppNetConfigReconciler reconciles a AppNetConfig object
 type AppNetConfigReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme  *runtime.Scheme
+	mu      sync.Mutex
+	Version int
 }
 
 //+kubebuilder:rbac:groups=api.core.appnet.io,resources=appnetconfigs,verbs=get;list;watch;create;update;patch;delete
@@ -91,6 +95,11 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	safe := config.Spec.Safe
 
+	r.mu.Lock()
+	r.Version++
+	currentVersion := r.Version
+	r.mu.Unlock()
+
 	// Call addonctl
 	l.Info("Reconciling AppNetConfig", "Safe", safe, "Name", config.Name, "Namespace", config.Namespace, "RPC Method", method,
 		"Backend:", backend, "Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
@@ -103,7 +112,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
 
-	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", backend)
+	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", backend, "-t", strconv.Itoa(currentVersion))
 	compile_output, compile_err := compile_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
@@ -114,13 +123,16 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	l.Info("All elements compiled successfully - deploying to envoy")
 
-	kubectl_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/install.yml"), "APP", app_name))
-	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
+	// TODO: temp hack
+	if currentVersion == 1 {
+		kubectl_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/install.yml"), "APP", app_name))
+		kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
 
-	// Check if there was an error running the command
-	if kubectl_err != nil {
-		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+		// Check if there was an error running the command
+		if kubectl_err != nil {
+			l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
 	}
 
 	// Deploy waypoint proxies
@@ -147,7 +159,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 		// Check if there was an error running the command
 		if attach_err != nil {
-			l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(attach_output))
+			l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", attach_err, string(attach_output))
 			return ctrl.Result{}, client.IgnoreNotFound(err)
 		}
 	}
