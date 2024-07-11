@@ -36,6 +36,7 @@ import (
 
 	apiv1 "github.com/appnet-org/appnet/api/v1"
 	"github.com/appnet-org/appnet/internal/controller"
+	networkingv1alpha3 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -119,6 +120,12 @@ func main() {
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	// Register Istio types with the scheme
+	if err := networkingv1alpha3.AddToScheme(mgr.GetScheme()); err != nil {
+		setupLog.Error(err, "unable to add Istio types to scheme")
 		os.Exit(1)
 	}
 

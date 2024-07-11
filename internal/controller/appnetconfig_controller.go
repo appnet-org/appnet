@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,14 +32,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	apiv1 "github.com/appnet-org/appnet/api/v1"
+	networkingv1alpha3 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 )
 
 // AppNetConfigReconciler reconciles a AppNetConfig object
 type AppNetConfigReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	mu      sync.Mutex
-	Version int
+	Scheme              *runtime.Scheme
+	mu                  sync.Mutex
+	Version             int
+	EnvoyFilterVersions map[int][]*networkingv1alpha3.EnvoyFilter
 }
 
 //+kubebuilder:rbac:groups=api.core.appnet.io,resources=appnetconfigs,verbs=get;list;watch;create;update;patch;delete
@@ -123,20 +126,18 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	l.Info("All elements compiled successfully - deploying to envoy")
 
-	// TODO: temp hack
-	if currentVersion == 1 {
-		kubectl_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/install.yml"), "APP", app_name))
-		kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
+	kubectl_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/install.yml"), "APP", app_name))
+	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
 
-		// Check if there was an error running the command
-		if kubectl_err != nil {
-			l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
-			return ctrl.Result{}, client.IgnoreNotFound(err)
-		}
+	// Check if there was an error running the command
+	if kubectl_err != nil {
+		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", kubectl_err, string(kubectl_output))
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Deploy waypoint proxies
-	if backend == "ambient" {
+	// Deploy waypoint proxies & Make sure the waypoints are only applied once
+	// TODO(XZ): This is a temporary fix for the waypoint issue. We need to detect if the waypoint is already applied
+	if backend == "ambient" && currentVersion == 1 {
 		// XZ: Temp hack to wait for all pods running
 		waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
 		waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
@@ -166,11 +167,85 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	l.Info("All elemenets deployed - Reconciliation finished!")
 
+	// List all EnvoyFilter resources and update the version map
+	if err := r.updateEnvoyFilterVersions(ctx, currentVersion); err != nil {
+		l.Error(err, "unable to update EnvoyFilter versions")
+		return ctrl.Result{}, err
+	}
+
+	// Update the version file (wait for in-flight requests to finish)
+	time.Sleep(5 * time.Second)
+	updateVersionFile("/tmp/appnet/config-version", currentVersion)
+
+	if currentVersion > 1 {
+		// Delete all EnvoyFilter resources for the previous version
+		if err := r.deleteEnvoyFiltersByVersion(ctx, currentVersion-1); err != nil {
+			l.Error(err, "unable to delete EnvoyFilters")
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
+}
+
+// updateEnvoyFilterVersions updates the map of EnvoyFilters by version
+func (r *AppNetConfigReconciler) updateEnvoyFilterVersions(ctx context.Context, version int) error {
+	l := log.FromContext(ctx)
+
+	// Create a list to store the EnvoyFilter resources
+	envoyFilterList := &networkingv1alpha3.EnvoyFilterList{}
+
+	// List all EnvoyFilter resources in the cluster
+	if err := r.Client.List(ctx, envoyFilterList, &client.ListOptions{}); err != nil {
+		l.Error(err, "unable to list EnvoyFilter resources")
+		return err
+	}
+
+	// Update the map with the current version and EnvoyFilter list
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.EnvoyFilterVersions[version] = envoyFilterList.Items
+
+	return nil
+}
+
+// deleteEnvoyFiltersByVersion deletes all EnvoyFilter resources for a specific version
+func (r *AppNetConfigReconciler) deleteEnvoyFiltersByVersion(ctx context.Context, version int) error {
+	l := log.FromContext(ctx)
+
+	// Lock the map to ensure thread safety
+	r.mu.Lock()
+	envoyFilters, exists := r.EnvoyFilterVersions[version]
+	r.mu.Unlock()
+
+	if !exists {
+		l.Info("No EnvoyFilters found for version", "version", version)
+		return nil
+	}
+
+	// Iterate over the EnvoyFilters and delete them
+	for _, ef := range envoyFilters {
+		if err := r.Client.Delete(ctx, ef); err != nil {
+			l.Error(err, "unable to delete EnvoyFilter", "name", ef.Name, "namespace", ef.Namespace)
+			return err
+		}
+		l.Info("Deleted EnvoyFilter", "name", ef.Name, "namespace", ef.Namespace)
+	}
+
+	// Remove the version entry from the map
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.EnvoyFilterVersions, version)
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *AppNetConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
+	// Initialize the map
+	r.EnvoyFilterVersions = make(map[int][]*networkingv1alpha3.EnvoyFilter)
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&apiv1.AppNetConfig{}).
 		Complete(r)

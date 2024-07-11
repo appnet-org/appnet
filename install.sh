@@ -36,4 +36,8 @@ go install golang.org/x/tools/cmd/goimports@latest
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
+# Create folder for appnet binaries
+mkdir -p /tmp/appnet
+echo 1 > /tmp/appnet/config-version
+
 set +e
