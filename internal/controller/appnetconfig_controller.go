@@ -62,7 +62,13 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	l := log.FromContext(ctx)
 
-	// TODO: add logic here
+	start := time.Now() // Start time
+
+	defer func() {
+		elapsed := time.Since(start) // End time
+		l.Info("Done", "Reconciliation took ", elapsed)
+	}()
+
 	config := &apiv1.AppNetConfig{}
 	err := r.Get(ctx, req.NamespacedName, config)
 	if err != nil {
@@ -174,7 +180,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	// Update the version file (wait for in-flight requests to finish)
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Second)
 	updateVersionFile("/tmp/appnet/config-version", currentVersion)
 
 	if currentVersion > 1 {
