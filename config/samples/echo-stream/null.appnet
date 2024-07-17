@@ -1,0 +1,12 @@
+state:
+	prob: float
+
+init():
+	prob = 0.99
+
+req(rpc):
+	send(rpc, Down)
+
+resp(rpc):
+    send(rpc, Up)
+
