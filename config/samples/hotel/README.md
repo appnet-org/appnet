@@ -1,3 +1,10 @@
+### Preparation
+
+```bash
+sed -i 's|<docker-username>|<your-docker-user-name>|g' config/samples/hotel/hotel_reservation.yaml
+sed -i 's|<APPNET_DIR_PATH>|'"$(pwd)"'|g' config/samples/hotel/sample_hotel.yaml
+```
+
 ### Deploy services
 
 run `kubectl apply -Rf hotel_reservation.yaml`

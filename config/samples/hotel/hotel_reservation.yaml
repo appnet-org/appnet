@@ -46,7 +46,7 @@ spec:
       containers:
       - command:
         - ./user
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-user
         ports:
@@ -107,7 +107,7 @@ spec:
       containers:
       - command:
         - ./search
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-search
         ports:
@@ -169,7 +169,7 @@ spec:
       containers:
       - command:
         - ./reservation
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-reservation
         ports:
@@ -231,7 +231,7 @@ spec:
       containers:
       - command:
         - ./recommendation
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-recommendation
         ports:
@@ -293,7 +293,7 @@ spec:
       containers:
       - command:
         - ./rate
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-rate
         ports:
@@ -355,7 +355,7 @@ spec:
       containers:
       - command:
         - ./profile
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-profile
         ports:
@@ -417,7 +417,7 @@ spec:
       containers:
       - command:
         - ./geo
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-geo
         ports:
@@ -480,7 +480,7 @@ spec:
       containers:
       - command:
         - ./frontend
-        image: <docker-username>/hotelreservation:latest
+        image: xzhu0027/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-frontend
         ports:
