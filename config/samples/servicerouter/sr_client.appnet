@@ -1,0 +1,44 @@
+state:
+    load_map: Map<backend, <int, float>>
+    epsilon: float
+
+init():
+    epsilon = 1.0
+
+req(rpc):
+    shard_key = get(rpc, "key")
+    backends = get_backends(shard_key)
+
+    sampled_backends = ramdom_choices(backend, 3)
+    filter
+
+    dst = 0
+    min_load = inf
+    for backend in sampled_backends:
+        backend_load, last_ts = get(load_map, backend)
+        freshness = time_diff(current_time(), last_ts) - epsilon
+        match freshness > 0:
+            true => 
+                pass
+            false =>
+                backend_load = get(load_map_global, backend)
+                set(load_map)
+    
+        match backend_load < min_load:
+            true =>
+                dst = backend
+                min_load = backend_load
+            false =>
+                pass
+
+    set(rpc, dst, dst)
+    send(rpc, up)
+    
+
+resp(rpc):
+    load = get(rpc, "load")
+    dst = get(rpc, dst)
+    set(rpc, dst, (load, current_time()))
+    send(rpc, down)
+
+
