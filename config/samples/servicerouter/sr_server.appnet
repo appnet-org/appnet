@@ -6,9 +6,10 @@ init():
 
 req(rpc):
     outstanding_req_count = outstanding_req_count + 1
-    send(rpc, up)
+    send(rpc, down)
 
 resp(rpc):
+    outstanding_req_count = outstanding_req_count - 1
     set(rpc, "load", outstanding_req_count)
-    send(rpc, down)
+    send(rpc, up)
 
