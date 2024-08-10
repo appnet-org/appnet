@@ -160,7 +160,7 @@ func startHTTPServer() {
 }
 
 func main() {
-	filename := "samples/example_shard.yaml"
+	filename := "example_shard.yaml"
 
 	// Initial read
 	initialServices, err := readYAMLFile(filename)
