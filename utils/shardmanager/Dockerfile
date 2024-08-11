@@ -8,7 +8,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main .
 
 FROM alpine:latest
 COPY --from=builder /app/main /main
-COPY ./samples/example_shard.yaml /example_shard.yaml 
 
 # Command to run the executable
 CMD ["./main"]

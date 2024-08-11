@@ -35,7 +35,42 @@ spec:
       containers:
       - image: xzhu0027/shard-manager:latest
         name: shard-manager
+        volumeMounts:
+        - name: shard-manager-storage
+          mountPath: "/data"
+      volumes:
+      - name: shard-manager-storage
+        persistentVolumeClaim:
+          claimName: shard-manager-pvc
       serviceAccountName: shard-manager
   selector:
     matchLabels:
       app: shard-manager
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shard-manager-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /tmp/appnet/shard-manager
+    type: Directory
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shard-manager-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-storage
+---
