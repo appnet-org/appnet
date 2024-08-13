@@ -12,18 +12,18 @@ req(rpc):
     sampled_backends = ramdom_choices(num_choices, 3)
 
     # Get their load and RIF information and store it in a list
-    sorted_backend_info = sort(map(get_backend_info(latency, RIF), sampled_backends), RIF)
+    sorted_backend_info = sort(map(get_backend_info(), sampled_backends), RIF)
     index = int(len(sorted_backend_info)*QRIF)
 
     # (hot-cold lexicographic) Divide it to hot and cold backend
-    cold_backend = sorted_backend_info[:index]
-    hot_backend = sorted_backend_info[index:]
+    cold_backend = slice(sorted_backend_info, 0, index)
+    hot_backend = slice(sorted_backend_info, index, len(sorted_backend_info))
 
     # if all probes are hot, then the one with lowest RIF is chosen.
     # Otherwise, the cold probe with the lowest latency is chosen
     match len(coldBackend) == 0:
         true =>
-            selected = hot_backend[0]
+            selected = get(hot_backend, 0)
         false =>
             selected = min(cold_backend, latency)
     
