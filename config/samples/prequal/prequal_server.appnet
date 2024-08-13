@@ -1,0 +1,19 @@
+state:
+    outstanding_req_count: int
+    request_map<int, float>
+
+init():
+    outstanding_req_count = 0
+
+req(rpc):
+    outstanding_req_count = outstanding_req_count + 1
+    rpc_id = get(rpc, "id")
+    set(request_map, rpc_id, current_time())
+    send(rpc, up)
+
+resp(rpc):
+    outstanding_req_count = outstanding_req_count - 1
+    rpc_id = get(rpc, "id")
+    latency = time_diff(current_time(), get(request_map, rpc_id))
+    send(rpc, down)
+

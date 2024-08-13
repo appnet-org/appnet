@@ -1,0 +1,68 @@
+state:
+    QRIF: float
+    num_choices: int
+
+init():
+    QRIF = 0.8
+    num_choices = 3
+
+req(rpc):
+    # Choose a subset of replicas
+    backends = get_backends()
+    sampled_backends = ramdom_choices(num_choices, 3)
+
+    # Get their load and RIF information and store it in a list
+    sorted_backend_info = sort(map(get_backend_info(), sampled_backends), RIF)
+    index = int(len(sorted_backend_info)*QRIF)
+
+    # (hot-cold lexicographic) Divide it to hot and cold backend
+    cold_backend = slice(sorted_backend_info, 0, index)
+    hot_backend = slice(sorted_backend_info, index, len(sorted_backend_info))
+
+    # if all probes are hot, then the one with lowest RIF is chosen.
+    # Otherwise, the cold probe with the lowest latency is chosen
+    match len(coldBackend) == 0:
+        true =>
+            selected = get(hot_backend, 0)
+        false =>
+            selected = min(cold_backend, latency)
+    
+    set(rpc, dst, selected)
+    send(rpc, down)
+    
+
+resp(rpc):
+    send(rpc, up)
+
+
+state:
+    QRIF: float
+    num_choices: int
+
+init():
+    QRIF = 0.8
+    num_choices = 3
+
+req(rpc):
+    # Choose a subset of replicas
+    backends = get_backends()
+    sampled_backends = ramdom_choices(backends, num_choices)
+
+    # Get their load and RIF information and store it in a list
+    # get_backend_info is a built-in function that receives backend name and returns a dictionary: {"backend": xxx, "latency": xxx, "RIF": xxx}
+    sorted_backend_info = sort(map(get_backend_info, sampled_backends), "RIF")
+    index = int(len(sorted_backend_info) * QRIF)
+    
+    match index == 0:
+    	true =>
+    	    # all probes are hot
+    	    selected = get(array_get(sorted_backend_info, 0), "backend")
+    	false =>
+    	    # cold probe with the lowest latency is chosen
+    	    selected = get(array_min(sorted_backend_info, 0, index, "latency"), "backend")
+    
+    set(rpc, dst, selected)
+    send(rpc, down)   
+
+resp(rpc):
+    send(rpc, up)

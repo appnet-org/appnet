@@ -1,0 +1,15 @@
+state:
+    outstanding_req_count: int
+
+init():
+    outstanding_req_count = 0
+
+req(rpc):
+    outstanding_req_count = outstanding_req_count + 1
+    send(rpc, down)
+
+resp(rpc):
+    outstanding_req_count = outstanding_req_count - 1
+    set(rpc, "load", outstanding_req_count)
+    send(rpc, up)
+

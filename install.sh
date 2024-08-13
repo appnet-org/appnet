@@ -38,6 +38,8 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 # Create folder for appnet binaries
 mkdir -p /tmp/appnet
+mkdir -p /tmp/appnet/shard-manager
+cp $APPNET_DIR/utils/shardmanager/samples/example_shard.yaml /tmp/appnet/shard-manager
 echo 1 > /tmp/appnet/config-version
 
 set +e

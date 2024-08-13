@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: shard-manager
+  name: shard-manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shard-manager
+  labels:
+    app: shard-manager
+spec:
+  clusterIP: 10.96.88.99
+  ports:
+  - name: shard-manager
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: shard-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shard-manager
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: shard-manager
+      labels:
+        app: shard-manager
+    spec:
+      containers:
+      - image: xzhu0027/shard-manager:latest
+        name: shard-manager
+        volumeMounts:
+        - name: shard-manager-storage
+          mountPath: "/data"
+      volumes:
+      - name: shard-manager-storage
+        persistentVolumeClaim:
+          claimName: shard-manager-pvc
+      serviceAccountName: shard-manager
+  selector:
+    matchLabels:
+      app: shard-manager
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shard-manager-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /tmp/appnet/shard-manager
+    type: Directory
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shard-manager-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-storage
+---

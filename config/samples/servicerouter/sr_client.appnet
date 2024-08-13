@@ -1,0 +1,87 @@
+state:
+    // backend id -> queue length, timestamp
+    load_map: Map<int, <int, float>>
+    epsilon: float
+
+init():
+    epsilon = 1.0
+    num_choices = 3
+
+req(rpc):
+    shard_key = get(rpc, "key")
+    backends = get_backends(shard_key)
+
+    sampled_backends = random_choices(backends, num_choices)
+    
+   
+    selected = 0
+    min_load = inf
+    for each backend in sampled_backends:
+        backend_load, last_ts = get(load_map, backend)
+        freshness = time_diff(current_time(), last_ts) - epsilon
+
+        match freshness > 0:
+            true => 
+                pass
+            false =>
+                backend_load = get(load_map_global, backend)
+                set(load_map, (backendload, current_time())
+
+        match backend_load < min_load:
+            true =>
+                selected = backend
+                min_load = backend_load
+            false =>
+                pass
+
+    set(rpc, "dst", selected)
+    send(rpc, down)
+
+resp(rpc):
+    load = get(rpc, "load")
+    dst = get(rpc, "dst")
+    set(load_map, dst, (load, current_time()))
+    send(rpc, up)
+
+
+state:
+    load_map: Map<int, <int, float>>
+    epsilon: float
+
+init():
+    epsilon = 1.0
+
+req(rpc):
+    shard_key = get(rpc, "key")
+    backends = get_backends(shard_key)
+
+    sampled_backends = random_choices(backends, 3)
+    
+    # Filter function to update freshness and backend load
+    update_backend = lambda backend: 
+        backend_load, last_ts = get(load_map, backend)
+        freshness = time_diff(current_time(), last_ts) - epsilon
+        match freshness > 0:
+            true => (backend, backend_load)
+            false => (backend, get(load_map_global, backend))
+    
+    updated_backends = map(sampled_backends, update_backend)
+    
+    # Reduce function to find the backend with the minimum load
+    min_backend = reduce(updated_backends, lambda acc, backend_tuple:
+        match backend_tuple[1] < acc[1]:
+            true => backend_tuple
+            false => acc, (None, inf))
+
+    selected, min_load = min_backend
+
+    set(rpc, "dst", selected)
+    send(rpc, down)
+
+resp(rpc):
+    load = get(rpc, "load")
+    dst = get(rpc, "dst")
+    set(load_map, dst, (load, current_time()))
+    send(rpc, up)
+
+

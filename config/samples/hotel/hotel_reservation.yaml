@@ -56,7 +56,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h2.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h2.<node-name>
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -117,7 +117,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h2.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h2.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -179,7 +179,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h4.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h4.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -241,7 +241,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h2.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h2.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -303,7 +303,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h3.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h3.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -365,7 +365,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h5.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h5.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -427,7 +427,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h3.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h3.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -490,7 +490,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h2.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h2.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -714,7 +714,7 @@ spec:
         - mountPath: /data/db
           name: user
       hostname: user-db
-      # nodeName: h2.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h2.<node-name>
       restartPolicy: Always
       volumes:
       - name: user
@@ -762,7 +762,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h4.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h4.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -806,7 +806,7 @@ spec:
         - mountPath: /data/db
           name: reservation
       hostname: reservation-db
-      # nodeName: h4.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h4.<node-name>
       restartPolicy: Always
       volumes:
       - name: reservation
@@ -854,7 +854,7 @@ spec:
         - mountPath: /data/db
           name: recommendation
       hostname: recommendation-db
-      # nodeName: h2.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h2.<node-name>
       restartPolicy: Always
       volumes:
       - name: recommendation
@@ -901,7 +901,7 @@ spec:
         volumeMounts:
         - mountPath: /data/db
           name: rate
-      # nodeName: h3.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h3.<node-name>
       restartPolicy: Always
       volumes:
       - name: rate
@@ -949,7 +949,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h3.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h3.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -993,7 +993,7 @@ spec:
             cpu: 1000m
           requests:
             cpu: 100m
-      # nodeName: h5.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h5.<node-name>
       restartPolicy: Always
 status: {}
 ---
@@ -1037,7 +1037,7 @@ spec:
         - mountPath: /data/db
           name: profile
       hostname: profile-db
-      # nodeName: h5.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h5.<node-name>
       restartPolicy: Always
       volumes:
       - name: profile
@@ -1084,7 +1084,7 @@ spec:
         volumeMounts:
         - mountPath: /data/db
           name: geo
-      # nodeName: h3.hotelbench.meshbench-pg0.clemson.cloudlab.us
+      # nodeName: h3.<node-name>
       restartPolicy: Always
       volumes:
       - name: geo

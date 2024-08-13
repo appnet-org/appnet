@@ -1,0 +1,40 @@
+services:
+  - name: ServiceA
+    replicas:
+      - replica_id: 0
+        shards:
+          - shard_id: shard0
+            role: primary
+            range: [0, 100]
+  - name: ServiceB
+    replicas:
+      - replica_id: 0
+        shards:
+          - shard_id: shard0
+            role: primary
+            range: [0, 100]
+          - shard_id: shard5
+            role: secondary
+            range: [500, 900]
+      - replica_id: 1
+        shards:
+          - shard_id: shard3
+            role: secondary
+            range: [300, 500]
+          - shard_id: shard5
+            role: secondary
+            range: [500, 900]
+          - shard_id: shard9
+            role: secondary
+            range: [900, 2000]
+      - replica_id: 2
+        shards:
+          - shard_id: shard0
+            role: secondary
+            range: [0, 100]
+          - shard_id: shard3
+            role: primary
+            range: [300, 500]
+          - shard_id: shard5
+            role: primary
+            range: [500, 900]
