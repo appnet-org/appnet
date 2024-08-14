@@ -12,27 +12,31 @@ req(rpc):
     backends = get_backends(shard_key)
 
     sampled_backends = random_choices(backends, num_choices)
-    
-   
-    selected = 0
-    min_load = inf
-    for each backend in sampled_backends:
+
+    foreach(backend, lambda(backend):
         backend_load, last_ts = get(load_map, backend)
         freshness = time_diff(current_time(), last_ts) - epsilon
 
-        match freshness > 0:
+        match(freshness > 0):
             true => 
                 pass
             false =>
                 backend_load = get(load_map_global, backend)
-                set(load_map, (backendload, current_time())
+                set(load_map, (backend, (backend_load, current_time())))
+    )
 
-        match backend_load < min_load:
+    selected = 0
+    min_load = inf
+    
+    foreach(backend, lambda(backend):
+        backend_load, last_ts = get(load_map, backend)
+        match(backend_load < min_load):
             true =>
-                selected = backend
-                min_load = backend_load
+                set(selected, backend)
+                set(min_load, backend_load)
             false =>
                 pass
+    )
 
     set(rpc, "dst", selected)
     send(rpc, down)
@@ -63,7 +67,10 @@ req(rpc):
         freshness = time_diff(current_time(), last_ts) - epsilon
         match freshness > 0:
             true => (backend, backend_load)
-            false => (backend, get(load_map_global, backend))
+            false => 
+                backend_load, last_ts = get(load_map_global, backend)
+                set(load_map, (backend_load, last_ts))
+                (backend, backend_load)
     
     updated_backends = map(sampled_backends, update_backend)
     
