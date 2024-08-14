@@ -21,8 +21,8 @@ req(rpc):
             true => 
                 pass
             false =>
-                backend_load = get(load_map_global, backend)
-                set(load_map, (backend, (backend_load, current_time())))
+                backend_load, last_ts = get(load_map_global, backend)
+                set(load_map, backend, (backend_load, last_ts))
     )
 
     selected = 0
