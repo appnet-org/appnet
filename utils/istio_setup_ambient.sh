@@ -3,7 +3,7 @@
 
 set -ex
 
-curl -k -L https://istio.io/downloadIstio | sh -
+curl -k -L https://istio.io/downloadIstio | ISTIO_VERSION=1.22.3 sh -
 pushd istio-*
 sudo cp bin/istioctl /usr/local/bin
 kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
