@@ -104,30 +104,36 @@ func updateServices(newServices Services) {
 	fmt.Printf("Updated Services: %+v\n", services)
 }
 
-func getReplicaIDByServiceAndKey(serviceName string, key int) (int, error) {
+func getReplicaIDByServiceAndKey(serviceName string, key int) ([]int, error) {
 	servicesMut.RLock()
 	defer servicesMut.RUnlock()
+
+	var replicaIDs []int
 
 	for _, service := range services.Services {
 		if service.Name == serviceName {
 			for _, replica := range service.Replicas {
 				for _, shard := range replica.Shards {
 					if key >= shard.Range[0] && key <= shard.Range[1] {
-						return replica.ReplicaID, nil
+						replicaIDs = append(replicaIDs, replica.ReplicaID)
 					}
 				}
 			}
 		}
 	}
 
-	return -1, fmt.Errorf("no replica found for service %s and key %d", serviceName, key)
+	if len(replicaIDs) == 0 {
+		return nil, fmt.Errorf("no replicas found for service %s and key %d", serviceName, key)
+	}
+
+	return replicaIDs, nil
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["key"]
-	serviceNames, ok2 := r.URL.Query()["service"]
+	serviceName, ok2 := r.URL.Query()["service"]
 
-	if !ok || len(keys[0]) < 1 || !ok2 || len(serviceNames[0]) < 1 {
+	if !ok || len(keys[0]) < 1 || !ok2 || len(serviceName[0]) < 1 {
 		http.Error(w, "Missing key or service parameter", http.StatusBadRequest)
 		return
 	}
@@ -138,15 +144,14 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serviceName := serviceNames[0]
-	replicaID, err := getReplicaIDByServiceAndKey(serviceName, key)
+	replicaIDs, err := getReplicaIDByServiceAndKey(serviceName[0], key)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	response := map[string]int{
-		"replica_id": replicaID,
+	response := map[string][]int{
+		"replica_id": replicaIDs,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -154,6 +159,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func startHTTPServer() {
+	// curl "http://localhost:8080/getReplica?key=23&service=ServiceA"
 	http.HandleFunc("/getReplica", handleRequest)
 	fmt.Println("Starting HTTP server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
