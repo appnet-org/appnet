@@ -5,3 +5,4 @@
 [submodule "go-lib"]
 	path = go-lib
 	url = https://github.com/appnet-org/go-lib.git
+	branch = main
