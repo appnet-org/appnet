@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: load-manager
+  name: load-manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-manager
+  labels:
+    app: load-manager
+spec:
+  clusterIP: 10.96.88.97
+  ports:
+  - name: load-manager
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: load-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-manager
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: load-manager
+      labels:
+        app: load-manager
+    spec:
+      containers:
+      - image: xzhu0027/load-manager:latest
+        name: load-manager
+        # volumeMounts:
+        # - name: load-manager-storage
+        #   mountPath: "/data"
+      # volumes:
+      # - name: load-manager-storage
+      #   persistentVolumeClaim:
+      #     claimName: load-manager-pvc
+      serviceAccountName: load-manager
+  selector:
+    matchLabels:
+      app: load-manager
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: load-manager-pv
+# spec:
+#   capacity:
+#     storage: 1Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: local-storage
+#   hostPath:
+#     path: /tmp/appnet/load-manager
+#     type: Directory
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: load-manager-pvc
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 1Gi
+#   storageClassName: local-storage
+# ---

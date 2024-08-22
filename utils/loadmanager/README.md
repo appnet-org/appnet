@@ -1,0 +1,2 @@
+curl "http://localhost:8080/getLoadInfo?service-name=my-service&replica-ids=replica1,replica2,replica3"
+curl "http://10.96.88.97:8080/getLoadInfo?service-name=my-service&replica-ids=replica1,replica2,replica3"
