@@ -15,6 +15,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	serviceName, ok := r.URL.Query()["service-name"]
 	replicaIDsParam, ok2 := r.URL.Query()["replica-ids"]
 
+	// Log the incoming request
+	fmt.Printf("Received request: %s %s\n", r.Method, r.URL.String())
+
 	if !ok || len(serviceName[0]) < 1 || !ok2 || len(replicaIDsParam[0]) < 1 {
 		http.Error(w, "Missing service name or replica id parameter", http.StatusBadRequest)
 		return

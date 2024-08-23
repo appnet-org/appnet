@@ -133,6 +133,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["key"]
 	serviceName, ok2 := r.URL.Query()["service"]
 
+	// Log the incoming request
+	fmt.Printf("Received request: %s %s\n", r.Method, r.URL.String())
+
 	if !ok || len(keys[0]) < 1 || !ok2 || len(serviceName[0]) < 1 {
 		http.Error(w, "Missing key or service parameter", http.StatusBadRequest)
 		return
