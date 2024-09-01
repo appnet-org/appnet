@@ -33,7 +33,7 @@ spec:
         app: frontend
     spec:
       containers:
-      - image: xzhu0027/echo-frontend-grpc
+      - image: appnetorg/echo-frontend-grpc
         name: frontend-grpc
       serviceAccountName: echo-frontend
   selector:
@@ -76,7 +76,7 @@ spec:
         app: server
     spec:
       containers:
-      - image: xzhu0027/echo-server-grpc
+      - image: appnetorg/echo-server-grpc
         name: server-grpc
       serviceAccountName: echo-server
   selector:
