@@ -33,7 +33,7 @@ spec:
         app: load-manager
     spec:
       containers:
-      - image: xzhu0027/load-manager:latest
+      - image: appnetorg/load-manager:latest
         name: load-manager
         # volumeMounts:
         # - name: load-manager-storage

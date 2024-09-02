@@ -33,7 +33,7 @@ spec:
         app: shard-manager
     spec:
       containers:
-      - image: xzhu0027/shard-manager:latest
+      - image: appnetorg/shard-manager:latest
         name: shard-manager
         volumeMounts:
         - name: shard-manager-storage
