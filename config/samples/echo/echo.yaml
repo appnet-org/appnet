@@ -33,8 +33,9 @@ spec:
         app: frontend
     spec:
       containers:
-      - image: xzhu0027/echo-frontend-grpc
+      - image: appnetorg/echo-frontend-grpc:latest
         name: frontend-grpc
+        imagePullPolicy: Always
       serviceAccountName: echo-frontend
   selector:
     matchLabels:
@@ -76,8 +77,9 @@ spec:
         app: server
     spec:
       containers:
-      - image: xzhu0027/echo-server-grpc
+      - image: appnetorg/echo-server-grpc:latest
         name: server-grpc
+        imagePullPolicy: Always
       serviceAccountName: echo-server
   selector:
     matchLabels:
