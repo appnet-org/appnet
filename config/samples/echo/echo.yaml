@@ -33,7 +33,7 @@ spec:
         app: frontend
     spec:
       containers:
-      - image: appnetorg/echo-frontend-grpc
+      - image: appnetorg/echo-frontend-grpc:latest
         name: frontend-grpc
         imagePullPolicy: Always
       serviceAccountName: echo-frontend
@@ -77,7 +77,7 @@ spec:
         app: server
     spec:
       containers:
-      - image: appnetorg/echo-server-grpc
+      - image: appnetorg/echo-server-grpc:latest
         name: server-grpc
         imagePullPolicy: Always
       serviceAccountName: echo-server
