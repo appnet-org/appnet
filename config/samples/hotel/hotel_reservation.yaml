@@ -1,4 +1,11 @@
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: user
+  name: hotel-user
+---
+apiVersion: v1
 kind: Service
 metadata:
   annotations:
@@ -43,10 +50,11 @@ spec:
       labels:
         app: user
     spec:
+      serviceAccountName: hotel-user
       containers:
       - command:
         - ./user
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-user
         ports:
@@ -58,6 +66,13 @@ spec:
             cpu: 100m
       # nodeName: h2.<node-name>
       restartPolicy: Always
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: search
+  name: hotel-search
 ---
 apiVersion: v1
 kind: Service
@@ -104,10 +119,11 @@ spec:
       labels:
         app: search
     spec:
+      serviceAccountName: hotel-search
       containers:
       - command:
         - ./search
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-search
         ports:
@@ -120,6 +136,13 @@ spec:
       # nodeName: h2.<node-name>
       restartPolicy: Always
 status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: reservation
+  name: hotel-reservation
 ---
 apiVersion: v1
 kind: Service
@@ -166,10 +189,11 @@ spec:
       labels:
         app: reservation
     spec:
+      serviceAccountName: hotel-reservation
       containers:
       - command:
         - ./reservation
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-reservation
         ports:
@@ -182,6 +206,13 @@ spec:
       # nodeName: h4.<node-name>
       restartPolicy: Always
 status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: recommendation
+  name: hotel-recommendation
 ---
 apiVersion: v1
 kind: Service
@@ -228,10 +259,11 @@ spec:
       labels:
         app: recommendation
     spec:
+      serviceAccountName: hotel-recommendation
       containers:
       - command:
         - ./recommendation
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-recommendation
         ports:
@@ -244,6 +276,13 @@ spec:
       # nodeName: h2.<node-name>
       restartPolicy: Always
 status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: rate
+  name: hotel-rate
 ---
 apiVersion: v1
 kind: Service
@@ -290,10 +329,11 @@ spec:
       labels:
         app: rate
     spec:
+      serviceAccountName: hotel-rate
       containers:
       - command:
         - ./rate
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-rate
         ports:
@@ -306,6 +346,13 @@ spec:
       # nodeName: h3.<node-name>
       restartPolicy: Always
 status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: profile
+  name: hotel-profile
 ---
 apiVersion: v1
 kind: Service
@@ -352,10 +399,11 @@ spec:
       labels:
         app: profile
     spec:
+      serviceAccountName: hotel-profile
       containers:
       - command:
         - ./profile
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-profile
         ports:
@@ -368,6 +416,13 @@ spec:
       # nodeName: h5.<node-name>
       restartPolicy: Always
 status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: geo
+  name: hotel-geo
 ---
 apiVersion: v1
 kind: Service
@@ -414,10 +469,11 @@ spec:
       labels:
         app: geo
     spec:
+      serviceAccountName: hotel-geo
       containers:
       - command:
         - ./geo
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-geo
         ports:
@@ -430,6 +486,13 @@ spec:
       # nodeName: h3.<node-name>
       restartPolicy: Always
 status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    account: frontend
+  name: hotel-frontend
 ---
 apiVersion: v1
 kind: Service
@@ -477,10 +540,11 @@ spec:
       labels:
         app: frontend
     spec:
+      serviceAccountName: hotel-frontend
       containers:
       - command:
         - ./frontend
-        image: xzhu0027/hotelreservation:latest
+        image: appnetorg/hotelreservation:latest
         imagePullPolicy: Always
         name: hotel-reserv-frontend
         ports:
