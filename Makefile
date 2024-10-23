@@ -47,6 +47,7 @@ help: ## Display this help.
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./internal/controller/..." output:crd:artifacts:config=config/crd/bases
+## TODO(xz): fix compiler and go-lib conflicts. Temporary workaround to generate CRD is to move compiler and go-lib to somewhere else.
 ## $(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	
 

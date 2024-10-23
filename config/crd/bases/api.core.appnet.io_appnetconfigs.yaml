@@ -53,6 +53,9 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    upgrade:
+                      default: true
+                      type: boolean
                   required:
                   - file
                   - name
@@ -61,8 +64,6 @@ spec:
               appManifestFile:
                 type: string
               appName:
-                type: string
-              backend:
                 type: string
               clientChain:
                 items:
@@ -78,6 +79,9 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    upgrade:
+                      default: true
+                      type: boolean
                   required:
                   - file
                   - name
@@ -101,10 +105,17 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    upgrade:
+                      default: true
+                      type: boolean
                   required:
                   - file
                   - name
                   type: object
+                type: array
+              processors:
+                items:
+                  type: string
                 type: array
               proto:
                 type: string
@@ -128,6 +139,9 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    upgrade:
+                      default: true
+                      type: boolean
                   required:
                   - file
                   - name
@@ -138,9 +152,9 @@ spec:
             required:
             - appManifestFile
             - appName
-            - backend
             - clientService
             - method
+            - processors
             - proto
             - serverService
             type: object

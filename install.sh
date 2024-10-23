@@ -2,6 +2,9 @@
 
 set -e
 
+# Python dependencies
+pip install lark pre-commit tomli tomli_w colorlog rich kubernetes pyyaml
+
 if [ -z "${APPNET_DIR}" ]; then
   echo "Setting APPNET_DIR to current directory"
   echo "export APPNET_DIR=$PWD" >> ~/.bashrc
@@ -27,10 +30,6 @@ echo ""
 echo "Installing Rust Dependencies"
 cargo install cargo-wasi
 rustup target add wasm32-wasi
-
-# Python dependencies
-pip install lark pre-commit tomli tomli_w colorlog rich kubernetes pyyaml
-
 
 go install golang.org/x/tools/cmd/goimports@latest
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest

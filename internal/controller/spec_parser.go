@@ -17,13 +17,15 @@ type AppManifest struct {
 }
 
 type EdgeElementItem struct {
-	Method           string `yaml:"method"`
-	Name             string `yaml:"name"`
-	Path             string `yaml:"path"`
-	Position         string `yaml:"position"`
-	Proto            string `yaml:"proto"`
-	ProtoModName     string `yaml:"proto_mod_name"`
-	ProtoModLocation string `yaml:"proto_mod_location"`
+	Method           string   `yaml:"method"`
+	Name             string   `yaml:"name"`
+	Path             string   `yaml:"path"`
+	Position         string   `yaml:"position"`
+	Proto            string   `yaml:"proto"`
+	ProtoModName     string   `yaml:"proto_mod_name"`
+	ProtoModLocation string   `yaml:"proto_mod_location"`
+	Upgrade          bool     `yaml:"upgrade"`
+	Processors       []string `yaml:"processors"`
 }
 
 type PairElementItem struct {
@@ -34,7 +36,7 @@ type PairElementItem struct {
 	Proto    string `yaml:"proto"`
 }
 
-func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serverService, method, proto, fileName, protoModName, protoModLocation string, clientChain, serverChain, anyChain, pairChain []apiv1.ChainElement) error {
+func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService, method, proto, fileName, protoModName, protoModLocation string, processors []string, clientChain, serverChain, anyChain, pairChain []apiv1.ChainElement) error {
 	clientServerTag := fmt.Sprintf("%s->%s", clientService, serverService)
 
 	appManifest := AppManifest{
@@ -49,12 +51,6 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 
 	position := ""
 	if len(clientChain) > 0 {
-		// All ambinet elements are considered to be on the server-side
-		if backend == "ambient" {
-			position = "S"
-		} else {
-			position = "C"
-		}
 		for _, element := range clientChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:           method,
@@ -64,6 +60,8 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 				Path:             element.File,
 				ProtoModName:     protoModName,
 				ProtoModLocation: protoModLocation,
+				Upgrade:          element.Upgrade,
+				Processors:       processors,
 			})
 		}
 	}
@@ -73,22 +71,18 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:           method,
 				Name:             element.Name,
-				Position:         "S",
+				Position:         "server",
 				Proto:            proto,
 				Path:             element.File,
 				ProtoModName:     protoModName,
 				ProtoModLocation: protoModLocation,
+				Upgrade:          element.Upgrade,
+				Processors:       processors,
 			})
 		}
 	}
 
 	if len(anyChain) > 0 {
-		// All ambinet elements are considered to be on the server-side
-		if backend == "ambient" {
-			position = "S"
-		} else {
-			position = "C/S"
-		}
 		for _, element := range anyChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:           method,
@@ -98,6 +92,8 @@ func ConvertToAppNetSpec(appName, backend, appManifestFile, clientService, serve
 				Path:             element.File,
 				ProtoModName:     protoModName,
 				ProtoModLocation: protoModLocation,
+				Upgrade:          element.Upgrade,
+				Processors:       processors,
 			})
 		}
 	}

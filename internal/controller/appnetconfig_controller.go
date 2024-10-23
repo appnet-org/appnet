@@ -81,13 +81,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	backend := config.Spec.Backend
-
-	// temporary fix for sidecar backend
-	if backend == "sidecar" {
-		backend = "envoy"
-	}
-
+	processors := config.Spec.Processors
 	client_service := config.Spec.ClientService
 	server_service := config.Spec.ServerService
 	client_elements := config.Spec.ClientChain
@@ -111,17 +105,17 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	// Call addonctl
 	l.Info("Reconciling AppNetConfig", "Safe", safe, "Name", config.Name, "Namespace", config.Namespace, "RPC Method", method,
-		"Backend:", backend, "Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
+		"Processors:", processors, "Client Service", client_service, "Server Service", server_service, "client-side Elements", client_elements,
 		"server-side Elements", server_elements, "unconstraint Elements", any_elements, "pair Elements", pair_elements)
 
 	l.Info("Reconciling AppNetConfig", "Safe", safe, "Name", config.Name, "Proto module name", proto_mod_name, "Proto Module location", proto_mod_location)
 
-	ConvertToAppNetSpec(app_name, backend, app_manifest_file, client_service, server_service, method, proto, "config.yaml",
-		proto_mod_name, proto_mod_location, client_elements, server_elements, any_elements, pair_elements)
+	ConvertToAppNetSpec(app_name, app_manifest_file, client_service, server_service, method, proto, "config.yaml",
+		proto_mod_name, proto_mod_location, processors, client_elements, server_elements, any_elements, pair_elements)
 
 	compilerDir := filepath.Join(os.Getenv("APPNET_DIR"), "compiler/compiler")
 
-	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-b", backend, "-t", strconv.Itoa(currentVersion))
+	compile_cmd := exec.Command("python", filepath.Join(compilerDir, "main.py"), "-s", "config.yaml", "-t", strconv.Itoa(currentVersion))
 	compile_output, compile_err := compile_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
@@ -131,6 +125,15 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	l.Info("All elements compiled successfully - deploying to envoy")
+
+	attach_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/sidecar-ambient-attach/attach.sh"), "APP", app_name))
+	attach_output, attach_err := attach_cmd.CombinedOutput()
+
+	// Check if there was an error running the command
+	if attach_err != nil {
+		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", attach_err, string(attach_output))
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
 	kubectl_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/install.yml"), "APP", app_name))
 	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
@@ -142,34 +145,23 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	// Deploy waypoint proxies & Make sure the waypoints are only applied once
-	// TODO(XZ): This is a temporary fix for the waypoint issue. We need to detect if the waypoint is already applied
-	if backend == "ambient" && currentVersion == 1 {
-		// XZ: Temp hack to wait for all pods running
-		waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
-		waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
+	// TODO(XZ): This is a temporary fix for the waypoint.
+	// if backend == "ambient" && currentVersion == 1 {
+	// 	// XZ: Temp hack to wait for all pods running
+	// 	waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+	// 	waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
 
-		// Check if there was an error running the command
-		if waypoint_err != nil {
-			l.Info("Reconciling AppNetConfig", "Error running istioctl waypoint: %s\nOutput:\n%s\n", waypoint_err, string(waypoint_output))
-			return ctrl.Result{}, client.IgnoreNotFound(err)
-		}
+	// 	// Check if there was an error running the command
+	// 	if waypoint_err != nil {
+	// 		l.Info("Reconciling AppNetConfig", "Error running istioctl waypoint: %s\nOutput:\n%s\n", waypoint_err, string(waypoint_output))
+	// 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	// 	}
 
-		// Attach volume to waypoint
-		waypoint_name := find_waypoint_name(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
-		l.Info("Reconciling AppNetConfig", server_service, waypoint_name)
-		attach_volume_to_waypoint(server_service, waypoint_name)
-	}
-
-	if backend != "grpc" {
-		attach_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/attach_all_elements.yml"), "APP", app_name))
-		attach_output, attach_err := attach_cmd.CombinedOutput()
-
-		// Check if there was an error running the command
-		if attach_err != nil {
-			l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", attach_err, string(attach_output))
-			return ctrl.Result{}, client.IgnoreNotFound(err)
-		}
-	}
+	// 	// Attach volume to waypoint
+	// 	waypoint_name := find_waypoint_name(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+	// 	l.Info("Reconciling AppNetConfig", server_service, waypoint_name)
+	// 	attach_volume_to_waypoint(server_service, waypoint_name)
+	// }
 
 	l.Info("All elemenets deployed - Reconciliation finished!")
 
