@@ -3,7 +3,8 @@ kind: AppNetConfig
 metadata:
   name: sample-echo-sidecar # Name of the AppNetConfig
 spec:
-  backend: sidecar # Name of the backend (sidecar/ambient/grpc)
+  processors: # Name of the backend (sidecar/ambient/grpc)
+    - sidecar 
   appName: echo # Name of the application
   clientService: frontend # Name of the client service (must be a valid service in the same namespace as the AppNetConfig)
   serverService: server # Name of the server service (must be a valid service in the same namespace as the AppNetConfig)

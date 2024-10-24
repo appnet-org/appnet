@@ -126,13 +126,19 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	l.Info("All elements compiled successfully - deploying to envoy")
 
-	attach_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/sidecar-ambient-attach/attach.sh"), "APP", app_name))
-	attach_output, attach_err := attach_cmd.CombinedOutput()
+	attachPath := filepath.Join(compilerDir, "graph/generated/sidecar-ambient-attach/attach.sh")
+	attachPath = strings.ReplaceAll(attachPath, "APP", app_name)
 
-	// Check if there was an error running the command
-	if attach_err != nil {
-		l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", attach_err, string(attach_output))
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+	// Check if the file exists
+	if _, err := os.Stat(attachPath); err == nil {
+		attach_cmd := exec.Command("bash", attachPath)
+		attach_output, attach_err := attach_cmd.CombinedOutput()
+
+		// Check if there was an error running the command
+		if attach_err != nil {
+			l.Info("Reconciling AppNetConfig", "Error running kubectl: %s\nOutput:\n%s\n", attach_err, string(attach_output))
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
 	}
 
 	kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
@@ -146,22 +152,25 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	// Deploy waypoint proxies & Make sure the waypoints are only applied once
 	// TODO(XZ): This is a temporary fix for the waypoint.
-	// if backend == "ambient" && currentVersion == 1 {
-	// 	// XZ: Temp hack to wait for all pods running
-	// 	waypoint_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
-	// 	waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
+	waypointPath := filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh")
+	waypointPath = strings.ReplaceAll(waypointPath, "APP", app_name)
 
-	// 	// Check if there was an error running the command
-	// 	if waypoint_err != nil {
-	// 		l.Info("Reconciling AppNetConfig", "Error running istioctl waypoint: %s\nOutput:\n%s\n", waypoint_err, string(waypoint_output))
-	// 		return ctrl.Result{}, client.IgnoreNotFound(err)
-	// 	}
+	// Check if the file exists
+	if _, err := os.Stat(waypointPath); err == nil && currentVersion == 1 {
+		waypoint_cmd := exec.Command("bash", waypointPath)
+		waypoint_output, waypoint_err := waypoint_cmd.CombinedOutput()
 
-	// 	// Attach volume to waypoint
-	// 	waypoint_name := find_waypoint_name(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
-	// 	l.Info("Reconciling AppNetConfig", server_service, waypoint_name)
-	// 	attach_volume_to_waypoint(server_service, waypoint_name)
-	// }
+		// Check if there was an error running the command
+		if waypoint_err != nil {
+			l.Info("Reconciling AppNetConfig", "Error running istioctl waypoint: %s\nOutput:\n%s\n", waypoint_err, string(waypoint_output))
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+		}
+
+		// Attach volume to waypoint
+		waypoint_name := find_waypoint_name(strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/waypoint_create.sh"), "APP", app_name))
+		l.Info("Reconciling AppNetConfig", server_service, waypoint_name)
+		attach_volume_to_waypoint(server_service, waypoint_name)
+	}
 
 	l.Info("All elemenets deployed - Reconciliation finished!")
 

@@ -25,7 +25,7 @@ type EdgeElementItem struct {
 	ProtoModName     string   `yaml:"proto_mod_name"`
 	ProtoModLocation string   `yaml:"proto_mod_location"`
 	Upgrade          bool     `yaml:"upgrade"`
-	Processors       []string `yaml:"processors"`
+	Processor        []string `yaml:"processor"`
 }
 
 type PairElementItem struct {
@@ -49,19 +49,18 @@ func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService,
 		Link: make(map[string][]PairElementItem),
 	}
 
-	position := ""
 	if len(clientChain) > 0 {
 		for _, element := range clientChain {
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:           method,
 				Name:             element.Name,
-				Position:         position,
+				Position:         "client",
 				Proto:            proto,
 				Path:             element.File,
 				ProtoModName:     protoModName,
 				ProtoModLocation: protoModLocation,
 				Upgrade:          element.Upgrade,
-				Processors:       processors,
+				Processor:        processors,
 			})
 		}
 	}
@@ -77,7 +76,7 @@ func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService,
 				ProtoModName:     protoModName,
 				ProtoModLocation: protoModLocation,
 				Upgrade:          element.Upgrade,
-				Processors:       processors,
+				Processor:        processors,
 			})
 		}
 	}
@@ -87,13 +86,13 @@ func ConvertToAppNetSpec(appName, appManifestFile, clientService, serverService,
 			appManifest.Edge[clientServerTag] = append(appManifest.Edge[clientServerTag], EdgeElementItem{
 				Method:           method,
 				Name:             element.Name,
-				Position:         position,
+				Position:         "any",
 				Proto:            proto,
 				Path:             element.File,
 				ProtoModName:     protoModName,
 				ProtoModLocation: protoModLocation,
 				Upgrade:          element.Upgrade,
-				Processors:       processors,
+				Processor:        processors,
 			})
 		}
 	}

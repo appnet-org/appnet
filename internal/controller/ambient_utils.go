@@ -94,8 +94,8 @@ func attach_volume_to_waypoint(service_name, waypoint_name string) {
 	// Set deployment details
 	namespace := "default"
 	deploymentName := waypoint_name
-	pvcName := service_name + "-pvc"
-	mountPath := "/data"
+	pvcName := service_name + "-appnet-pvc"
+	mountPath := "/appnet"
 
 	maxAttempts := 20
 
