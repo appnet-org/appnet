@@ -126,7 +126,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	l.Info("All elements compiled successfully - deploying to envoy")
 
-	attach_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/sidecar-ambient-attach/attach.sh"), "APP", app_name))
+	attach_cmd := exec.Command("bash", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/sidecar-ambient-attach/attach.sh"), "APP", app_name))
 	attach_output, attach_err := attach_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
@@ -135,7 +135,7 @@ func (r *AppNetConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	kubectl_cmd := exec.Command("kubectl", "apply", "-f", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy/install.yml"), "APP", app_name))
+	kubectl_cmd := exec.Command("kubectl", "apply", "-Rf", strings.ReplaceAll(filepath.Join(compilerDir, "graph/generated/APP-deploy"), "APP", app_name))
 	kubectl_output, kubectl_err := kubectl_cmd.CombinedOutput()
 
 	// Check if there was an error running the command
