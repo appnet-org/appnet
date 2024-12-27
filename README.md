@@ -2,7 +2,7 @@
 
 ## To start using AppNet
 
-See our documentation on [appnet.wiki](appnet.wiki).
+See our documentation on [appnet.wiki](https://appnet.wiki).
 
 
 ## To start developing AppNet
