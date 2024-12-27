@@ -1,5 +1,5 @@
 state:
-    RIF_map: Map<int, int>
+    RIF_map: Map<int, int>  // Map to store the RIF values for each backend.
     QRIF: float  // Quantile value to separate hot and cold backends based on RIF.
     num_choices: int  // Number of replicas to sample from the available backends.
 
@@ -8,56 +8,61 @@ init():
     num_choices = 3  // Initialize the number of backends to sample to 3.
 
 req(rpc):
-    // Choose a subset of replicas
+    // Step 1: Choose a subset of replicas
     backends = get_backends()  // Retrieve the list of available backends.
-    // Randomly select a subset of backends of size `num_choices`.
     sampled_backends = random_choices(backends, num_choices)  
+    // Randomly select a subset of backends of size `num_choices`.
 
+    // Step 2: Calculate the RIF distribution and determine the hot threshold
     RIF_distribution = estimate_RIF_distribution(sampled_backends)
-    hot_threshold = quantile(RIF_distribution, QRIF)
+    hot_threshold = quantile(RIF_distribution, QRIF)  
+    // Determine the threshold RIF value at the QRIF quantile.
 
-    hot_backends = []
-    cold_backends = []
+    hot_backends = []  // List to store backends classified as hot.
+    cold_backends = []  // List to store backends classified as cold.
 
+    // Step 3: Classify sampled backends as hot or cold based on the RIF threshold
     foreach(sampled_backends, lambda(backend):
-        RIF = get(RIF_map, backend)
+        RIF = get(RIF_map, backend)  // Retrieve the RIF value for the backend.
         match(RIF > hot_threshold):
             true => 
-                set(hot_backends, size(hot_backends), （backend， RIF))
+                set(hot_backends, size(hot_backends), (backend, RIF))
+                // Add backend to hot_backends if its RIF exceeds the hot threshold.
             false =>
                 set(cold_backends, size(cold_backends), (backend, latency))
-    )
+                // Add backend to cold_backends otherwise.
 
-    selected = 0
-    
-    match(len(hot_backend)==0):
+    selected = 0  // Initialize the selected backend.
+
+    // Step 4: Select backend based on hot-cold lexicographic rule
+    match(len(hot_backends) == 0):  
+        // Case: No hot backends available.
         true => 
-            min_latency = inf
+            min_latency = inf  // Initialize minimum latency for cold backends.
             foreach(cold_backends, lambda(cold_backend):
                 backend, latency = cold_backend
-                match(RIF < min_RIF):
+                match(latency < min_latency):
                     true =>
-                        selected = backend
-                        min_latency = latency
+                        selected = backend  // Select backend with the lowest latency.
+                        min_latency = latency  // Update the minimum latency.
                     false =>
-                        pass
-            )
+                        pass  // Continue checking other cold backends.
 
         false => 
-            min_RIF = inf
+            min_RIF = inf  // Initialize minimum RIF for hot backends.
             foreach(hot_backends, lambda(hot_backend):
                 backend, RIF = hot_backend
                 match(RIF < min_RIF):
                     true =>
-                        selected = backend
-                        min_RIF = RIF
+                        selected = backend  // Select backend with the lowest RIF.
+                        min_RIF = RIF  // Update the minimum RIF.
                     false =>
-                        pass
-            )
+                        pass  // Continue checking other hot backends.
 
-
+    // Step 5: Set the selected backend as the destination and send the RPC downstream
     set(rpc, dst, selected)  // Set the selected backend as the destination for the RPC.
     send(rpc, down)  // Send the RPC downstream to the selected backend.
 
 resp(rpc):
-    send(rpc, up)  // Forward the response upstream.
+    // Forward the response upstream
+    send(rpc, up)  
