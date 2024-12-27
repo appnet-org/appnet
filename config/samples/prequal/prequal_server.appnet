@@ -1,19 +1,31 @@
 state:
-    outstanding_req_count: int
-    request_map<int, float>
+    request_in_flight: int  // Tracks the number of requests currently in flight.
+    request_map: Map<int, <int, float>>  // Maps an RPC ID to a tuple containing the request's in-flight count at arrival and its start time.
+    latency_map: Map<int, Vec<float>>  // Maps an in-flight count to a vector of latency values for requests at that count.
 
 init():
-    outstanding_req_count = 0
+    request_in_flight = 0  // Initialize the in-flight request count to zero.
 
 req(rpc):
-    outstanding_req_count = outstanding_req_count + 1
-    rpc_id = get(rpc, "id")
-    set(request_map, rpc_id, current_time())
-    send(rpc, up)
+    request_in_flight = request_in_flight + 1  // Increment the in-flight request count when a new request is received.
+
+    rpc_id = get(rpc, "id")  // Extract the unique ID of the RPC.
+    // Store the current in-flight count and the current time as the start time for the RPC ID.
+    set(request_map, rpc_id, (request_in_flight, current_time()))  
+
+    send(rpc, up)  // Send the RPC upstream for further processing.
 
 resp(rpc):
-    outstanding_req_count = outstanding_req_count - 1
-    rpc_id = get(rpc, "id")
-    latency = time_diff(current_time(), get(request_map, rpc_id))
-    send(rpc, down)
+    request_in_flight = request_in_flight - 1  // Decrement the in-flight request count when a response is received.
 
+    rpc_id = get(rpc, "id")  // Extract the unique ID of the RPC.
+    // Retrieve the in-flight count and start time associated with the RPC ID.
+    (arrival_rif, start_time) = get(request_map, rpc_id)  
+    // Calculate the latency as the difference between the current time and the start time.
+    latency = time_diff(current_time(), start_time)  
+    // Retrieve the vector of latency values corresponding to the in-flight count.
+    latency_vec = get(latency_map, arrival_rif)  
+    // Add the calculated latency to the latency vector.
+    set(latency_vec, size(latency_vec), latency)  
+
+    send(rpc, down)  // Send the RPC downstream after processing the response.
