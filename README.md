@@ -117,7 +117,9 @@ Please consider citing our paper if you find AppNet related to your research.
 }
 ```
 
-## Contact
+## Contributors
+
+AppNet is written and maintained by [Xiangfeng Zhu](https://xzhu27.me/), [Yuyao Wang](https://kristoff-starling.github.io/), [Yongtong Wu](https://jokerwyt.github.io/), [Nikola Bojanic](https://github.com/NikolaBo), and [Banruo Liu](https://github.com/livingshade).
 
 If you have any questions or comments, please get in touch with Xiangfeng Zhu (xfzhu@cs.washington.edu).
 
