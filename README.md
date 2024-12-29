@@ -106,7 +106,7 @@ kubectl apply -f https://raw.githubusercontent.com/<org>/appnet/<tag or branch>/
 More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html) -->
 
 ## Reference
-Please consider citing our paper if you find AppNet related to your research.
+Please consider citing our papers if you find AppNet related to your research.
 ```bibtex
 @inproceedings{applicationdefinednetworks,
   title={Application Defined Networks},
@@ -114,6 +114,13 @@ Please consider citing our paper if you find AppNet related to your research.
   booktitle={Proceedings of the 22nd ACM Workshop on Hot Topics in Networks},
   pages={87--94},
   year={2023}
+}
+
+@inproceedings{zhu2025appnet,
+  title={High-level Programming for Application Networks},
+  author={Zhu, Xiangfeng and Wang, Yuyao and Liu, Banruo and Wu, Yongtong and Bojanic, Nikola and Chen, Jingrong and Bernstein, Gilbert and Krishnamurthy, Arvind and Kumar, Sam and Mahajan, Ratul and Zhuo, Danyang},
+  booktitle={22th USENIX Symposium on Networked Systems Design and Implementation (NSDI 25)},
+  year={2025}
 }
 ```
 
