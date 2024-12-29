@@ -31,7 +31,7 @@ req(rpc):
             false =>
                 set(cold_backends, size(cold_backends), (backend, latency))
                 // Add backend to cold_backends otherwise.
-
+    )
     selected = 0  // Initialize the selected backend.
 
     // Step 4: Select backend based on hot-cold lexicographic rule
@@ -47,7 +47,7 @@ req(rpc):
                         min_latency = latency  // Update the minimum latency.
                     false =>
                         pass  // Continue checking other cold backends.
-
+            )
         false => 
             min_RIF = inf  // Initialize minimum RIF for hot backends.
             foreach(hot_backends, lambda(hot_backend):
@@ -58,7 +58,7 @@ req(rpc):
                         min_RIF = RIF  // Update the minimum RIF.
                     false =>
                         pass  // Continue checking other hot backends.
-
+            )
     // Step 5: Set the selected backend as the destination and send the RPC downstream
     set(rpc, dst, selected)  // Set the selected backend as the destination for the RPC.
     send(rpc, down)  // Send the RPC downstream to the selected backend.
