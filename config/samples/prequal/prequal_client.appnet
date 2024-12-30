@@ -32,33 +32,35 @@ req(rpc):
                 set(cold_backends, size(cold_backends), (backend, latency))
                 // Add backend to cold_backends otherwise.
     )
-    selected = 0  // Initialize the selected backend.
-
+    
     // Step 4: Select backend based on hot-cold lexicographic rule
-    match(len(hot_backends) == 0):  
-        // Case: No hot backends available.
-        true => 
-            min_latency = inf  // Initialize minimum latency for cold backends.
-            foreach(cold_backends, lambda(cold_backend):
-                backend, latency = cold_backend
-                match(latency < min_latency):
-                    true =>
-                        selected = backend  // Select backend with the lowest latency.
-                        min_latency = latency  // Update the minimum latency.
-                    false =>
-                        pass  // Continue checking other cold backends.
-            )
-        false => 
-            min_RIF = inf  // Initialize minimum RIF for hot backends.
+    selected = 0  // Initialize the selected backend.
+    match len(cold_backends) == 0:
+        true =>
+            # All backends are hot, the one with loweset RIF is chosen.
+            min_RIF = inf
             foreach(hot_backends, lambda(hot_backend):
                 backend, RIF = hot_backend
-                match(RIF < min_RIF):
+                match RIF < min_RIF:
                     true =>
-                        selected = backend  // Select backend with the lowest RIF.
-                        min_RIF = RIF  // Update the minimum RIF.
+                        selected = backend
+                        min_RIF = RIF
                     false =>
-                        pass  // Continue checking other hot backends.
+                        pass
             )
+        false =>
+            # There exists cold backen, the one with lowest latency is chosen.
+            min_latency = inf
+            foreach(cold_backends, lambda(cold_backend):
+                backend, latency = cold_backend
+                match latency < min_latency:
+                    true =>
+                        selected = backend
+                        min_latency = latency
+                    false =>
+                        pass
+            )
+     
     // Step 5: Set the selected backend as the destination and send the RPC downstream
     set(rpc, dst, selected)  // Set the selected backend as the destination for the RPC.
     send(rpc, down)  // Send the RPC downstream to the selected backend.
