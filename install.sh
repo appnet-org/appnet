@@ -29,7 +29,7 @@ echo ""
 
 echo "Installing Rust Dependencies"
 cargo install cargo-wasi
-rustup target add wasm32-wasi
+rustup target add wasm32-wasip1
 
 go install golang.org/x/tools/cmd/goimports@latest
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
