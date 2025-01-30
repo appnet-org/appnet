@@ -1,0 +1,824 @@
+##################################################################################################
+# ad service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: ad
+  labels:
+    app: ad
+    service: ad
+spec:
+  ports:
+  - port: 8089
+    targetPort: 8089
+    name: grpc
+  selector:
+    app: ad
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-ad
+  labels:
+    account: ad
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ad
+  labels:
+    app: ad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ad
+  template:
+    metadata:
+      labels:
+        app: ad
+    spec:
+      serviceAccountName: onlineboutique-ad
+      containers:
+      - name: ad
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["ad"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8089
+---
+# volume and persistent volume claim of `ad`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ad-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: ad-storage
+  hostPath:
+    path: /data/volumes/ad-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ad-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ad-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# cart service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart
+  labels:
+    app: cart
+    service: cart
+spec:
+  ports:
+  - port: 8081
+    targetPort: 8081
+    name: grpc
+  selector:
+    app: cart
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-cart
+  labels:
+    account: cart
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart
+  labels:
+    app: cart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart
+  template:
+    metadata:
+      labels:
+        app: cart
+    spec:
+      serviceAccountName: onlineboutique-cart
+      containers:
+      - name: cart
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["cart"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+---
+# volume and persistent volume claim of `cart`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cart-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: cart-storage
+  hostPath:
+    path: /data/volumes/cart-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cart-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: cart-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-redis
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-redis
+  template:
+    metadata:
+      labels:
+        app: cart-redis
+    spec:
+      containers:
+      - name: cart-redis
+        image: redis:6.2
+        ports:
+        - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-redis
+  namespace: default
+spec:
+  selector:
+    app: cart-redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+---
+##################################################################################################
+# checkout service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout
+  labels:
+    app: checkout
+    service: checkout
+spec:
+  ports:
+  - port: 8087
+    targetPort: 8087
+    name: grpc
+  selector:
+    app: checkout
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-checkout
+  labels:
+    account: checkout
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+  labels:
+    app: checkout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: checkout
+  template:
+    metadata:
+      labels:
+        app: checkout
+    spec:
+      serviceAccountName: onlineboutique-checkout
+      containers:
+      - name: checkout
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["checkout"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8087
+---
+# volume and persistent volume claim of `checkout`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: checkout-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: checkout-storage
+  hostPath:
+    path: /data/volumes/checkout-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: checkout-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: checkout-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# currency service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: currency
+  labels:
+    app: currency
+    service: currency
+spec:
+  ports:
+  - port: 8083
+    targetPort: 8083
+    name: grpc
+  selector:
+    app: currency
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-currency
+  labels:
+    account: currency
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency
+  labels:
+    app: currency
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: currency
+  template:
+    metadata:
+      labels:
+        app: currency
+    spec:
+      serviceAccountName: onlineboutique-currency
+      containers:
+      - name: currency
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["currency"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8083
+---
+# volume and persistent volume claim of `currency`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: currency-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: currency-storage
+  hostPath:
+    path: /data/volumes/currency-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: currency-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: currency-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# email service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: email
+  labels:
+    app: email
+    service: email
+spec:
+  ports:
+  - port: 8086
+    targetPort: 8086
+    name: grpc
+  selector:
+    app: email
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-email
+  labels:
+    account: email
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: email
+  labels:
+    app: email
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: email
+  template:
+    metadata:
+      labels:
+        app: email
+    spec:
+      serviceAccountName: onlineboutique-email
+      containers:
+      - name: email
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["email"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8086
+---
+# volume and persistent volume claim of `email`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: email-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: email-storage
+  hostPath:
+    path: /data/volumes/email-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: email-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: email-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# frontend service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  clusterIP: 10.96.88.88
+  ports:
+  - name: frontend
+    port: 80
+    targetPort: 8080
+  selector:
+    app: frontend
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-frontend
+  labels:
+    account: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      serviceAccountName: onlineboutique-frontend
+      containers:
+      - name: frontend
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["frontend"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+---
+# volume and persistent volume claim of `frontend`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: frontend-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: frontend-storage
+  hostPath:
+    path: /data/volumes/frontend-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frontend-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: frontend-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# payment service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+  labels:
+    app: payment
+    service: payment
+spec:
+  ports:
+  - port: 8084
+    targetPort: 8084
+    name: grpc
+  selector:
+    app: payment
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-payment
+  labels:
+    account: payment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+  labels:
+    app: payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      serviceAccountName: onlineboutique-payment
+      containers:
+      - name: payment
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["payment"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8084
+---
+# volume and persistent volume claim of `payment`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: payment-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: payment-storage
+  hostPath:
+    path: /data/volumes/payment-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: payment-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: payment-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# productcatalog service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: productcatalog
+  labels:
+    app: productcatalog
+    service: productcatalog
+spec:
+  ports:
+  - port: 8082
+    targetPort: 8082
+    name: grpc
+  selector:
+    app: productcatalog
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-productcatalog
+  labels:
+    account: productcatalog
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productcatalog
+  labels:
+    app: productcatalog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productcatalog
+  template:
+    metadata:
+      labels:
+        app: productcatalog
+    spec:
+      serviceAccountName: onlineboutique-productcatalog
+      containers:
+      - name: productcatalog
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["productcatalog"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+---
+# volume and persistent volume claim of `productcatalog`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: productcatalog-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: productcatalog-storage
+  hostPath:
+    path: /data/volumes/productcatalog-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: productcatalog-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: productcatalog-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# recommendation service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation
+  labels:
+    app: recommendation
+    service: recommendation
+spec:
+  ports:
+  - port: 8088
+    targetPort: 8088
+    name: grpc
+  selector:
+    app: recommendation
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-recommendation
+  labels:
+    account: recommendation
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation
+  labels:
+    app: recommendation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendation
+  template:
+    metadata:
+      labels:
+        app: recommendation
+    spec:
+      serviceAccountName: onlineboutique-recommendation
+      containers:
+      - name: recommendation
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["recommendation"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8088
+---
+# volume and persistent volume claim of `recommendation`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: recommendation-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: recommendation-storage
+  hostPath:
+    path: /data/volumes/recommendation-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: recommendation-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: recommendation-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+##################################################################################################
+# shipping service and deployment
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping
+  labels:
+    app: shipping
+    service: shipping
+spec:
+  ports:
+  - port: 8085
+    targetPort: 8085
+    name: grpc
+  selector:
+    app: shipping
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onlineboutique-shipping
+  labels:
+    account: shipping
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping
+  labels:
+    app: shipping
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shipping
+  template:
+    metadata:
+      labels:
+        app: shipping
+    spec:
+      serviceAccountName: onlineboutique-shipping
+      containers:
+      - name: shipping
+        image: appnetorg/onlineboutique-grpc:latest
+        command: ["/app/onlineboutique"]
+        args: ["shipping"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8088
+---
+# volume and persistent volume claim of `shipping`
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shipping-pv
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  storageClassName: shipping-storage
+  hostPath:
+    path: /data/volumes/shipping-pv   # Where all the hard drives are mounted
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shipping-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: shipping-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
