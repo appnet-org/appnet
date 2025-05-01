@@ -4,6 +4,10 @@
   </picture>
 </p>
 
+<h3 align="center">
+Expressive, Easy to Build, and High-Performance Application Networks
+</h3>
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/appnet-org/appnet)](https://goreportcard.com/report/github.com/appnet-org/appnet)
 
 ## To start using AppNet
