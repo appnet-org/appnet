@@ -1,5 +1,7 @@
 # AppNet
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/appnet-org/appnet)](https://goreportcard.com/report/github.com/appnet-org/appnet)
+
 ## To start using AppNet
 
 See our documentation on [appnet.wiki](https://appnet.wiki).
