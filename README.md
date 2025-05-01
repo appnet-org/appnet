@@ -1,10 +1,18 @@
-# AppNet
+<p align="center">
+  <picture>
+    <img alt="AppNet" src="https://raw.githubusercontent.com/appnet-org/docs/main/src/assets/logos/AppNet-blue.png" width=35%>
+  </picture>
+</p>
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/appnet-org/appnet)](https://goreportcard.com/report/github.com/appnet-org/appnet)
 
 ## To start using AppNet
 
 See our documentation on [appnet.wiki](https://appnet.wiki).
+
+## To learn more about AppNet
+
+See our NSDI [paper](https://www.usenix.org/system/files/nsdi25-zhu.pdf).
 
 
 ## To start developing AppNet
@@ -109,8 +117,9 @@ More information can be found via the [Kubebuilder Documentation](https://book.k
 
 ## Reference
 Please consider citing our papers if you find AppNet related to your research.
+
 ```bibtex
-@inproceedings{applicationdefinednetworks,
+@inproceedings{zhu2023application,
   title={Application Defined Networks},
   author={Zhu, Xiangfeng and Deng, Weixin and Liu, Banruo and Chen, Jingrong and Wu, Yongji and Anderson, Thomas and Krishnamurthy, Arvind and Mahajan, Ratul and Zhuo, Danyang},
   booktitle={Proceedings of the 22nd ACM Workshop on Hot Topics in Networks},
@@ -118,11 +127,13 @@ Please consider citing our papers if you find AppNet related to your research.
   year={2023}
 }
 
-@inproceedings{zhu2025appnet,
-  title={High-level Programming for Application Networks},
-  author={Zhu, Xiangfeng and Wang, Yuyao and Liu, Banruo and Wu, Yongtong and Bojanic, Nikola and Chen, Jingrong and Bernstein, Gilbert and Krishnamurthy, Arvind and Kumar, Sam and Mahajan, Ratul and Zhuo, Danyang},
-  booktitle={22th USENIX Symposium on Networked Systems Design and Implementation (NSDI 25)},
-  year={2025}
+@inproceedings {zhu2025appnet,
+  author = {Xiangfeng Zhu and Yuyao Wang and Banruo Liu and Yongtong Wu and Nikola Bojanic and Jingrong Chen and Gilbert Louis Bernstein and Arvind Krishnamurthy and Sam Kumar and Ratul Mahajan and Danyang Zhuo},
+  title = {High-level Programming for Application Networks},
+  booktitle = {22nd USENIX Symposium on Networked Systems Design and Implementation (NSDI 25)},
+  year = {2025},
+  address = {Philadelphia, PA},
+  pages = {915--935},
 }
 ```
 
