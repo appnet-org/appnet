@@ -9,6 +9,10 @@ Expressive, Easy to Build, and High-Performance Application Networks
 </h3>
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/appnet-org/appnet)](https://goreportcard.com/report/github.com/appnet-org/appnet)
+[![Apache 2.0 License][license-badge]][license-link]
+
+[license-badge]: https://img.shields.io/github/license/appnet-org/appnet
+[license-link]: https://github.com/appnet-org/appnet/blob/main/LICENSE
 
 ## To start using AppNet
 
