@@ -4,15 +4,18 @@
   </picture>
 </p>
 
-<h3 align="center">
-Expressive, Easy to Build, and High-Performance Application Networks
-</h3>
+<div align="center">
+  <h3>
+    Expressive, Easy to Build, and High-Performance Application Networks
+  </h3>
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/appnet-org/appnet)](https://goreportcard.com/report/github.com/appnet-org/appnet)
-[![Apache 2.0 License][license-badge]][license-link]
-
-[license-badge]: https://img.shields.io/github/license/appnet-org/appnet
-[license-link]: https://github.com/appnet-org/appnet/blob/main/LICENSE
+  <a href="https://goreportcard.com/report/github.com/appnet-org/appnet">
+    <img src="https://goreportcard.com/badge/github.com/appnet-org/appnet" alt="Go Report Card">
+  </a>
+  <a href="https://github.com/appnet-org/appnet/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/appnet-org/appnet" alt="Apache 2.0 License">
+  </a>
+</div>
 
 ## To start using AppNet
 
