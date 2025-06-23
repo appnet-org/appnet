@@ -3,7 +3,7 @@
 set -e
 
 # Python dependencies
-pip install lark pre-commit tomli tomli_w colorlog rich kubernetes pyyaml
+pip install lark pre-commit tomli tomli_w colorlog rich kubernetes pyyaml z3-solver
 
 if [ -z "${APPNET_DIR}" ]; then
   echo "Setting APPNET_DIR to current directory"
